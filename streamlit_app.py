@@ -33,6 +33,37 @@ menu = st.sidebar.radio(
 # ----------------------------
 # DISPONIBILIDAD
 # ----------------------------
+# ----------------------------
+# JUGADORES
+# ----------------------------
+if menu == "Jugadores":
+    st.header("👥 Gestión de jugadores")
+
+    nuevo = st.text_input("Nombre del jugador")
+
+    if st.button("Añadir jugador"):
+        if nuevo and nuevo not in [j["nombre"] for j in data["jugadores"]]:
+            data["jugadores"].append({
+                "nombre": nuevo,
+                "disponible": False,
+                "puntos": 0
+            })
+            save_data(data)
+            st.success(f"Jugador '{nuevo}' añadido")
+        else:
+            st.error("Nombre vacío o jugador ya existe")
+
+    st.markdown("### Lista de jugadores")
+
+    for i, j in enumerate(data["jugadores"]):
+        col1, col2 = st.columns([4, 1])
+        col1.write(j["nombre"])
+
+        if col2.button("🗑️", key=f"del_{i}"):
+            data["jugadores"].pop(i)
+            save_data(data)
+            st.experimental_rerun()
+``
 if menu == "Disponibilidad":
     st.header("✅ Disponibilidad de jugadores")
 
