@@ -89,7 +89,7 @@ st.title("🏓 Pádel Matchmaker")
 
 menu = st.sidebar.radio(
     "Menú",
-    ["Jugadores",  "Jornadas",  "Ranking"]
+    [  "Jornadas",  "Ranking"]
 )
  
 # ----------------------------
