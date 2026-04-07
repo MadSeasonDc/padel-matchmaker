@@ -47,10 +47,22 @@ LOCATIONS_INICIALES = [
         "email": "recepcion@aqalosprunos.com",
         "inout": "All",
         "wall": "Wall",
-        "price": "8,90 Interior / 6,90 Exterior",
+        "price": "8,90 € interior / 6,90 € exterior",
         "comments": ""
+    },
+    {
+        "club": "Urb. Lela",
+        "address": "N/A",
+        "telephone": "N/A",
+        "whatsapp": "N/A",
+        "email": "N/A",
+        "inout": "",
+        "wall": "",
+        "price": "(La voluntad)",
+        "comments": "Solo partidos en los que participe Lela"
     }
 ]
+``
 
 
 
