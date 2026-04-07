@@ -5,16 +5,35 @@ import os
 DATA_FILE = "padel_data.json"
 
 def load_data():
+  
+def load_data():
+    # Si el archivo no existe, crear estructura completa
     if not os.path.exists(DATA_FILE):
-        return {
-            "jugadores": [
-                {"nombre": f"Jugador {i+1}", "disponible": False, "puntos": 0}
-                for i in range(20)
-            ],
-            "jornadas": [{"numero": i + 1, "partidos": []} for i in range(7)]
+        data = {
+            "jugadores": [],
+            "jornadas": [{"numero": i + 1, "partidos": []} for i in range(7)],
+            "partidos_borrador": []
         }
+        save_data(data)
+        return data
+
+    # Si existe, cargarlo
     with open(DATA_FILE, "r") as f:
-        return json.load(f)
+        data = json.load(f)
+
+    # Asegurar claves necesarias
+    if "jugadores" not in data:
+        data["jugadores"] = []
+
+    if "jornadas" not in data or len(data["jornadas"]) == 0:
+        data["jornadas"] = [{"numero": i + 1, "partidos": []} for i in range(7)]
+
+    if "partidos_borrador" not in data:
+        data["partidos_borrador"] = []
+
+    save_data(data)
+    return data
+
 
 def save_data(data):
     with open(DATA_FILE, "w") as f:
