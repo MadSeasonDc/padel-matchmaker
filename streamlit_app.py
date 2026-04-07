@@ -275,7 +275,7 @@ elif menu == "Ranking":
 
     st.header("🏆 Ranking")
 
-    # Seleccionar hasta qué jornada calcular el ranking
+    # -------- Selector de jornada para congelar ranking --------
     jornadas = data.get("jornadas", [])
     opciones_jornada = ["Todas"] + [f"Jornada {j['numero']}" for j in jornadas]
 
@@ -287,57 +287,68 @@ elif menu == "Ranking":
         nro = int(seleccion.split()[-1])
         jornadas_usar = [j for j in jornadas if j["numero"] <= nro]
 
-    # Inicializar estadísticas
-    stats = {j["nombre"]: {
-        "PJ": 0, "PG": 0, "PP": 0, "Pts": 0, "TSW": 0, "TSL": 0
-    } for j in data["jugadores"]}
+    # -------- Inicializar estadísticas --------
+    stats = {
+        j["nombre"]: {
+            "PJ": 0,
+            "PG": 0,
+            "PP": 0,
+            "Pts": 0,
+            "TSW": 0,
+            "TSL": 0
+        }
+        for j in data["jugadores"]
+    }
 
-    # Calcular estadísticas
+    # -------- Calcular estadísticas --------
     for jornada in jornadas_usar:
         for p in jornada.get("partidos", []):
-            p1, p2 = p["pareja_1"], p["pareja_2"]
-            if len(p1) != 2 or len(p2) != 2:
+            pareja1 = p.get("pareja_1", [])
+            pareja2 = p.get("pareja_2", [])
+
+            if len(pareja1) != 2 or len(pareja2) != 2:
                 continue
 
-            s1p1, s1p2 = p["set1_p1"], p["set1_p2"]
-            s2p1, s2p2 = p["set2_p1"], p["set2_p2"]
+            s1_p1, s1_p2 = p["set1_p1"], p["set1_p2"]
+            s2_p1, s2_p2 = p["set2_p1"], p["set2_p2"]
 
-            sets1 = (s1p1 > s1p2) + (s2p1 > s2p2)
-            sets2 = (s1p2 > s1p1) + (s2p2 > s2p1)
+            sets_p1 = (s1_p1 > s1_p2) + (s2_p1 > s2_p2)
+            sets_p2 = (s1_p2 > s1_p1) + (s2_p2 > s2_p1)
 
-            games1 = s1p1 + s2p1
-            games2 = s1p2 + s2p2
+            juegos_p1 = s1_p1 + s2_p1
+            juegos_p2 = s1_p2 + s2_p2
 
-            for j in p1:
+            for j in pareja1:
                 stats[j]["PJ"] += 1
-                stats[j]["TSW"] += games1
-                stats[j]["TSL"] += games2
-            for j in p2:
-                stats[j]["PJ"] += 1
-                stats[j]["TSW"] += games2
-                stats[j]["TSL"] += games1
+                stats[j]["TSW"] += juegos_p1
+                stats[j]["TSL"] += juegos_p2
 
-            if sets1 > sets2:
-                for j in p1:
+            for j in pareja2:
+                stats[j]["PJ"] += 1
+                stats[j]["TSW"] += juegos_p2
+                stats[j]["TSL"] += juegos_p1
+
+            if sets_p1 > sets_p2:
+                for j in pareja1:
                     stats[j]["PG"] += 1
                     stats[j]["Pts"] += 2
-                for j in p2:
+                for j in pareja2:
                     stats[j]["PP"] += 1
-            elif sets2 > sets1:
-                for j in p2:
+            elif sets_p2 > sets_p1:
+                for j in pareja2:
                     stats[j]["PG"] += 1
                     stats[j]["Pts"] += 2
-                for j in p1:
+                for j in pareja1:
                     stats[j]["PP"] += 1
             else:
-                for j in p1 + p2:
+                for j in pareja1 + pareja2:
                     stats[j]["Pts"] += 1
 
-    # DataFrame
-    rows = []
-    for name, s in stats.items():
-        rows.append({
-            "Jugador": name,
+    # -------- Crear DataFrame --------
+    filas = []
+    for nombre, s in stats.items():
+        filas.append({
+            "Jugador": nombre,
             "PJ": s["PJ"],
             "PG": s["PG"],
             "PP": s["PP"],
@@ -347,12 +358,12 @@ elif menu == "Ranking":
             "Dif": s["TSW"] - s["TSL"]
         })
 
-    rows.sort(key=lambda x: (x["Pts"], x["PG"], x["Dif"]), reverse=True)
+    filas.sort(key=lambda x: (x["Pts"], x["PG"], x["Dif"]), reverse=True)
 
-    df = pd.DataFrame(rows)
-    df.insert(0, "RK", range(1, len(df)+1))
+    df = pd.DataFrame(filas)
+    df.insert(0, "RK", range(1, len(df) + 1))
 
-    # Iconos
+    # -------- Iconos TOP 3 --------
     def nombre_con_icono(row):
         if row["RK"] == 1:
             return f"🥇 {row['Jugador']}"
@@ -364,44 +375,55 @@ elif menu == "Ranking":
 
     df["Jugador"] = df.apply(nombre_con_icono, axis=1)
 
-    # Estilo solo en la columna Jugador
+    # -------- Estilo solo en nombre --------
     def style_row(row):
-        styles = ["" for _ in row.index]
+        estilos = ["" for _ in row.index]
         idx = row.index.get_loc("Jugador")
         if row["RK"] == 1:
-            styles[idx] = "background-color:#FFD700;font-weight:bold"
+            estilos[idx] = "background-color:#FFD700;font-weight:bold"
         elif row["RK"] == 2:
-            styles[idx] = "background-color:#C0C0C0"
+            estilos[idx] = "background-color:#C0C0C0"
         elif row["RK"] == 3:
-            styles[idx] = "background-color:#CD7F32"
-        return styles
+            estilos[idx] = "background-color:#CD7F32"
+        return estilos
 
     st.dataframe(
         df.style.apply(style_row, axis=1),
         use_container_width=True,
         hide_index=True
     )
+
+    # ----------------------------
+    # RESUMEN POR JUGADOR
+    # ----------------------------
     st.markdown("---")
-st.markdown("## 👤 Resumen por jugador")
+    st.markdown("## 👤 Resumen por jugador")
 
-jugador_sel = st.selectbox(
-    "Selecciona un jugador",
-    sorted(df["Jugador"].str.replace("🥇 ", "").str.replace("🥈 ", "").str.replace("🥉 ", ""))
-)
+    nombres_limpios = sorted(
+        df["Jugador"]
+        .str.replace("🥇 ", "", regex=False)
+        .str.replace("🥈 ", "", regex=False)
+        .str.replace("🥉 ", "", regex=False)
+    )
 
-fila = df[df["Jugador"].str.contains(jugador_sel)].iloc[0]
+    jugador_sel = st.selectbox(
+        "Selecciona un jugador",
+        nombres_limpios
+    )
 
-c1, c2, c3 = st.columns(3)
-c1.metric("Puntos", fila["Pts"])
-c2.metric("Partidos Jugados", fila["PJ"])
-c3.metric("Dif. Juegos", fila["Dif"])
+    fila = df[df["Jugador"].str.contains(jugador_sel, regex=False)].iloc[0]
 
-st.write(
-    f"""
-    **📊 Estadísticas**
-    - ✅ Partidos ganados: {fila['PG']}
-    - ❌ Partidos perdidos: {fila['PP']}
-    - 🎾 Juegos a favor: {fila['TSW']}
-    - 🚫 Juegos en contra: {fila['TSL']}
-    """
-)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Puntos", fila["Pts"])
+    c2.metric("Partidos Jugados", fila["PJ"])
+    c3.metric("Dif. Juegos", fila["Dif"])
+
+    st.write(
+        f"""
+**📊 Estadísticas**
+- ✅ Partidos ganados: {fila['PG']}
+- ❌ Partidos perdidos: {fila['PP']}
+- 🎾 Juegos a favor: {fila['TSW']}
+- 🚫 Juegos en contra: {fila['TSL']}
+"""
+    )
