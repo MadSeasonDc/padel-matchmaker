@@ -144,37 +144,39 @@ def load_data():
             })
 
     # -------- Asegurar jornadas --------
-    if "jornadas" not in data or len(data["jornadas"]) == 0:
-        data["jornadas"] = [
-            {
-                "numero": 1,
-                "partidos": [partido_vacio() for _ in range(5)]
-            },
-            {
-                "numero": 2,
-                "partidos": [partido_vacio() for _ in range(4)]
-            },
-            {
-                "numero": 3,
-                "partidos": []
-            },
-            {
-                "numero": 4,
-                "partidos": []
-            },
-            {
-                "numero": 5,
-                "partidos": []
-            },
-            {
-                "numero": 6,
-                "partidos": []
-            },
-            {
-                "numero": 7,
-                "partidos": []
-            }
+    
+if "jornadas" not in data or len(data["jornadas"]) == 0:
+    data["jornadas"] = [
+        {
+            "numero": 1,
+            "partidos": [partido_vacio() for _ in range(5)]
+        },
+        {
+            "numero": 2,
+            "partidos": [partido_vacio() for _ in range(4)]
+        },  # ✅ COMA IMPORTANTE AQUÍ
+        {
+            "numero": 3,
+            "partidos": []
+        },
+        {
+            "numero": 4,
+            "partidos": []
+        },
+        {
+            "numero": 5,
+            "partidos": []
+        },
+        {
+            "numero": 6,
+            "partidos": []
+        },
+        {
+            "numero": 7,
+            "partidos": []
         }
+    ]
+
 
     # -------- Asegurar borrador --------
     if "partidos_borrador" not in data:
