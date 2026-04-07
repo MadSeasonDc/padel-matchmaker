@@ -92,7 +92,40 @@ menu = st.sidebar.radio(
     ["Jugadores",  "Partidos",  "Ranking"]
 )
  
+# ----------------------------
+# JUGADORES
+# ----------------------------
+if menu == "Jugadores":
+    st.header("👥 Jugadores")
 
+    for j in data["jugadores"]:
+        st.write(j["nombre"])
+# ----------------------------
+# PARTIDOS
+# ----------------------------
+elif menu == "Partidos":
+    st.header("🎾 Partidos")
+
+    if "partidos" not in data:
+        data["partidos"] = []
+
+    if st.button("➕ Nuevo partido"):
+        data["partidos"].append({
+            "pareja_1": [],
+            "pareja_2": [],
+            "lugar": "",
+            "fecha": "",
+            "hora": "",
+            "set1": "",
+            "set2": "",
+            "set3": "",
+            "cerrado": False
+        })
+        save_data(data)
+        st.experimental_rerun()
+
+    st.write(f"Partidos creados: {len(data['partidos'])}")
+        
 # ----------------------------
 # RANKING
 # ----------------------------
