@@ -275,80 +275,69 @@ elif menu == "Ranking":
 
     st.header("🏆 Ranking")
 
+    # Seleccionar hasta qué jornada calcular el ranking
+    jornadas = data.get("jornadas", [])
+    opciones_jornada = ["Todas"] + [f"Jornada {j['numero']}" for j in jornadas]
+
+    seleccion = st.selectbox("Ranking hasta:", opciones_jornada)
+
+    if seleccion == "Todas":
+        jornadas_usar = jornadas
+    else:
+        nro = int(seleccion.split()[-1])
+        jornadas_usar = [j for j in jornadas if j["numero"] <= nro]
+
     # Inicializar estadísticas
-    stats = {}
-    for j in data["jugadores"]:
-        stats[j["nombre"]] = {
-            "PJ": 0,
-            "PG": 0,
-            "PP": 0,
-            "Pts": 0,
-            "TSW": 0,
-            "TSL": 0
-        }
+    stats = {j["nombre"]: {
+        "PJ": 0, "PG": 0, "PP": 0, "Pts": 0, "TSW": 0, "TSL": 0
+    } for j in data["jugadores"]}
 
-    # Recorrer jornadas y partidos
-    for jornada in data.get("jornadas", []):
+    # Calcular estadísticas
+    for jornada in jornadas_usar:
         for p in jornada.get("partidos", []):
-
-            pareja1 = p.get("pareja_1", [])
-            pareja2 = p.get("pareja_2", [])
-
-            if len(pareja1) != 2 or len(pareja2) != 2:
+            p1, p2 = p["pareja_1"], p["pareja_2"]
+            if len(p1) != 2 or len(p2) != 2:
                 continue
 
-            s1_p1 = p.get("set1_p1", 0)
-            s1_p2 = p.get("set1_p2", 0)
-            s2_p1 = p.get("set2_p1", 0)
-            s2_p2 = p.get("set2_p2", 0)
+            s1p1, s1p2 = p["set1_p1"], p["set1_p2"]
+            s2p1, s2p2 = p["set2_p1"], p["set2_p2"]
 
-            sets_p1 = 0
-            sets_p2 = 0
+            sets1 = (s1p1 > s1p2) + (s2p1 > s2p2)
+            sets2 = (s1p2 > s1p1) + (s2p2 > s2p1)
 
-            if s1_p1 > s1_p2:
-                sets_p1 += 1
-            elif s1_p2 > s1_p1:
-                sets_p2 += 1
+            games1 = s1p1 + s2p1
+            games2 = s1p2 + s2p2
 
-            if s2_p1 > s2_p2:
-                sets_p1 += 1
-            elif s2_p2 > s2_p1:
-                sets_p2 += 1
-
-            juegos_p1 = s1_p1 + s2_p1
-            juegos_p2 = s1_p2 + s2_p2
-
-            for j in pareja1:
+            for j in p1:
                 stats[j]["PJ"] += 1
-                stats[j]["TSW"] += juegos_p1
-                stats[j]["TSL"] += juegos_p2
-
-            for j in pareja2:
+                stats[j]["TSW"] += games1
+                stats[j]["TSL"] += games2
+            for j in p2:
                 stats[j]["PJ"] += 1
-                stats[j]["TSW"] += juegos_p2
-                stats[j]["TSL"] += juegos_p1
+                stats[j]["TSW"] += games2
+                stats[j]["TSL"] += games1
 
-            if sets_p1 > sets_p2:
-                for j in pareja1:
+            if sets1 > sets2:
+                for j in p1:
                     stats[j]["PG"] += 1
                     stats[j]["Pts"] += 2
-                for j in pareja2:
+                for j in p2:
                     stats[j]["PP"] += 1
-            elif sets_p2 > sets_p1:
-                for j in pareja2:
+            elif sets2 > sets1:
+                for j in p2:
                     stats[j]["PG"] += 1
                     stats[j]["Pts"] += 2
-                for j in pareja1:
+                for j in p1:
                     stats[j]["PP"] += 1
             else:
-                for j in pareja1 + pareja2:
+                for j in p1 + p2:
                     stats[j]["Pts"] += 1
 
-    # Crear dataframe
-    ranking = []
-    for nombre, s in stats.items():
-        ranking.append({
-            "Jugador": nombre,
+    # DataFrame
+    rows = []
+    for name, s in stats.items():
+        rows.append({
+            "Jugador": name,
             "PJ": s["PJ"],
             "PG": s["PG"],
             "PP": s["PP"],
@@ -358,34 +347,37 @@ elif menu == "Ranking":
             "Dif": s["TSW"] - s["TSL"]
         })
 
-    ranking.sort(
-        key=lambda x: (x["Pts"], x["PG"], x["Dif"]),
-        reverse=True
+    rows.sort(key=lambda x: (x["Pts"], x["PG"], x["Dif"]), reverse=True)
+
+    df = pd.DataFrame(rows)
+    df.insert(0, "RK", range(1, len(df)+1))
+
+    # Iconos
+    def nombre_con_icono(row):
+        if row["RK"] == 1:
+            return f"🥇 {row['Jugador']}"
+        elif row["RK"] == 2:
+            return f"🥈 {row['Jugador']}"
+        elif row["RK"] == 3:
+            return f"🥉 {row['Jugador']}"
+        return row["Jugador"]
+
+    df["Jugador"] = df.apply(nombre_con_icono, axis=1)
+
+    # Estilo solo en la columna Jugador
+    def style_row(row):
+        styles = ["" for _ in row.index]
+        idx = row.index.get_loc("Jugador")
+        if row["RK"] == 1:
+            styles[idx] = "background-color:#FFD700;font-weight:bold"
+        elif row["RK"] == 2:
+            styles[idx] = "background-color:#C0C0C0"
+        elif row["RK"] == 3:
+            styles[idx] = "background-color:#CD7F32"
+        return styles
+
+    st.dataframe(
+        df.style.apply(style_row, axis=1),
+        use_container_width=True,
+        hide_index=True
     )
-
-    df = pd.DataFrame(ranking)
-    df.insert(0, "RK", range(1, len(df) + 1))
-    df = df[["RK", "Jugador", "PJ", "PG", "PP", "Pts", "TSW", "TSL", "Dif"]]
-
-    # 🎨 Estilo SOLO para la columna Jugador
-    def style_jugador(val, rk):
-        if rk == 1:
-            return "background-color: #FFD700; font-weight: bold"  # Oro
-        elif rk == 2:
-            return "background-color: #C0C0C0"  # Plata
-        elif rk == 3:
-            return "background-color: #CD7F32"  # Bronce
-        else:
-            return ""
-
-    df_styled = df.style.apply(
-        lambda row: [
-            style_jugador(row["Jugador"], row["RK"])
-            if col == "Jugador" else ""
-            for col in df.columns
-        ],
-        axis=1
-    )
-
-    st.markdown("### 📊 Clasificación General")
-    st.dataframe(df_styled, use_container_width=True, hide_index=True)
