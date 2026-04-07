@@ -265,7 +265,7 @@ elif menu == "Jornadas":
             partido["pareja_2"] = pareja2
             save_data(data)
             st.success("Partido guardado ✅")
-``
+
 
 # ----------------------------
 # RANKING
