@@ -381,3 +381,27 @@ elif menu == "Ranking":
         use_container_width=True,
         hide_index=True
     )
+    st.markdown("---")
+st.markdown("## 👤 Resumen por jugador")
+
+jugador_sel = st.selectbox(
+    "Selecciona un jugador",
+    sorted(df["Jugador"].str.replace("🥇 ", "").str.replace("🥈 ", "").str.replace("🥉 ", ""))
+)
+
+fila = df[df["Jugador"].str.contains(jugador_sel)].iloc[0]
+
+c1, c2, c3 = st.columns(3)
+c1.metric("Puntos", fila["Pts"])
+c2.metric("Partidos Jugados", fila["PJ"])
+c3.metric("Dif. Juegos", fila["Dif"])
+
+st.write(
+    f"""
+    **📊 Estadísticas**
+    - ✅ Partidos ganados: {fila['PG']}
+    - ❌ Partidos perdidos: {fila['PP']}
+    - 🎾 Juegos a favor: {fila['TSW']}
+    - 🚫 Juegos en contra: {fila['TSL']}
+    """
+)
