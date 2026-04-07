@@ -122,7 +122,7 @@ elif menu == "Partidos":
             "cerrado": False
         })
         save_data(data)
-        st.experimental_rerun()
+        st.rerun()
 
     st.write(f"Partidos creados: {len(data['partidos'])}")
         
