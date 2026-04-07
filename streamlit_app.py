@@ -63,6 +63,18 @@ LOCATIONS_INICIALES = [
     }
 ]
 
+def partido_vacio():
+    return {
+        "pareja_1": [],
+        "pareja_2": [],
+        "lugar": "",
+        "fecha": "",
+        "hora": "18:00",
+        "set1_p1": 0, "set1_p2": 0,
+        "set2_p1": 0, "set2_p2": 0,
+        "set3_p1": 0, "set3_p2": 0
+    }
+
 
 
 
