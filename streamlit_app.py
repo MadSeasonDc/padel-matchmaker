@@ -3,30 +3,71 @@ import json
 import os
 
 DATA_FILE = "padel_data.json"
+JUGADORES_INICIALES = [JUGADORES "Antonio Seoane",
+    "Carlos Ortiz",
+    "Nacho Moros",
+    "Nacho Urbano",
+    "Adrian Gomez",
+    "Alvaro Sarmiento",
+    "Manuel Díaz",
+    "Patricia Seoane",
+    "Julio Mendez",
+    "Jose Luis Pozuelo",
+    "Juan Carmona",
+    "Jesus Fernandez",
+    "Jordi Safont",
+    "Bea Jaen",
+    "Cecile Autran",
+    "Ester Martin",
+    "Graciela Martinez",
+    "Alicia Soriano",
+    "Lela Bekauri",
+    "Oriol Palacios"
+]
+
 
 def load_data():
-
-    # Si el archivo no existe, crear estructura completa
     if not os.path.exists(DATA_FILE):
         data = {
-            "jugadores": [],
+            "jugadores": [
+                {
+                    "nombre": nombre,
+                    "disponible": False,
+                    "puntos": 0,
+                    "fijo": True
+                }
+                for nombre in JUGADORES_INICIALES
+            ],
             "jornadas": [{"numero": i + 1, "partidos": []} for i in range(7)],
             "partidos_borrador": []
         }
         save_data(data)
         return data
 
-    # Si existe, cargarlo
     with open(DATA_FILE, "r") as f:
         data = json.load(f)
 
-    # Asegurar claves necesarias
+    # Asegurar estructura
     if "jugadores" not in data:
         data["jugadores"] = []
 
+    # Asegurar que los jugadores iniciales existen y están protegidos
+    nombres_existentes = {j["nombre"] for j in data["jugadores"]}
+
+    for nombre in JUGADORES_INICIALES:
+        if nombre not in nombres_existentes:
+            data["jugadores"].append({
+                "nombre": nombre,
+                "disponible": False,
+                "puntos": 0,
+                "fijo": True
+            })
+
+    # Asegurar jornadas
     if "jornadas" not in data or len(data["jornadas"]) == 0:
         data["jornadas"] = [{"numero": i + 1, "partidos": []} for i in range(7)]
 
+    # Asegurar borrador
     if "partidos_borrador" not in data:
         data["partidos_borrador"] = []
 
