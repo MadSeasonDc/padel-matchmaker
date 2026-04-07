@@ -11,7 +11,7 @@ JUGADORES_INICIALES = [
     "Nacho Urbano",
     "Adrian Gomez",
     "Alvaro Sarmiento",
-    "Manuel Díaz",
+    "Manuel Díaz", 
     "Patricia Seoane",
     "Julio Mendez",
     "Jose Luis Pozuelo",
