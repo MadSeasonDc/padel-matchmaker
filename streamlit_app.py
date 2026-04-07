@@ -63,7 +63,7 @@ if menu == "Jugadores":
             data["jugadores"].pop(i)
             save_data(data)
             st.experimental_rerun()
-``
+            
 if menu == "Disponibilidad":
     st.header("✅ Disponibilidad de jugadores")
 
