@@ -89,11 +89,13 @@ st.title("🏓 Pádel Matchmaker")
 
 menu = st.sidebar.radio(
     "Menú",
-    [  "Jornadas",  "Ranking"]
+    [ "Jornadas",  "Ranking"]
 )
- # ----------------------------
+
+# ----------------------------
 # JORNADAS
 # ----------------------------
+
 elif menu == "Jornadas":
     import datetime
 
