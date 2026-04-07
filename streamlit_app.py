@@ -100,7 +100,6 @@ menu = st.sidebar.radio(
 # ----------------------------
 # JORNADAS
 # ----------------------------
-
 if menu == "Jornadas":
     import datetime
 
@@ -109,6 +108,9 @@ if menu == "Jornadas":
     if "jornadas" not in data:
         data["jornadas"] = []
 
+    if "locations" not in data:
+        data["locations"] = []
+
     if not data["jornadas"]:
         st.info("No hay jornadas disponibles")
         st.stop()
@@ -116,7 +118,7 @@ if menu == "Jornadas":
     # Selector de jornada
     jornada_index = st.selectbox(
         "Selecciona una jornada",
-        range(len(data["jornadas"])),
+        list(range(len(data["jornadas"]))),
         format_func=lambda i: f"Jornada {data['jornadas'][i]['numero']}"
     )
 
@@ -125,7 +127,7 @@ if menu == "Jornadas":
     st.subheader(f"🗂 Jornada {jornada['numero']}")
     st.write(f"Partidos: {len(jornada['partidos'])} / 5")
 
-    # 👉 Crear automáticamente Partido 1 si no hay ninguno
+    # Crear Partido 1 automáticamente
     if len(jornada["partidos"]) == 0:
         jornada["partidos"].append({
             "pareja_1": [],
@@ -141,17 +143,15 @@ if menu == "Jornadas":
         st.rerun()
 
     # --------- TABS ----------
-    tabs_labels = []
-
+    tab_labels = []
     if len(jornada["partidos"]) < 5:
-        tabs_labels.append("➕")
+        tab_labels.append("➕")
+    tab_labels += [f"Partido {i+1}" for i in range(len(jornada["partidos"]))]
 
-    tabs_labels += [f"Partido {i+1}" for i in range(len(jornada["partidos"]))]
-    tabs = st.tabs(tabs_labels)
-
+    tabs = st.tabs(tab_labels)
     offset = 0
 
-    # --------- TAB ➕ (CREA PARTIDO DIRECTO) ----------
+    # TAB ➕ CREA PARTIDO DIRECTO
     if len(jornada["partidos"]) < 5:
         with tabs[0]:
             st.markdown("### ➕ Nuevo partido")
@@ -174,40 +174,64 @@ if menu == "Jornadas":
 
     jugadores = sorted([j["nombre"] for j in data["jugadores"]])
 
-    # --------- TABS DE PARTIDOS ----------
+    # --------- PARTIDOS ----------
     for idx, partido in enumerate(jornada["partidos"]):
         with tabs[idx + offset]:
             st.subheader(f"🎾 Partido {idx + 1}")
 
-            # Información en una línea
-            c1, c2, c3 = st.columns(3)
+            # INFO EN UNA SOLA LÍNEA
+            col1, col2, col3 = st.columns(3)
 
-            with c1:
-                partido["lugar"] = st.text_input(
-                    "📍 Lugar", partido["lugar"], key=f"lugar_{jornada_index}_{idx}"
-                )
+            # 📍 LUGAR (DESDE LOCATIONS)
+            with col1:
+                clubs = [loc["club"] for loc in data["locations"]]
 
-            with c2:
+                if clubs:
+                    partido["lugar"] = st.selectbox(
+                        "📍 Lugar",
+                        clubs,
+                        index=clubs.index(partido["lugar"]) if partido["lugar"] in clubs else 0,
+                        key=f"lugar_{jornada_index}_{idx}"
+                    )
+                else:
+                    partido["lugar"] = st.text_input(
+                        "📍 Lugar (sin clubs definidos)",
+                        partido["lugar"],
+                        key=f"lugar_{jornada_index}_{idx}"
+                    )
+
+            with col2:
                 fecha_val = datetime.date.fromisoformat(partido["fecha"])
                 partido["fecha"] = str(
-                    st.date_input("📅 Fecha", fecha_val, key=f"fecha_{jornada_index}_{idx}")
+                    st.date_input(
+                        "📅 Fecha",
+                        fecha_val,
+                        key=f"fecha_{jornada_index}_{idx}"
+                    )
                 )
 
-            horas = [f"{h:02d}:{m:02d}" for h in range(8, 23) for m in (0, 30) if not (h == 22 and m == 30)]
+            horas = [
+                f"{h:02d}:{m:02d}"
+                for h in range(8, 23)
+                for m in (0, 30)
+                if not (h == 22 and m == 30)
+            ]
 
-            with c3:
+            with col3:
                 partido["hora"] = st.selectbox(
-                    "⏰ Hora", horas,
+                    "⏰ Hora",
+                    horas,
                     index=horas.index(partido["hora"]) if partido["hora"] in horas else 0,
                     key=f"hora_{jornada_index}_{idx}"
                 )
 
-            # Parejas
-            col1, col2 = st.columns(2)
+            # PAREJAS
+            c1, c2 = st.columns(2)
 
-            with col1:
+            with c1:
                 pareja1 = st.multiselect(
-                    "👥 Pareja 1", jugadores,
+                    "👥 Pareja 1",
+                    jugadores,
                     default=partido["pareja_1"],
                     max_selections=2,
                     key=f"p1_{jornada_index}_{idx}"
@@ -215,15 +239,16 @@ if menu == "Jornadas":
 
             disponibles_p2 = [j for j in jugadores if j not in pareja1]
 
-            with col2:
+            with c2:
                 pareja2 = st.multiselect(
-                    "👥 Pareja 2", disponibles_p2,
+                    "👥 Pareja 2",
+                    disponibles_p2,
                     default=partido["pareja_2"],
                     max_selections=2,
                     key=f"p2_{jornada_index}_{idx}"
                 )
 
-            # ---------- RESULTADOS COMPACTOS (UNA FILA) ----------
+            # RESULTADOS COMPACTOS
             st.markdown("### 🎾 Resultado")
 
             s1, s2, s3 = st.columns(3)
@@ -232,11 +257,15 @@ if menu == "Jornadas":
                 with col:
                     st.markdown(f"**Set {set_num}**")
                     partido[f"set{set_num}_p1"] = st.number_input(
-                        "P1", 0, 7, partido[f"set{set_num}_p1"],
+                        "P1",
+                        0, 7,
+                        partido[f"set{set_num}_p1"],
                         key=f"s{set_num}p1_{jornada_index}_{idx}"
                     )
                     partido[f"set{set_num}_p2"] = st.number_input(
-                        "P2", 0, 7, partido[f"set{set_num}_p2"],
+                        "P2",
+                        0, 7,
+                        partido[f"set{set_num}_p2"],
                         key=f"s{set_num}p2_{jornada_index}_{idx}"
                     )
 
