@@ -106,9 +106,11 @@ if menu == "Jugadores":
 elif menu == "Partidos":
     st.header("🎾 Partidos")
 
+    # Asegurar estructura
     if "partidos" not in data:
         data["partidos"] = []
 
+    # Crear nuevo partido
     if st.button("➕ Nuevo partido"):
         data["partidos"].append({
             "pareja_1": [],
@@ -123,21 +125,76 @@ elif menu == "Partidos":
         })
         save_data(data)
         st.rerun()
-       st.markdown("---")
 
-if not data["partidos"]:
-    st.info("No hay partidos creados todavía")
-    st.stop()
+    st.markdown("---")
 
-partido_index = st.selectbox(
-    "Selecciona un partido",
-    range(len(data["partidos"])),
-    format_func=lambda i: f"Partido {i + 1}"
-)
+    # Si no hay partidos, salir
+    if not data["partidos"]:
+        st.info("No hay partidos creados todavía")
+        st.stop()
 
-partido = data["partidos"][partido_index] 
+    # Selector de partido
+    partido_index = st.selectbox(
+        "Selecciona un partido",
+        range(len(data["partidos"])),
+        format_func=lambda i: f"Partido {i + 1}"
+    )
 
-    st.write(f"Partidos creados: {len(data['partidos'])}")
+    partido = data["partidos"][partido_index]
+
+    st.subheader(f"🧾 Partido {partido_index + 1}")
+
+    jugadores = [j["nombre"] for j in data["jugadores"]]
+
+    # Selección de parejas
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("### 👥 Pareja 1")
+        pareja1 = st.multiselect(
+            "Jugadores",
+            jugadores,
+            default=partido["pareja_1"],
+            max_selections=2,
+            key=f"p1_{partido_index}"
+        )
+
+    with col2:
+        st.markdown("### 👥 Pareja 2")
+        pareja2 = st.multiselect(
+            "Jugadores",
+            jugadores,
+            default=partido["pareja_2"],
+            max_selections=2,
+            key=f"p2_{partido_index}"
+        )
+
+    # Información del partido
+    st.markdown("### 📍 Información")
+
+    partido["lugar"] = st.text_input(
+        "Lugar",
+        partido["lugar"],
+        key=f"lugar_{partido_index}"
+    )
+
+    partido["fecha"] = st.text_input(
+        "Fecha",
+        partido["fecha"],
+        key=f"fecha_{partido_index}"
+    )
+
+    partido["hora"] = st.text_input(
+        "Hora",
+        partido["hora"],
+        key=f"hora_{partido_index}"
+    )
+
+    # Resultado
+    st.markdown("### 🎾 Resultado")
+
+    partido["set1"] = st.text_input(
+
         
 # ----------------------------
 # RANKING
