@@ -138,7 +138,7 @@ elif menu == "Jornadas":
     st.subheader(f"🗂 Jornada {jornada['numero']}")
     st.write(f"Partidos: {len(jornada['partidos'])} / 5")
 
-    # Añadir partido (máx 5)
+    # Añadir partido (máx. 5)
     if len(jornada["partidos"]) < 5:
         if st.button("➕ Añadir partido a esta jornada"):
             jornada["partidos"].append({
@@ -174,18 +174,98 @@ elif menu == "Jornadas":
     )
 
     partido = jornada["partidos"][partido_index]
-
     st.subheader(f"🎾 Partido {partido_index + 1}")
 
     jugadores = [j["nombre"] for j in data["jugadores"]]
 
-    # Parejas
+    # ---- PAREJAS (AQUÍ ESTABA EL ERROR ANTES) ----
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("### 👥 Pareja 1")
         pareja1 = st.multiselect(
-            "Jugadores",
+            label="Jugadores Pareja 1",
+            options=jugadores,
+            default=partido["pareja_1"],
+            max_selections=2,
+            key=f"p1_{jornada_index}_{partido_index}"
+        )
+
+    with col2:
+        st.markdown("### 👥 Pareja 2")
+        pareja2 = st.multiselect(
+            label="Jugadores Pareja 2",
+            options=jugadores,
+            default=partido["pareja_2"],
+            max_selections=2,
+            key=f"p2_{jornada_index}_{partido_index}"
+        )
+
+    # Información del partido
+    st.markdown("### 📍 Información")
+    partido["lugar"] = st.text_input("Lugar", partido["lugar"])
+    partido["fecha"] = st.text_input("Fecha", partido["fecha"])
+    partido["hora"] = st.text_input("Hora", partido["hora"])
+
+    # Resultado
+    st.markdown("### 🎾 Resultado (juegos por set)")
+
+    st.markdown("**Set 1**")
+    c1, c2 = st.columns(2)
+    with c1:
+        partido["set1_p1"] = st.number_input(
+            "Pareja 1",
+            0, 7, partido["set1_p1"],
+            key=f"s1p1_{jornada_index}_{partido_index}"
+        )
+    with c2:
+        partido["set1_p2"] = st.number_input(
+            "Pareja 2",
+            0, 7, partido["set1_p2"],
+            key=f"s1p2_{jornada_index}_{partido_index}"
+        )
+
+    st.markdown("**Set 2**")
+    c1, c2 = st.columns(2)
+    with c1:
+        partido["set2_p1"] = st.number_input(
+            "Pareja 1",
+            0, 7, partido["set2_p1"],
+            key=f"s2p1_{jornada_index}_{partido_index}"
+        )
+    with c2:
+        partido["set2_p2"] = st.number_input(
+            "Pareja 2",
+            0, 7, partido["set2_p2"],
+            key=f"s2p2_{jornada_index}_{partido_index}"
+        )
+
+    st.markdown("**Set 3 / Desempate (opcional – no cuenta)**")
+    c1, c2 = st.columns(2)
+    with c1:
+        partido["set3_p1"] = st.number_input(
+            "Pareja 1",
+            0, 7, partido["set3_p1"],
+            key=f"s3p1_{jornada_index}_{partido_index}"
+        )
+    with c2:
+        partido["set3_p2"] = st.number_input(
+            "Pareja 2",
+            0, 7, partido["set3_p2"],
+            key=f"s3p2_{jornada_index}_{partido_index}"
+        )
+
+    # Guardar partido
+    if st.button("💾 Guardar partido"):
+        if len(pareja1) != 2 or len(pareja2) != 2:
+            st.error("Cada pareja debe tener exactamente 2 jugadores")
+        elif set(pareja1) & set(pareja2):
+            st.error("Un jugador no puede estar en las dos parejas")
+        else:
+            partido["pareja_1"] = pareja1
+            partido["pareja_2"] = pareja2
+            save_data(data)
+            st.success("Partido guardado ✅")
 
 
 # ----------------------------
