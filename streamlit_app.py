@@ -27,6 +27,31 @@ JUGADORES_INICIALES = [
     "Oriol Palacios"
 ]
 
+LOCATIONS_INICIALES = [
+    {
+        "club": "Factory Fit",
+        "address": "Calle Santa Leonor, 52",
+        "telephone": "913 040 291",
+        "whatsapp": "639 556 378",
+        "email": "info@factoryfit.es",
+        "inout": "Outdoor",
+        "wall": "Crystal",
+        "price": "12 € hasta las 14:00 / 14 € a partir de las 14:00",
+        "comments": "Pista más cercana a la oficina"
+    },
+    {
+        "club": "AQA Los Prunos",
+        "address": "Avda. Los Prunos 98-100",
+        "telephone": "917 43 20 01",
+        "whatsapp": "N/A",
+        "email": "recepcion@aqalosprunos.com",
+        "inout": "All",
+        "wall": "Wall",
+        "price": "8,90 Interior / 6,90 Exterior",
+        "comments": ""
+    }
+]
+
 
 
 def load_data():
@@ -70,13 +95,19 @@ def load_data():
     if "jornadas" not in data or len(data["jornadas"]) == 0:
         data["jornadas"] = [{"numero": i + 1, "partidos": []} for i in range(7)]
 
-    # Asegurar borrador
+   # Asegurar borrador
     if "partidos_borrador" not in data:
         data["partidos_borrador"] = []
 
     # ✅ Asegurar locations
     if "locations" not in data:
         data["locations"] = []
+
+    if len(data["locations"]) == 0:
+        data["locations"] = LOCATIONS_INICIALES.copy()
+
+    save_data(data)
+    return data
 
     save_data(data)
     return data
