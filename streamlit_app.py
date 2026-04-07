@@ -96,7 +96,7 @@ menu = st.sidebar.radio(
 # JORNADAS
 # ----------------------------
 
-elif menu == "Jornadas":
+if menu == "Jornadas":
     import datetime
 
     st.header("📅 Jornadas")
