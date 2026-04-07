@@ -90,9 +90,38 @@ def load_data():
                 }
                 for nombre in JUGADORES_INICIALES
             ],
-            "jornadas": [{"numero": i + 1, "partidos": []} for i in range(7)],
+            "jornadas": [
+                {
+                    "numero": 1,
+                    "partidos": [partido_vacio() for _ in range(5)]
+                },
+                {
+                    "numero": 2,
+                    "partidos": [partido_vacio() for _ in range(4)]
+                },
+                {
+                    "numero": 3,
+                    "partidos": []
+                },
+                {
+                    "numero": 4,
+                    "partidos": []
+                },
+                {
+                    "numero": 5,
+                    "partidos": []
+                },
+                {
+                    "numero": 6,
+                    "partidos": []
+                },
+                {
+                    "numero": 7,
+                    "partidos": []
+                }
+            ],
             "partidos_borrador": [],
-            "locations": []   # ✅ se crea desde el inicio
+            "locations": LOCATIONS_INICIALES.copy()
         }
         save_data(data)
         return data
@@ -115,40 +144,40 @@ def load_data():
                 "fijo": True
             })
 
-    # ✅ Asegurar jornadas iniciales
-if "jornadas" not in data or len(data["jornadas"]) == 0:
-    data["jornadas"] = [
-        {
-            "numero": 1,
-            "partidos": [partido_vacio() for _ in range(5)]
-        },
-        {
-            "numero": 2,
-            "partidos": [partido_vacio() for _ in range(4)]
-        },
-        {
-            "numero": 3,
-            "partidos": []
-        },
-        {
-            "numero": 4,
-            "partidos": []
-        },
-        {
-            "numero": 5,
-            "partidos": []
-        },
-        {
-            "numero": 6,
-            "partidos": []
-        },
-        {
-            "numero": 7,
-            "partidos": []
+    # ✅ Asegurar jornadas iniciales (solo si está vacío)
+    if "jornadas" not in data or len(data["jornadas"]) == 0:
+        data["jornadas"] = [
+            {
+                "numero": 1,
+                "partidos": [partido_vacio() for _ in range(5)]
+            },
+            {
+                "numero": 2,
+                "partidos": [partido_vacio() for _ in range(4)]
+            },
+            {
+                "numero": 3,
+                "partidos": []
+            },
+            {
+                "numero": 4,
+                "partidos": []
+            },
+            {
+                "numero": 5,
+                "partidos": []
+            },
+            {
+                "numero": 6,
+                "partidos": []
+            },
+            {
+                "numero": 7,
+                "partidos": []
+            }
         }
-    ]
 
-   # Asegurar borrador
+    # Asegurar borrador
     if "partidos_borrador" not in data:
         data["partidos_borrador"] = []
 
@@ -162,8 +191,6 @@ if "jornadas" not in data or len(data["jornadas"]) == 0:
     save_data(data)
     return data
 
-    save_data(data)
-    return data
 
 
 
