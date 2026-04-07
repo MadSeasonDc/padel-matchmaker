@@ -123,6 +123,19 @@ elif menu == "Partidos":
         })
         save_data(data)
         st.rerun()
+       st.markdown("---")
+
+if not data["partidos"]:
+    st.info("No hay partidos creados todavía")
+    st.stop()
+
+partido_index = st.selectbox(
+    "Selecciona un partido",
+    range(len(data["partidos"])),
+    format_func=lambda i: f"Partido {i + 1}"
+)
+
+partido = data["partidos"][partido_index] 
 
     st.write(f"Partidos creados: {len(data['partidos'])}")
         
