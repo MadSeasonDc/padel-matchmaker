@@ -174,7 +174,7 @@ def load_data():
                 "numero": 7,
                 "partidos": []
             }
-        }
+        ]
 
     # -------- borrador --------
     if "partidos_borrador" not in data:
