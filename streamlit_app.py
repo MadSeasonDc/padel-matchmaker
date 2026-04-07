@@ -3,7 +3,9 @@ import json
 import os
 
 DATA_FILE = "padel_data.json"
-JUGADORES_INICIALES = [JUGADORES "Antonio Seoane",
+
+JUGADORES_INICIALES = [
+    "Antonio Seoane",
     "Carlos Ortiz",
     "Nacho Moros",
     "Nacho Urbano",
@@ -24,6 +26,7 @@ JUGADORES_INICIALES = [JUGADORES "Antonio Seoane",
     "Lela Bekauri",
     "Oriol Palacios"
 ]
+
 
 
 def load_data():
