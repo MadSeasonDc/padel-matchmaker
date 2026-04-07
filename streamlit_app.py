@@ -191,6 +191,28 @@ elif menu == "Partidos":
     )
 
     # Resultado
+    
+# Resultado
+st.markdown("### 🎾 Resultado")
+
+partido["set1"] = st.text_input(
+    "Set 1 (ej: 6-4)",
+    value=partido["set1"],
+    key=f"set1_{partido_index}"
+)
+
+partido["set2"] = st.text_input(
+    "Set 2 (ej: 4-6)",
+    value=partido["set2"],
+    key=f"set2_{partido_index}"
+)
+
+partido["set3"] = st.text_input(
+    "Set 3 / Desempate (opcional – NO cuenta para el resultado)",
+    value=partido["set3"],
+    key=f"set3_{partido_index}"
+)
+
     st.markdown("### 🎾 Resultado")
 
     partido["set1"] = st.text_input(
