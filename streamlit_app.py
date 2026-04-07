@@ -272,6 +272,8 @@ elif menu == "Jornadas":
 # RANKING
 # ----------------------------
 elif menu == "Ranking":
+    import pandas as pd
+
     st.header("🏆 Ranking")
 
     # Inicializar estadísticas por jugador
@@ -283,10 +285,10 @@ elif menu == "Ranking":
             "PP": 0,
             "Pts": 0,
             "TSW": 0,
-            "TSL": 0,
+            "TSL": 0
         }
 
-    # Recorrer todas las jornadas y partidos
+    # Recorrer jornadas y partidos
     for jornada in data.get("jornadas", []):
         for p in jornada.get("partidos", []):
 
@@ -296,13 +298,13 @@ elif menu == "Ranking":
             if len(pareja1) != 2 or len(pareja2) != 2:
                 continue  # partido incompleto
 
-            # Juegos por set (solo set 1 y 2)
+            # Juegos (solo set 1 y 2)
             s1_p1 = p.get("set1_p1", 0)
             s1_p2 = p.get("set1_p2", 0)
             s2_p1 = p.get("set2_p1", 0)
             s2_p2 = p.get("set2_p2", 0)
 
-            # Determinar sets ganados
+            # Sets ganados
             sets_p1 = 0
             sets_p2 = 0
 
@@ -320,7 +322,7 @@ elif menu == "Ranking":
             juegos_p1 = s1_p1 + s2_p1
             juegos_p2 = s1_p2 + s2_p2
 
-            # Actualizar PJ y juegos
+            # PJ y juegos
             for j in pareja1:
                 stats[j]["PJ"] += 1
                 stats[j]["TSW"] += juegos_p1
@@ -331,7 +333,7 @@ elif menu == "Ranking":
                 stats[j]["TSW"] += juegos_p2
                 stats[j]["TSL"] += juegos_p1
 
-            # Resultado del partido
+            # Resultado
             if sets_p1 > sets_p2:
                 for j in pareja1:
                     stats[j]["PG"] += 1
@@ -347,11 +349,10 @@ elif menu == "Ranking":
                     stats[j]["PP"] += 1
 
             else:
-                # Empate
                 for j in pareja1 + pareja2:
                     stats[j]["Pts"] += 1
 
-    # Construir tabla final
+    # Construir ranking
     ranking = []
     for nombre, s in stats.items():
         ranking.append({
@@ -362,24 +363,32 @@ elif menu == "Ranking":
             "Pts": s["Pts"],
             "TSW": s["TSW"],
             "TSL": s["TSL"],
-            "Dif": s["TSW"] - s["TSL"],
+            "Dif": s["TSW"] - s["TSL"]
         })
 
-    # Ordenar ranking
+    # Ordenar
     ranking.sort(
         key=lambda x: (x["Pts"], x["PG"], x["Dif"]),
         reverse=True
     )
 
-    # Mostrar ranking
-    st.markdown("### 📊 Clasificación")
+    # DataFrame
+    df = pd.DataFrame(ranking)
+    df.insert(0, "RK", range(1, len(df) + 1))
+    df = df[["RK", "Jugador", "PJ", "PG", "PP", "Pts", "TSW", "TSL", "Dif"]]
 
-    for i, r in enumerate(ranking, start=1):
-        st.write(
-            f"**{i}. {r['Jugador']}** — "
-            f"{r['Pts']} pts | "
-            f"PG: {r['PG']} | "
-            f"PJ: {r['PJ']} | "
-            f"Dif: {r['Dif']} "
-            f"(TSW {r['TSW']} / TSL {r['TSL']})"
-        )
+    # Estilos TOP 3
+    def style_top3(row):
+        if row["RK"] == 1:
+            return ["background-color: #FFD700; font-weight: bold"] * len(row)  # Oro
+        elif row["RK"] == 2:
+            return ["background-color: #C0C0C0"] * len(row)  # Plata
+        elif row["RK"] == 3:
+            return ["background-color: #CD7F32"] * len(row)  # Bronce
+        else:
+            return [""] * len(row)
+
+    styled_df = df.style.apply(style_top3, axis=1)
+
+    st.markdown("### 📊 Clasificación General")
+    st.dataframe(styled_df, use_container_width=True, hide_index=True)
