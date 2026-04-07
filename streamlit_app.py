@@ -136,6 +136,7 @@ if menu == "Jornadas":
 
     st.header("📅 Jornadas")
 
+    # Seguridad de estructura
     if "jornadas" not in data:
         data["jornadas"] = []
 
@@ -149,7 +150,7 @@ if menu == "Jornadas":
     # Selector de jornada
     jornada_index = st.selectbox(
         "Selecciona una jornada",
-        list(range(len(data["jornadas"]))),
+        range(len(data["jornadas"])),
         format_func=lambda i: f"Jornada {data['jornadas'][i]['numero']}"
     )
 
@@ -173,50 +174,41 @@ if menu == "Jornadas":
         save_data(data)
         st.rerun()
 
-    # --------- TABS ----------
-    tab_labels = []
-    if len(jornada["partidos"]) < 5:
+    # ----------------------------
+    # TABS: Partido 1-4 + ➕ (5º)
+    # ----------------------------
+    tab_labels = ["Partido 1", "Partido 2", "Partido 3", "Partido 4"]
+
+    if len(jornada["partidos"]) == 5:
+        tab_labels.append("Partido 5")
+    else:
         tab_labels.append("➕")
-    tab_labels += [f"Partido {i+1}" for i in range(len(jornada["partidos"]))]
 
     tabs = st.tabs(tab_labels)
-    offset = 0
-
-    # TAB ➕ CREA PARTIDO DIRECTO
-    if len(jornada["partidos"]) < 5:
-        with tabs[0]:
-            st.markdown("### ➕ Nuevo partido")
-            st.info("Se añadirá automáticamente un nuevo partido")
-
-            jornada["partidos"].append({
-                "pareja_1": [],
-                "pareja_2": [],
-                "lugar": "",
-                "fecha": str(datetime.date.today()),
-                "hora": "18:00",
-                "set1_p1": 0, "set1_p2": 0,
-                "set2_p1": 0, "set2_p2": 0,
-                "set3_p1": 0, "set3_p2": 0
-            })
-            save_data(data)
-            st.rerun()
-
-        offset = 1
 
     jugadores = sorted([j["nombre"] for j in data["jugadores"]])
 
-    # --------- PARTIDOS ----------
-    for idx, partido in enumerate(jornada["partidos"]):
-        with tabs[idx + offset]:
+    # ----------------------------
+    # PARTIDOS 1 A 4 (y 5 si existe)
+    # ----------------------------
+    max_visibles = min(len(jornada["partidos"]), 5)
+
+    for idx in range(max_visibles):
+        # No pintar tab inexistente
+        if idx > 3 and len(jornada["partidos"]) < 5:
+            continue
+
+        partido = jornada["partidos"][idx]
+
+        with tabs[idx]:
             st.subheader(f"🎾 Partido {idx + 1}")
 
-            # INFO EN UNA SOLA LÍNEA
+            # Información en una sola línea
             col1, col2, col3 = st.columns(3)
 
-            # 📍 LUGAR (DESDE LOCATIONS)
+            # Lugar desde Locations
             with col1:
                 clubs = [loc["club"] for loc in data["locations"]]
-
                 if clubs:
                     partido["lugar"] = st.selectbox(
                         "📍 Lugar",
@@ -226,7 +218,7 @@ if menu == "Jornadas":
                     )
                 else:
                     partido["lugar"] = st.text_input(
-                        "📍 Lugar (sin clubs definidos)",
+                        "📍 Lugar",
                         partido["lugar"],
                         key=f"lugar_{jornada_index}_{idx}"
                     )
@@ -256,7 +248,7 @@ if menu == "Jornadas":
                     key=f"hora_{jornada_index}_{idx}"
                 )
 
-            # PAREJAS
+            # Parejas
             c1, c2 = st.columns(2)
 
             with c1:
@@ -279,7 +271,7 @@ if menu == "Jornadas":
                     key=f"p2_{jornada_index}_{idx}"
                 )
 
-            # RESULTADOS COMPACTOS
+            # Resultados compactos (una sola fila)
             st.markdown("### 🎾 Resultado")
 
             s1, s2, s3 = st.columns(3)
@@ -305,6 +297,26 @@ if menu == "Jornadas":
                 partido["pareja_2"] = pareja2
                 save_data(data)
                 st.success("✅ Partido guardado")
+
+    # ----------------------------
+    # TAB ➕ (crear 5º partido)
+    # ----------------------------
+    if len(jornada["partidos"]) < 5:
+        with tabs[-1]:
+            st.markdown("### ➕ Añadir quinto partido (opcional)")
+            if st.button("Añadir Partido 5"):
+                jornada["partidos"].append({
+                    "pareja_1": [],
+                    "pareja_2": [],
+                    "lugar": "",
+                    "fecha": str(datetime.date.today()),
+                    "hora": "18:00",
+                    "set1_p1": 0, "set1_p2": 0,
+                    "set2_p1": 0, "set2_p2": 0,
+                    "set3_p1": 0, "set3_p2": 0
+                })
+                save_data(data)
+                st.rerun()
 # ----------------------------
 # RANKING
 # ----------------------------
