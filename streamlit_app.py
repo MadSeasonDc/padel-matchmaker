@@ -62,7 +62,7 @@ LOCATIONS_INICIALES = [
         "comments": "Solo partidos en los que participe Lela"
     }
 ]
-``
+
 
 
 
