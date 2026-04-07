@@ -75,7 +75,17 @@ def partido_vacio():
         "set3_p1": 0, "set3_p2": 0
     }
 
-
+def partido_con_jugadores(p1, p2):
+    return {
+        "pareja_1": p1,
+        "pareja_2": p2,
+        "lugar": "",
+        "fecha": "",
+        "hora": "18:00",
+        "set1_p1": 0, "set1_p2": 0,
+        "set2_p1": 0, "set2_p2": 0,
+        "set3_p1": 0, "set3_p2": 0
+    }
 
 
 def load_data():
