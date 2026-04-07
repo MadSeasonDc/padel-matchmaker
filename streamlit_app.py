@@ -5,8 +5,7 @@ import os
 DATA_FILE = "padel_data.json"
 
 def load_data():
-  
-def load_data():
+
     # Si el archivo no existe, crear estructura completa
     if not os.path.exists(DATA_FILE):
         data = {
