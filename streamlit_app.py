@@ -74,6 +74,11 @@ def load_data():
     if "partidos_borrador" not in data:
         data["partidos_borrador"] = []
 
+    
+if "locations" not in data:
+    data["locations"] = []
+
+
     save_data(data)
     return data
 
