@@ -126,10 +126,30 @@ elif menu == "Jornadas":
         st.info("No hay jornadas creadas todavía")
         st.stop()
 
-    # Selector de jornada
+    # Selección de jornada
     jornada_index = st.selectbox(
         "Selecciona una jornada",
         range(len(data["jornadas"])),
+        format_func=lambda i: f"Jornada {data['jornadas'][i]['numero']}"
+    )
+
+    jornada = data["jornadas"][jornada_index]
+
+    st.subheader(f"🗂 Jornada {jornada['numero']}")
+    st.write(f"Partidos: {len(jornada['partidos'])} / 5")
+
+    # Añadir partido (máx. 5)
+    if len(jornada["partidos"]) < 5:
+        if st.button("➕ Añadir partido a esta jornada"):
+            jornada["partidos"].append({
+                "pareja_1": [],
+                "pareja_2": [],
+                "lugar": "",
+                "fecha": "",
+                "hora": "",
+                "set1_p1": 0,
+                "set1_p2": 0,
+                "set2_p1": 0,
 
 # ----------------------------
 # RANKING
