@@ -104,9 +104,10 @@ if menu == "Jugadores":
 # JORNADAS
 # ----------------------------
 elif menu == "Jornadas":
+    import datetime
+
     st.header("📅 Jornadas")
 
-    # Asegurar estructura
     if "jornadas" not in data:
         data["jornadas"] = []
 
@@ -145,8 +146,8 @@ elif menu == "Jornadas":
                 "pareja_1": [],
                 "pareja_2": [],
                 "lugar": "",
-                "fecha": "",
-                "hora": "",
+                "fecha": str(datetime.date.today()),
+                "hora": "18:00",
                 "set1_p1": 0,
                 "set1_p2": 0,
                 "set2_p1": 0,
@@ -176,10 +177,42 @@ elif menu == "Jornadas":
     partido = jornada["partidos"][partido_index]
     st.subheader(f"🎾 Partido {partido_index + 1}")
 
-    # ✅ LISTA DE JUGADORES ORDENADA ALFABÉTICAMENTE
+    # ⬇️ INFORMACIÓN EN UNA SOLA LÍNEA
+    col_lugar, col_fecha, col_hora = st.columns(3)
+
+    with col_lugar:
+        partido["lugar"] = st.text_input(
+            "📍 Lugar",
+            partido["lugar"]
+        )
+
+    with col_fecha:
+        fecha_val = datetime.date.fromisoformat(partido["fecha"])
+        partido["fecha"] = str(
+            st.date_input(
+                "📅 Fecha",
+                value=fecha_val
+            )
+        )
+
+    # Horas de 08:00 a 22:00 cada 30 min
+    horas = [
+        f"{h:02d}:{m:02d}"
+        for h in range(8, 23)
+        for m in (0, 30)
+        if not (h == 22 and m == 30)
+    ]
+
+    with col_hora:
+        partido["hora"] = st.selectbox(
+            "⏰ Hora",
+            horas,
+            index=horas.index(partido["hora"]) if partido["hora"] in horas else 0
+        )
+
+    # ---------- Selección de jugadores ----------
     jugadores = sorted([j["nombre"] for j in data["jugadores"]])
 
-    # Parejas
     col1, col2 = st.columns(2)
 
     with col1:
@@ -192,7 +225,6 @@ elif menu == "Jornadas":
             key=f"p1_{jornada_index}_{partido_index}"
         )
 
-    # ✅ Eliminar los ya seleccionados en pareja 1
     jugadores_pareja2 = [j for j in jugadores if j not in pareja1]
 
     with col2:
@@ -205,61 +237,26 @@ elif menu == "Jornadas":
             key=f"p2_{jornada_index}_{partido_index}"
         )
 
-    # Información
-    st.markdown("### 📍 Información")
-    partido["lugar"] = st.text_input("Lugar", partido["lugar"])
-    partido["fecha"] = st.text_input("Fecha", partido["fecha"])
-    partido["hora"] = st.text_input("Hora", partido["hora"])
-
-    # Resultado
+    # ---------- Resultado ----------
     st.markdown("### 🎾 Resultado (juegos por set)")
 
-    st.markdown("**Set 1**")
-    c1, c2 = st.columns(2)
-    with c1:
-        partido["set1_p1"] = st.number_input(
-            "Pareja 1",
-            0, 7, partido["set1_p1"],
-            key=f"s1p1_{jornada_index}_{partido_index}"
-        )
-    with c2:
-        partido["set1_p2"] = st.number_input(
-            "Pareja 2",
-            0, 7, partido["set1_p2"],
-            key=f"s1p2_{jornada_index}_{partido_index}"
-        )
+    for set_num in [1, 2, 3]:
+        st.markdown(f"**Set {set_num}" + (" / Desempate**" if set_num == 3 else "**"))
+        c1, c2 = st.columns(2)
+        with c1:
+            partido[f"set{set_num}_p1"] = st.number_input(
+                "Pareja 1",
+                0, 7, partido[f"set{set_num}_p1"],
+                key=f"s{set_num}p1_{jornada_index}_{partido_index}"
+            )
+        with c2:
+            partido[f"set{set_num}_p2"] = st.number_input(
+                "Pareja 2",
+                0, 7, partido[f"set{set_num}_p2"],
+                key=f"s{set_num}p2_{jornada_index}_{partido_index}"
+            )
 
-    st.markdown("**Set 2**")
-    c1, c2 = st.columns(2)
-    with c1:
-        partido["set2_p1"] = st.number_input(
-            "Pareja 1",
-            0, 7, partido["set2_p1"],
-            key=f"s2p1_{jornada_index}_{partido_index}"
-        )
-    with c2:
-        partido["set2_p2"] = st.number_input(
-            "Pareja 2",
-            0, 7, partido["set2_p2"],
-            key=f"s2p2_{jornada_index}_{partido_index}"
-        )
-
-    st.markdown("**Set 3 / Desempate (opcional – no cuenta)**")
-    c1, c2 = st.columns(2)
-    with c1:
-        partido["set3_p1"] = st.number_input(
-            "Pareja 1",
-            0, 7, partido["set3_p1"],
-            key=f"s3p1_{jornada_index}_{partido_index}"
-        )
-    with c2:
-        partido["set3_p2"] = st.number_input(
-            "Pareja 2",
-            0, 7, partido["set3_p2"],
-            key=f"s3p2_{jornada_index}_{partido_index}"
-        )
-
-    # Guardar partido
+    # Guardar
     if st.button("💾 Guardar partido"):
         if len(pareja1) != 2 or len(pareja2) != 2:
             st.error("Cada pareja debe tener exactamente 2 jugadores")
@@ -268,20 +265,7 @@ elif menu == "Jornadas":
             partido["pareja_2"] = pareja2
             save_data(data)
             st.success("Partido guardado ✅")
-
-
-    # Guardar partido
-    if st.button("💾 Guardar partido"):
-        if len(pareja1) != 2 or len(pareja2) != 2:
-            st.error("Cada pareja debe tener exactamente 2 jugadores")
-        elif set(pareja1) & set(pareja2):
-            st.error("Un jugador no puede estar en las dos parejas")
-        else:
-            partido["pareja_1"] = pareja1
-            partido["pareja_2"] = pareja2
-            save_data(data)
-            st.success("Partido guardado ✅")
-
+``
 
 # ----------------------------
 # RANKING
