@@ -91,8 +91,7 @@ menu = st.sidebar.radio(
     "Menú",
     [  "Jornadas",  "Ranking"]
 )
- 
-# ----------------------------
+ # ----------------------------
 # JORNADAS
 # ----------------------------
 elif menu == "Jornadas":
