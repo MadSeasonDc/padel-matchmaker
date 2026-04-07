@@ -94,7 +94,7 @@ st.title("🏓 Pádel Matchmaker")
 
 menu = st.sidebar.radio(
     "Menú",
-    [ "Jornadas",  "Ranking"]
+    [ "Jornadas",  "Ranking", "Locations"]
 )
 
 # ----------------------------
@@ -405,3 +405,54 @@ elif menu == "Ranking":
 - 🚫 Juegos en contra: {fila['TSL']}
 """
     )
+# ----------------------------
+# LOCATIONS
+# ----------------------------
+elif menu == "Locations":
+    st.header("📍 Locations / Clubs")
+
+    if "locations" not in data:
+        data["locations"] = []
+
+    st.markdown("### ➕ Añadir nuevo club")
+
+    with st.expander("Añadir nuevo club"):
+        club = st.text_input("Club")
+        address = st.text_input("Dirección")
+        telephone = st.text_input("Teléfono")
+        whatsapp = st.text_input("Whatsapp")
+        email = st.text_input("E-mail")
+        inout = st.selectbox("In / Out", ["Indoor", "Outdoor", "All"])
+        wall = st.selectbox("Crystal / Wall", ["Crystal", "Wall"])
+        price = st.text_input("Precio aproximado")
+        comments = st.text_input("Comentarios adicionales")
+
+        if st.button("Guardar club"):
+            if club:
+                data["locations"].append({
+                    "club": club,
+                    "address": address,
+                    "telephone": telephone,
+                    "whatsapp": whatsapp,
+                    "email": email,
+                    "inout": inout,
+                    "wall": wall,
+                    "price": price,
+                    "comments": comments
+                })
+                save_data(data)
+                st.success("✅ Club añadido correctamente")
+                st.rerun()
+            else:
+                st.error("El nombre del club es obligatorio")
+
+    st.markdown("---")
+    st.markdown("### 📋 Clubs guardados")
+
+    if not data["locations"]:
+        st.info("No hay clubs añadidos todavía")
+    else:
+        import pandas as pd
+
+        df_locations = pd.DataFrame(data["locations"])
+        st.dataframe(df_locations, use_container_width=True)
