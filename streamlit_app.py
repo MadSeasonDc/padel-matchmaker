@@ -129,7 +129,7 @@ def load_data():
     with open(DATA_FILE, "r") as f:
         data = json.load(f)
 
-    # -------- Asegurar jugadores --------
+    # -------- jugadores --------
     if "jugadores" not in data:
         data["jugadores"] = []
 
@@ -143,46 +143,44 @@ def load_data():
                 "fijo": True
             })
 
-    # -------- Asegurar jornadas --------
-    
-if "jornadas" not in data or len(data["jornadas"]) == 0:
-    data["jornadas"] = [
-        {
-            "numero": 1,
-            "partidos": [partido_vacio() for _ in range(5)]
-        },
-        {
-            "numero": 2,
-            "partidos": [partido_vacio() for _ in range(4)]
-        },  # ✅ COMA IMPORTANTE AQUÍ
-        {
-            "numero": 3,
-            "partidos": []
-        },
-        {
-            "numero": 4,
-            "partidos": []
-        },
-        {
-            "numero": 5,
-            "partidos": []
-        },
-        {
-            "numero": 6,
-            "partidos": []
-        },
-        {
-            "numero": 7,
-            "partidos": []
+    # -------- jornadas --------
+    if "jornadas" not in data or len(data["jornadas"]) == 0:
+        data["jornadas"] = [
+            {
+                "numero": 1,
+                "partidos": [partido_vacio() for _ in range(5)]
+            },
+            {
+                "numero": 2,
+                "partidos": [partido_vacio() for _ in range(4)]
+            },
+            {
+                "numero": 3,
+                "partidos": []
+            },
+            {
+                "numero": 4,
+                "partidos": []
+            },
+            {
+                "numero": 5,
+                "partidos": []
+            },
+            {
+                "numero": 6,
+                "partidos": []
+            },
+            {
+                "numero": 7,
+                "partidos": []
+            }
         }
-    ]
 
-
-    # -------- Asegurar borrador --------
+    # -------- borrador --------
     if "partidos_borrador" not in data:
         data["partidos_borrador"] = []
 
-    # -------- Asegurar locations --------
+    # -------- locations --------
     if "locations" not in data or len(data["locations"]) == 0:
         data["locations"] = LOCATIONS_INICIALES.copy()
 
