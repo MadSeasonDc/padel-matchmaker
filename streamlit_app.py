@@ -176,32 +176,36 @@ elif menu == "Jornadas":
     partido = jornada["partidos"][partido_index]
     st.subheader(f"🎾 Partido {partido_index + 1}")
 
-    jugadores = [j["nombre"] for j in data["jugadores"]]
+    # ✅ LISTA DE JUGADORES ORDENADA ALFABÉTICAMENTE
+    jugadores = sorted([j["nombre"] for j in data["jugadores"]])
 
-    # ---- PAREJAS (AQUÍ ESTABA EL ERROR ANTES) ----
+    # Parejas
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("### 👥 Pareja 1")
         pareja1 = st.multiselect(
-            label="Jugadores Pareja 1",
-            options=jugadores,
+            "Jugadores Pareja 1",
+            jugadores,
             default=partido["pareja_1"],
             max_selections=2,
             key=f"p1_{jornada_index}_{partido_index}"
         )
 
+    # ✅ Eliminar los ya seleccionados en pareja 1
+    jugadores_pareja2 = [j for j in jugadores if j not in pareja1]
+
     with col2:
         st.markdown("### 👥 Pareja 2")
         pareja2 = st.multiselect(
-            label="Jugadores Pareja 2",
-            options=jugadores,
+            "Jugadores Pareja 2",
+            jugadores_pareja2,
             default=partido["pareja_2"],
             max_selections=2,
             key=f"p2_{jornada_index}_{partido_index}"
         )
 
-    # Información del partido
+    # Información
     st.markdown("### 📍 Información")
     partido["lugar"] = st.text_input("Lugar", partido["lugar"])
     partido["fecha"] = st.text_input("Fecha", partido["fecha"])
@@ -254,6 +258,17 @@ elif menu == "Jornadas":
             0, 7, partido["set3_p2"],
             key=f"s3p2_{jornada_index}_{partido_index}"
         )
+
+    # Guardar partido
+    if st.button("💾 Guardar partido"):
+        if len(pareja1) != 2 or len(pareja2) != 2:
+            st.error("Cada pareja debe tener exactamente 2 jugadores")
+        else:
+            partido["pareja_1"] = pareja1
+            partido["pareja_2"] = pareja2
+            save_data(data)
+            st.success("Partido guardado ✅")
+
 
     # Guardar partido
     if st.button("💾 Guardar partido"):
