@@ -89,7 +89,7 @@ st.title("🏓 Pádel Matchmaker")
 
 menu = st.sidebar.radio(
     "Menú",
-    ["Jugadores",  "Partidos",  "Ranking"]
+    ["Jugadores",  "Jornadas",  "Ranking"]
 )
  
 # ----------------------------
@@ -101,46 +101,78 @@ if menu == "Jugadores":
     for j in data["jugadores"]:
         st.write(j["nombre"])
 # ----------------------------
-# PARTIDOS
+# JORNADAS
 # ----------------------------
-elif menu == "Partidos":
-    st.header("🎾 Partidos")
+elif menu == "Jornadas":
+    st.header("📅 Jornadas")
 
     # Asegurar estructura
-    if "partidos" not in data:
-        data["partidos"] = []
+    if "jornadas" not in data:
+        data["jornadas"] = []
 
-    # Crear nuevo partido
-    if st.button("➕ Nuevo partido"):
-        data["partidos"].append({
-            "pareja_1": [],
-            "pareja_2": [],
-            "lugar": "",
-            "fecha": "",
-            "hora": "",
-            "set1": "",
-            "set2": "",
-            "set3": "",
-            "cerrado": False
+    # Crear nueva jornada
+    if st.button("➕ Nueva jornada"):
+        numero = len(data["jornadas"]) + 1
+        data["jornadas"].append({
+            "numero": numero,
+            "partidos": []
         })
         save_data(data)
         st.rerun()
 
     st.markdown("---")
 
-    if not data["partidos"]:
-        st.info("No hay partidos creados todavía")
+    if not data["jornadas"]:
+        st.info("No hay jornadas creadas todavía")
         st.stop()
 
+    # Selector de jornada
+    jornada_index = st.selectbox(
+        "Selecciona una jornada",
+        range(len(data["jornadas"])),
+        format_func=lambda i: f"Jornada {data['jornadas'][i]['numero']}"
+    )
+
+    jornada = data["jornadas"][jornada_index]
+
+    st.subheader(f"🗂 Jornada {jornada['numero']}")
+    st.write(f"Partidos: {len(jornada['partidos'])} / 5")
+
+    # Añadir partido (máximo 5)
+    if len(jornada["partidos"]) < 5:
+        if st.button("➕ Añadir partido a esta jornada"):
+            jornada["partidos"].append({
+                "pareja_1": [],
+                "pareja_2": [],
+                "lugar": "",
+                "fecha": "",
+                "hora": "",
+                "set1": "",
+                "set2": "",
+                "set3": "",
+                "cerrado": False
+            })
+            save_data(data)
+            st.rerun()
+    else:
+        st.warning("Esta jornada ya tiene el máximo de 5 partidos")
+
+    st.markdown("---")
+
+    if not jornada["partidos"]:
+        st.info("La jornada aún no tiene partidos")
+        st.stop()
+
+    # Seleccionar partido dentro de la jornada
     partido_index = st.selectbox(
         "Selecciona un partido",
-        range(len(data["partidos"])),
+        range(len(jornada["partidos"])),
         format_func=lambda i: f"Partido {i + 1}"
     )
 
-    partido = data["partidos"][partido_index]
+    partido = jornada["partidos"][partido_index]
 
-    st.subheader(f"🧾 Partido {partido_index + 1}")
+    st.subheader(f"🎾 Partido {partido_index + 1}")
 
     jugadores = [j["nombre"] for j in data["jugadores"]]
 
@@ -154,7 +186,7 @@ elif menu == "Partidos":
             jugadores,
             default=partido["pareja_1"],
             max_selections=2,
-            key=f"p1_{partido_index}"
+            key=f"p1_{jornada_index}_{partido_index}"
         )
 
     with col2:
@@ -164,10 +196,10 @@ elif menu == "Partidos":
             jugadores,
             default=partido["pareja_2"],
             max_selections=2,
-            key=f"p2_{partido_index}"
+            key=f"p2_{jornada_index}_{partido_index}"
         )
 
-    # Información
+    # Información del partido
     st.markdown("### 📍 Información")
     partido["lugar"] = st.text_input("Lugar", partido["lugar"])
     partido["fecha"] = st.text_input("Fecha", partido["fecha"])
@@ -178,11 +210,11 @@ elif menu == "Partidos":
     partido["set1"] = st.text_input("Set 1 (ej: 6-4)", partido["set1"])
     partido["set2"] = st.text_input("Set 2 (ej: 4-6)", partido["set2"])
     partido["set3"] = st.text_input(
-        "Set 3 / Desempate (opcional – NO cuenta)",
+        "Set 3 / Desempate (opcional – no cuenta)",
         partido["set3"]
     )
 
-    # Guardar
+    # Guardar partido
     if st.button("💾 Guardar partido"):
         if len(pareja1) != 2 or len(pareja2) != 2:
             st.error("Cada pareja debe tener 2 jugadores")
