@@ -274,11 +274,112 @@ elif menu == "Jornadas":
 elif menu == "Ranking":
     st.header("🏆 Ranking")
 
-    ranking = sorted(
-        data["jugadores"],
-        key=lambda x: x["puntos"],
+    # Inicializar estadísticas por jugador
+    stats = {}
+    for j in data["jugadores"]:
+        stats[j["nombre"]] = {
+            "PJ": 0,
+            "PG": 0,
+            "PP": 0,
+            "Pts": 0,
+            "TSW": 0,
+            "TSL": 0,
+        }
+
+    # Recorrer todas las jornadas y partidos
+    for jornada in data.get("jornadas", []):
+        for p in jornada.get("partidos", []):
+
+            pareja1 = p.get("pareja_1", [])
+            pareja2 = p.get("pareja_2", [])
+
+            if len(pareja1) != 2 or len(pareja2) != 2:
+                continue  # partido incompleto
+
+            # Juegos por set (solo set 1 y 2)
+            s1_p1 = p.get("set1_p1", 0)
+            s1_p2 = p.get("set1_p2", 0)
+            s2_p1 = p.get("set2_p1", 0)
+            s2_p2 = p.get("set2_p2", 0)
+
+            # Determinar sets ganados
+            sets_p1 = 0
+            sets_p2 = 0
+
+            if s1_p1 > s1_p2:
+                sets_p1 += 1
+            elif s1_p2 > s1_p1:
+                sets_p2 += 1
+
+            if s2_p1 > s2_p2:
+                sets_p1 += 1
+            elif s2_p2 > s2_p1:
+                sets_p2 += 1
+
+            # Juegos totales
+            juegos_p1 = s1_p1 + s2_p1
+            juegos_p2 = s1_p2 + s2_p2
+
+            # Actualizar PJ y juegos
+            for j in pareja1:
+                stats[j]["PJ"] += 1
+                stats[j]["TSW"] += juegos_p1
+                stats[j]["TSL"] += juegos_p2
+
+            for j in pareja2:
+                stats[j]["PJ"] += 1
+                stats[j]["TSW"] += juegos_p2
+                stats[j]["TSL"] += juegos_p1
+
+            # Resultado del partido
+            if sets_p1 > sets_p2:
+                for j in pareja1:
+                    stats[j]["PG"] += 1
+                    stats[j]["Pts"] += 2
+                for j in pareja2:
+                    stats[j]["PP"] += 1
+
+            elif sets_p2 > sets_p1:
+                for j in pareja2:
+                    stats[j]["PG"] += 1
+                    stats[j]["Pts"] += 2
+                for j in pareja1:
+                    stats[j]["PP"] += 1
+
+            else:
+                # Empate
+                for j in pareja1 + pareja2:
+                    stats[j]["Pts"] += 1
+
+    # Construir tabla final
+    ranking = []
+    for nombre, s in stats.items():
+        ranking.append({
+            "Jugador": nombre,
+            "PJ": s["PJ"],
+            "PG": s["PG"],
+            "PP": s["PP"],
+            "Pts": s["Pts"],
+            "TSW": s["TSW"],
+            "TSL": s["TSL"],
+            "Dif": s["TSW"] - s["TSL"],
+        })
+
+    # Ordenar ranking
+    ranking.sort(
+        key=lambda x: (x["Pts"], x["PG"], x["Dif"]),
         reverse=True
     )
 
-    for i, j in enumerate(ranking, start=1):
-        st.write(f"{i}. {j['nombre']} – {j['puntos']} puntos")
+    # Mostrar ranking
+    st.markdown("### 📊 Clasificación")
+
+    for i, r in enumerate(ranking, start=1):
+        st.write(
+            f"**{i}. {r['Jugador']}** — "
+            f"{r['Pts']} pts | "
+            f"PG: {r['PG']} | "
+            f"PJ: {r['PJ']} | "
+            f"Dif: {r['Dif']} "
+            f"(TSW {r['TSW']} / TSL {r['TSL']})"
+        )
