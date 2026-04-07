@@ -128,12 +128,10 @@ elif menu == "Partidos":
 
     st.markdown("---")
 
-    # Si no hay partidos, salir
     if not data["partidos"]:
         st.info("No hay partidos creados todavía")
         st.stop()
 
-    # Selector de partido
     partido_index = st.selectbox(
         "Selecciona un partido",
         range(len(data["partidos"])),
@@ -146,7 +144,7 @@ elif menu == "Partidos":
 
     jugadores = [j["nombre"] for j in data["jugadores"]]
 
-    # Selección de parejas
+    # Parejas
     col1, col2 = st.columns(2)
 
     with col1:
@@ -169,54 +167,32 @@ elif menu == "Partidos":
             key=f"p2_{partido_index}"
         )
 
-    # Información del partido
+    # Información
     st.markdown("### 📍 Información")
-
-    partido["lugar"] = st.text_input(
-        "Lugar",
-        partido["lugar"],
-        key=f"lugar_{partido_index}"
-    )
-
-    partido["fecha"] = st.text_input(
-        "Fecha",
-        partido["fecha"],
-        key=f"fecha_{partido_index}"
-    )
-
-    partido["hora"] = st.text_input(
-        "Hora",
-        partido["hora"],
-        key=f"hora_{partido_index}"
-    )
+    partido["lugar"] = st.text_input("Lugar", partido["lugar"])
+    partido["fecha"] = st.text_input("Fecha", partido["fecha"])
+    partido["hora"] = st.text_input("Hora", partido["hora"])
 
     # Resultado
-    
-# Resultado
-st.markdown("### 🎾 Resultado")
-
-partido["set1"] = st.text_input(
-    "Set 1 (ej: 6-4)",
-    value=partido["set1"],
-    key=f"set1_{partido_index}"
-)
-
-partido["set2"] = st.text_input(
-    "Set 2 (ej: 4-6)",
-    value=partido["set2"],
-    key=f"set2_{partido_index}"
-)
-
-partido["set3"] = st.text_input(
-    "Set 3 / Desempate (opcional – NO cuenta para el resultado)",
-    value=partido["set3"],
-    key=f"set3_{partido_index}"
-)
-
     st.markdown("### 🎾 Resultado")
+    partido["set1"] = st.text_input("Set 1 (ej: 6-4)", partido["set1"])
+    partido["set2"] = st.text_input("Set 2 (ej: 4-6)", partido["set2"])
+    partido["set3"] = st.text_input(
+        "Set 3 / Desempate (opcional – NO cuenta)",
+        partido["set3"]
+    )
 
-    partido["set1"] = st.text_input(
-
+    # Guardar
+    if st.button("💾 Guardar partido"):
+        if len(pareja1) != 2 or len(pareja2) != 2:
+            st.error("Cada pareja debe tener 2 jugadores")
+        elif set(pareja1) & set(pareja2):
+            st.error("Un jugador no puede estar en ambas parejas")
+        else:
+            partido["pareja_1"] = pareja1
+            partido["pareja_2"] = pareja2
+            save_data(data)
+            st.success("Partido guardado ✅")
         
 # ----------------------------
 # RANKING
