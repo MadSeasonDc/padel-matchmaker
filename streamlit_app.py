@@ -42,7 +42,8 @@ def load_data():
                 for nombre in JUGADORES_INICIALES
             ],
             "jornadas": [{"numero": i + 1, "partidos": []} for i in range(7)],
-            "partidos_borrador": []
+            "partidos_borrador": [],
+            "locations": []   # ✅ se crea desde el inicio
         }
         save_data(data)
         return data
@@ -50,13 +51,12 @@ def load_data():
     with open(DATA_FILE, "r") as f:
         data = json.load(f)
 
-    # Asegurar estructura
+    # Asegurar jugadores
     if "jugadores" not in data:
         data["jugadores"] = []
 
-    # Asegurar que los jugadores iniciales existen y están protegidos
+    # Asegurar jugadores iniciales
     nombres_existentes = {j["nombre"] for j in data["jugadores"]}
-
     for nombre in JUGADORES_INICIALES:
         if nombre not in nombres_existentes:
             data["jugadores"].append({
@@ -74,13 +74,13 @@ def load_data():
     if "partidos_borrador" not in data:
         data["partidos_borrador"] = []
 
-    
-if "locations" not in data:
-    data["locations"] = []
-
+    # ✅ Asegurar locations
+    if "locations" not in data:
+        data["locations"] = []
 
     save_data(data)
     return data
+
 
 
 def save_data(data):
