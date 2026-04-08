@@ -154,10 +154,11 @@ data = load_data()
 st.set_page_config(page_title="Pádel Matchmaker", layout="wide")
 st.title("🏓 Pádel Matchmaker")
 
+
 menu = st.sidebar.radio(
     "Menú",
-    [ "Jornadas",  "Ranking", "Locations"]
-)
+    ["Jornadas", "Ranking", "Locations", "Import / Export"] )
+
 
 
 # ----------------------------
