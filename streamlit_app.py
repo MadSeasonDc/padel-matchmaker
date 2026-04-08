@@ -295,19 +295,54 @@ if menu == "Jornadas":
             partido["pareja_2"] = pareja2
 
             # Resultado
-            st.markdown("### 🎾 Resultado")
-            s1, s2, s3 = st.columns(3)
+            
+st.markdown("### 🎾 Resultado")
 
-            for n, col in zip([1, 2, 3], [s1, s2, s3]):
-                with col:
-                    partido[f"set{n}_p1"] = st.number_input(
-                        "P1", 0, 7, partido.get(f"set{n}_p1", 0),
-                        key=f"s{n}p1_{jornada_index}_{idx}"
-                    )
-                    partido[f"set{n}_p2"] = st.number_input(
-                        "P2", 0, 7, partido.get(f"set{n}_p2", 0),
-                        key=f"s{n}p2_{jornada_index}_{idx}"
-                    )
+# Cabecera de sets
+c_set1, c_set2, c_set3 = st.columns(3)
+with c_set1:
+    st.markdown("**Set 1**")
+with c_set2:
+    st.markdown("**Set 2**")
+with c_set3:
+    st.markdown("**Set 3**")
+
+# Inputs compactos P1 / P2
+r1, r2, r3 = st.columns(3)
+
+# Set 1
+with r1:
+    partido["set1_p1"] = st.number_input(
+        "P1", 0, 7, partido.get("set1_p1", 0),
+        key=f"s1p1_{jornada_index}_{idx}"
+    )
+    partido["set1_p2"] = st.number_input(
+        "P2", 0, 7, partido.get("set1_p2", 0),
+        key=f"s1p2_{jornada_index}_{idx}"
+    )
+
+# Set 2
+with r2:
+    partido["set2_p1"] = st.number_input(
+        "P1", 0, 7, partido.get("set2_p1", 0),
+        key=f"s2p1_{jornada_index}_{idx}"
+    )
+    partido["set2_p2"] = st.number_input(
+        "P2", 0, 7, partido.get("set2_p2", 0),
+        key=f"s2p2_{jornada_index}_{idx}"
+    )
+
+# Set 3
+with r3:
+    partido["set3_p1"] = st.number_input(
+        "P1", 0, 7, partido.get("set3_p1", 0),
+        key=f"s3p1_{jornada_index}_{idx}"
+    )
+    partido["set3_p2"] = st.number_input(
+        "P2", 0, 7, partido.get("set3_p2", 0),
+        key=f"s3p2_{jornada_index}_{idx}"
+    )
+
 
             if st.button("💾 Guardar partido", key=f"save_{jornada_index}_{idx}"):
                 save_data(data)
