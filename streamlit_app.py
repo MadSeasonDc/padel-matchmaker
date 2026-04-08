@@ -188,9 +188,9 @@ if menu == "Jornadas":
     jugadores = sorted(j["nombre"] for j in data["jugadores"])
     clubs = [loc["club"] for loc in data.get("locations", [])]
 
-    # Crear 3 partidos por defecto
+    # ✅ CREAR 4 PARTIDOS POR DEFECTO
     if len(jornada["partidos"]) == 0:
-        for _ in range(3):
+        for _ in range(4):
             jornada["partidos"].append({
                 "pareja_1": [],
                 "pareja_2": [],
@@ -205,41 +205,54 @@ if menu == "Jornadas":
         st.rerun()
 
     # ----------------------------
-    # GRID DE PARTIDOS (2 x 2)
+    # GRID DE PARTIDOS (2x2)
     # ----------------------------
     filas = [
         jornada["partidos"][i:i+2]
         for i in range(0, len(jornada["partidos"]), 2)
     ]
 
-    for fila_idx, fila_partidos in enumerate(filas):
+    for fila_idx, fila in enumerate(filas):
+        st.markdown("")
         cols = st.columns(2)
 
-        for col_idx, partido in enumerate(fila_partidos):
+        for col_idx, partido in enumerate(fila):
             idx = fila_idx * 2 + col_idx
 
             with cols[col_idx]:
+                # Marco del partido
+                st.markdown(
+                    """
+                    <div style="
+                        border: 1px solid #333;
+                        border-radius: 10px;
+                        padding: 12px;
+                        margin-bottom: 16px;
+                    ">
+                    """,
+                    unsafe_allow_html=True
+                )
+
                 st.markdown(f"### 🎾 Partido {idx + 1}")
 
+                # Info básica
                 c1, c2, c3 = st.columns(3)
 
-                # Lugar
                 with c1:
                     if clubs:
                         partido["lugar"] = st.selectbox(
-                            "📍 Lugar",
+                            "Lugar",
                             clubs,
                             index=clubs.index(partido.get("lugar", "")) if partido.get("lugar") in clubs else 0,
                             key=f"lugar_{jornada_index}_{idx}"
                         )
                     else:
                         partido["lugar"] = st.text_input(
-                            "📍 Lugar",
+                            "Lugar",
                             partido.get("lugar", ""),
                             key=f"lugar_{jornada_index}_{idx}"
                         )
 
-                # Fecha
                 with c2:
                     try:
                         fecha_val = datetime.date.fromisoformat(partido.get("fecha", ""))
@@ -248,13 +261,12 @@ if menu == "Jornadas":
 
                     partido["fecha"] = str(
                         st.date_input(
-                            "📅 Fecha",
+                            "Fecha",
                             fecha_val,
                             key=f"fecha_{jornada_index}_{idx}"
                         )
                     )
 
-                # Hora
                 with c3:
                     horas = [
                         f"{h:02d}:{m:02d}"
@@ -263,15 +275,13 @@ if menu == "Jornadas":
                         if not (h == 22 and m == 30)
                     ]
                     partido["hora"] = st.selectbox(
-                        "⏰ Hora",
+                        "Hora",
                         horas,
                         index=horas.index(partido.get("hora", "18:00")) if partido.get("hora") in horas else 0,
                         key=f"hora_{jornada_index}_{idx}"
                     )
 
-                # ----------------------------
-                # PAREJAS (Derecha / Revés)
-                # ----------------------------
+                # Parejas Der / Rev
                 p1_actual = partido.get("pareja_1", [])
                 p2_actual = partido.get("pareja_2", [])
 
@@ -316,9 +326,7 @@ if menu == "Jornadas":
                 partido["pareja_1"] = [der_p1, rev_p1]
                 partido["pareja_2"] = [der_p2, rev_p2]
 
-                # ----------------------------
-                # RESULTADO COMPACTO
-                # ----------------------------
+                # Resultado compacto
                 st.markdown("**Resultado**")
                 r1, r2, r3 = st.columns(3)
 
@@ -352,34 +360,31 @@ if menu == "Jornadas":
                         key=f"s3p2_{jornada_index}_{idx}"
                     )
 
-                if st.button("💾 Guardar partido", key=f"save_{jornada_index}_{idx}"):
+                if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
                     save_data(data)
-                    st.success("✅ Partido guardado")
+                    st.success("✅ Guardado")
 
-    # ----------------------------
-    # BOTÓN "+" SOLO PARA 5º PARTIDO
-    # ----------------------------
+                st.markdown("</div>", unsafe_allow_html=True)
+
+    # ✅ BOTÓN + CENTRADO SOLO PARA EL 5º PARTIDO
     if len(jornada["partidos"]) == 4:
-        st.markdown("### ➕ Añadir quinto partido")
-        if st.button("➕"):
-            jornada["partidos"].append({
-                "pareja_1": [],
-                "pareja_2": [],
-                "lugar": "",
-                "fecha": "",
-                "hora": "18:00",
-                "set1_p1": 0, "set1_p2": 0,
-                "set2_p1": 0, "set2_p2": 0,
-                "set3_p1": 0, "set3_p2": 0
-            })
-            save_data(data)
-            st.rerun()
+        st.markdown("---")
+        c = st.columns([1, 1, 1])
+        with c[1]:
+            if st.button("➕ Añadir 5º partido"):
+                jornada["partidos"].append({
+                    "pareja_1": [],
+                    "pareja_2": [],
+                    "lugar": "",
+                    "fecha": "",
+                    "hora": "18:00",
+                    "set1_p1": 0, "set1_p2": 0,
+                    "set2_p1": 0, "set2_p2": 0,
+                    "set3_p1": 0, "set3_p2": 0
+                })
+                save_data(data)
+                st.rerun()
 
-
-
-# ----------------------------
-# RANKING
-# ----------------------------
 # ----------------------------
 # RANKING
 # ----------------------------
