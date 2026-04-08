@@ -169,7 +169,7 @@ if menu == "Jornadas":
 
     st.header("📅 Jornadas")
 
-    # Si no existen jornadas, crearlas (1 a 7)
+    # Crear jornadas base si no existen
     if not data.get("jornadas"):
         data["jornadas"] = [{"numero": i + 1, "partidos": []} for i in range(7)]
         save_data(data)
@@ -187,23 +187,34 @@ if menu == "Jornadas":
     jugadores = sorted(j["nombre"] for j in data["jugadores"])
     clubs = [loc["club"] for loc in data.get("locations", [])]
 
+    # ✅ CREAR 3 PARTIDOS POR DEFECTO
+    if len(jornada["partidos"]) == 0:
+        for _ in range(3):
+            jornada["partidos"].append({
+                "pareja_1": [],
+                "pareja_2": [],
+                "lugar": "",
+                "fecha": "",
+                "hora": "18:00",
+                "set1_p1": 0, "set1_p2": 0,
+                "set2_p1": 0, "set2_p2": 0,
+                "set3_p1": 0, "set3_p2": 0
+            })
+        save_data(data)
+        st.rerun()
+
     # ----------------------------
     # TABS
     # ----------------------------
-    tab_labels = []
+    tab_labels = [f"Partido {i+1}" for i in range(len(jornada["partidos"]))]
 
-    for i in range(min(4, len(jornada["partidos"]))):
-        tab_labels.append(f"Partido {i + 1}")
-
-    if len(jornada["partidos"]) == 5:
-        tab_labels.append("Partido 5")
-    else:
+    if len(jornada["partidos"]) < 5:
         tab_labels.append("➕")
 
     tabs = st.tabs(tab_labels)
 
     # ----------------------------
-    # PARTIDOS EXISTENTES
+    # PARTIDOS
     # ----------------------------
     for idx, partido in enumerate(jornada["partidos"]):
         with tabs[idx]:
@@ -303,12 +314,11 @@ if menu == "Jornadas":
                 st.success("✅ Partido guardado")
 
     # ----------------------------
-    # AÑADIR NUEVO PARTIDO
+    # TAB ➕ (AÑADIR PARTIDO 4 o 5)
     # ----------------------------
     if len(jornada["partidos"]) < 5:
         with tabs[-1]:
-            st.markdown("### ➕ Añadir partido")
-            if st.button("Añadir partido"):
+            if st.button("➕ Añadir partido"):
                 jornada["partidos"].append({
                     "pareja_1": [],
                     "pareja_2": [],
@@ -321,7 +331,6 @@ if menu == "Jornadas":
                 })
                 save_data(data)
                 st.rerun()
-
 
 
 # ----------------------------
