@@ -88,6 +88,7 @@ def partido_con_jugadores(p1, p2):
     }
 
 
+
 def load_data():
     if not os.path.exists(DATA_FILE):
         data = {
@@ -142,114 +143,6 @@ def load_data():
     save_data(data)
     return data
 
-
-    # -------- Cargar archivo existente --------
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-
-    # -------- Asegurar jugadores --------
-    if "jugadores" not in data:
-        data["jugadores"] = []
-
-    nombres_existentes = {j["nombre"] for j in data["jugadores"]}
-    for nombre in JUGADORES_INICIALES:
-        if nombre not in nombres_existentes:
-            data["jugadores"].append({
-                "nombre": nombre,
-                "disponible": False,
-                "puntos": 0,
-                "fijo": True
-            })
-
-    # -------- Asegurar jornadas (solo si está vacío) --------
-    if "jornadas" not in data or len(data["jornadas"]) == 0:
-        data["jornadas"] = [
-            {
-                "numero": 1,
-                "partidos": [partido_vacio() for _ in range(5)]
-            },
-            {
-                "numero": 2,
-                "partidos": [partido_vacio() for _ in range(4)]
-            },
-            {"numero": 3, "partidos": []},
-            {"numero": 4, "partidos": []},
-            {"numero": 5, "partidos": []},
-            {"numero": 6, "partidos": []},
-            {"numero": 7, "partidos": []},
-        ]
-
-    # -------- Asegurar borrador --------
-    if "partidos_borrador" not in data:
-        data["partidos_borrador"] = []
-
-    # -------- Asegurar locations --------
-    if "locations" not in data or len(data["locations"]) == 0:
-        data["locations"] = LOCATIONS_INICIALES.copy()
-
-    save_data(data)
-    return data
-
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-
-    # -------- jugadores --------
-    if "jugadores" not in data:
-        data["jugadores"] = []
-
-    nombres_existentes = {j["nombre"] for j in data["jugadores"]}
-    for nombre in JUGADORES_INICIALES:
-        if nombre not in nombres_existentes:
-            data["jugadores"].append({
-                "nombre": nombre,
-                "disponible": False,
-                "puntos": 0,
-                "fijo": True
-            })
-
-    # -------- jornadas --------
-    if "jornadas" not in data or len(data["jornadas"]) == 0:
-        data["jornadas"] = [
-            {
-                "numero": 1,
-                "partidos": [partido_vacio() for _ in range(5)]
-            },
-            {
-                "numero": 2,
-                "partidos": [partido_vacio() for _ in range(4)]
-            },
-            {
-                "numero": 3,
-                "partidos": []
-            },
-            {
-                "numero": 4,
-                "partidos": []
-            },
-            {
-                "numero": 5,
-                "partidos": []
-            },
-            {
-                "numero": 6,
-                "partidos": []
-            },
-            {
-                "numero": 7,
-                "partidos": []
-            }
-        ]
-
-    # -------- borrador --------
-    if "partidos_borrador" not in data:
-        data["partidos_borrador"] = []
-
-    # -------- locations --------
-    if "locations" not in data or len(data["locations"]) == 0:
-        data["locations"] = LOCATIONS_INICIALES.copy()
-
-    save_data(data)
-    return data
 
 
 def save_data(data):
