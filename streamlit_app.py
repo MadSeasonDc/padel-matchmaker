@@ -582,7 +582,7 @@ elif menu == "Locations":
         st.dataframe(df_locations, use_container_width=True)
 
 
- ----------------------------
+# ----------------------------
 # IMPORT / EXPORT
 # ----------------------------
 elif menu == "Import / Export":
@@ -590,8 +590,8 @@ elif menu == "Import / Export":
 
     st.markdown(
         """
-        Este apartado sirve para **guardar una copia de las jornadas** o
-        **restaurarlas más adelante**.
+        Este apartado sirve para **guardar una copia de seguridad** de las jornadas
+        o **restaurarlas más adelante**.
 
         ✅ Incluye solo **jornadas y partidos**  
         ❌ No modifica jugadores ni locations
@@ -599,7 +599,7 @@ elif menu == "Import / Export":
     )
 
     # ----------------------------
-    # EXPORTAR
+    # EXPORTAR JORNADAS
     # ----------------------------
     st.markdown("### 📤 Exportar jornadas")
 
@@ -619,7 +619,7 @@ elif menu == "Import / Export":
     st.markdown("---")
 
     # ----------------------------
-    # IMPORTAR
+    # IMPORTAR JORNADAS
     # ----------------------------
     st.markdown("### 📥 Importar jornadas")
 
@@ -635,7 +635,11 @@ elif menu == "Import / Export":
             if "jornadas" not in imported_data:
                 st.error("❌ El archivo no contiene jornadas válidas")
             else:
-                if st.button("⚠️ Importar y sobrescribir jornadas actuales"):
+                st.warning(
+                    "⚠️ Esta acción sobrescribirá las jornadas actuales."
+                )
+
+                if st.button("✅ Importar y reemplazar jornadas"):
                     data["jornadas"] = imported_data["jornadas"]
                     save_data(data)
                     st.success("✅ Jornadas importadas correctamente")
