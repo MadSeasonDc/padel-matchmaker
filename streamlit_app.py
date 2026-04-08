@@ -461,7 +461,7 @@ elif menu == "Ranking":
     df.insert(0, "RK", range(1, len(df) + 1))
 
     st.dataframe(df, use_container_width=True, hide_index=True)
-``
+
 
     # -------- Crear DataFrame --------
     filas = []
