@@ -336,24 +336,17 @@ if menu == "Jornadas":
 # ----------------------------
 # RANKING
 # ----------------------------
+# ----------------------------
+# RANKING
+# ----------------------------
 elif menu == "Ranking":
     import pandas as pd
 
     st.header("🏆 Ranking")
 
-    # -------- Selector de jornada para congelar ranking --------
     jornadas = data.get("jornadas", [])
-    opciones_jornada = ["Todas"] + [f"Jornada {j['numero']}" for j in jornadas]
 
-    seleccion = st.selectbox("Ranking hasta:", opciones_jornada)
-
-    if seleccion == "Todas":
-        jornadas_usar = jornadas
-    else:
-        nro = int(seleccion.split()[-1])
-        jornadas_usar = [j for j in jornadas if j["numero"] <= nro]
-
-    # -------- Inicializar estadísticas --------
+    # Inicializar estadísticas
     stats = {
         j["nombre"]: {
             "PJ": 0,
@@ -366,49 +359,109 @@ elif menu == "Ranking":
         for j in data["jugadores"]
     }
 
-    # -------- Calcular estadísticas --------
-    for jornada in jornadas_usar:
+    # Recorremos jornadas y partidos
+    for jornada in jornadas:
         for p in jornada.get("partidos", []):
-            pareja1 = p.get("pareja_1", [])
-            pareja2 = p.get("pareja_2", [])
 
-            if len(pareja1) != 2 or len(pareja2) != 2:
+            p1 = p.get("pareja_1", [])
+            p2 = p.get("pareja_2", [])
+
+            if len(p1) != 2 or len(p2) != 2:
                 continue
 
+            # Sets
             s1_p1, s1_p2 = p["set1_p1"], p["set1_p2"]
             s2_p1, s2_p2 = p["set2_p1"], p["set2_p2"]
+            s3_p1, s3_p2 = p["set3_p1"], p["set3_p2"]
 
+            # ¿Hay set jugado?
+            set1_jugado = (s1_p1 + s1_p2) > 0
+            set2_jugado = (s2_p1 + s2_p2) > 0
+            set3_jugado = (s3_p1 + s3_p2) > 0
+
+            if not set1_jugado:
+                continue  # partido no jugado
+
+            # Sets ganados
             sets_p1 = (s1_p1 > s1_p2) + (s2_p1 > s2_p2)
             sets_p2 = (s1_p2 > s1_p1) + (s2_p2 > s2_p1)
 
-            juegos_p1 = s1_p1 + s2_p1
-            juegos_p2 = s1_p2 + s2_p2
+            # Juegos totales
+            juegos_p1 = s1_p1 + s2_p1 + s3_p1
+            juegos_p2 = s1_p2 + s2_p2 + s3_p2
 
-            for j in pareja1:
+            # Actualizar partidos jugados y juegos
+            for j in p1:
                 stats[j]["PJ"] += 1
                 stats[j]["TSW"] += juegos_p1
                 stats[j]["TSL"] += juegos_p2
 
-            for j in pareja2:
+            for j in p2:
                 stats[j]["PJ"] += 1
                 stats[j]["TSW"] += juegos_p2
                 stats[j]["TSL"] += juegos_p1
 
-            if sets_p1 > sets_p2:
-                for j in pareja1:
+            # ----------------------------
+            # LÓGICA DE PUNTOS
+            # ----------------------------
+
+            if set3_jugado:
+                # Partido decidido en 3er set
+                if s3_p1 > s3_p2:
+                    ganadores, perdedores = p1, p2
+                else:
+                    ganadores, perdedores = p2, p1
+
+                for j in ganadores:
                     stats[j]["PG"] += 1
-                    stats[j]["Pts"] += 2
-                for j in pareja2:
+                    stats[j]["Pts"] += 3
+
+                for j in perdedores:
                     stats[j]["PP"] += 1
-            elif sets_p2 > sets_p1:
-                for j in pareja2:
-                    stats[j]["PG"] += 1
-                    stats[j]["Pts"] += 2
-                for j in pareja1:
-                    stats[j]["PP"] += 1
-            else:
-                for j in pareja1 + pareja2:
                     stats[j]["Pts"] += 1
+
+            else:
+                # NO hay set 3
+                if sets_p1 > sets_p2:
+                    for j in p1:
+                        stats[j]["PG"] += 1
+                        stats[j]["Pts"] += 3
+                    for j in p2:
+                        stats[j]["PP"] += 1
+
+                elif sets_p2 > sets_p1:
+                    for j in p2:
+                        stats[j]["PG"] += 1
+                        stats[j]["Pts"] += 3
+                    for j in p1:
+                        stats[j]["PP"] += 1
+
+                else:
+                    # Empate real (1–1 sin set 3)
+                    for j in p1 + p2:
+                        stats[j]["Pts"] += 1
+
+    # Construir DataFrame
+    filas = []
+    for nombre, s in stats.items():
+        filas.append({
+            "Jugador": nombre,
+            "PJ": s["PJ"],
+            "PG": s["PG"],
+            "PP": s["PP"],
+            "Pts": s["Pts"],
+            "TSW": s["TSW"],
+            "TSL": s["TSL"],
+            "Dif": s["TSW"] - s["TSL"]
+        })
+
+    filas.sort(key=lambda x: (x["Pts"], x["PG"], x["Dif"]), reverse=True)
+
+    df = pd.DataFrame(filas)
+    df.insert(0, "RK", range(1, len(df) + 1))
+
+    st.dataframe(df, use_container_width=True, hide_index=True)
+``
 
     # -------- Crear DataFrame --------
     filas = []
