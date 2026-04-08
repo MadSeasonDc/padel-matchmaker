@@ -188,7 +188,7 @@ if menu == "Jornadas":
     jugadores = sorted(j["nombre"] for j in data["jugadores"])
     clubs = [loc["club"] for loc in data.get("locations", [])]
 
-    # ✅ CREAR 4 PARTIDOS POR DEFECTO
+    # Crear 4 partidos por defecto
     if len(jornada["partidos"]) == 0:
         for _ in range(4):
             jornada["partidos"].append({
@@ -204,123 +204,84 @@ if menu == "Jornadas":
         save_data(data)
         st.rerun()
 
-    # ----------------------------
-    # GRID DE PARTIDOS (2x2)
-    # ----------------------------
-    filas = [
-        jornada["partidos"][i:i+2]
-        for i in range(0, len(jornada["partidos"]), 2)
-    ]
+    # GRID 2x2
+    filas = [jornada["partidos"][i:i+2] for i in range(0, len(jornada["partidos"]), 2)]
 
     for fila_idx, fila in enumerate(filas):
-        st.markdown("")
         cols = st.columns(2)
 
         for col_idx, partido in enumerate(fila):
             idx = fila_idx * 2 + col_idx
 
-            with cols[col_idx]:
-                # Marco del partido
+            with cols# Marco
                 st.markdown(
                     """
                     <div style="
-                        border: 1px solid #333;
-                        border-radius: 10px;
-                        padding: 12px;
-                        margin-bottom: 16px;
+                        border: 2px solid #3a3a3a;
+                        border-radius: 12px;
+                        padding: 16px;
+                        margin-bottom: 20px;
                     ">
                     """,
                     unsafe_allow_html=True
                 )
 
-                st.markdown(f"### 🎾 Partido {idx + 1}")
+                # Título centrado
+                st.markdown(
+                    f"<h3 style='text-align:center;'>🎾 Partido {idx + 1}</h3>",
+                    unsafe_allow_html=True
+                )
+
+                # Jugadores usados en partidos anteriores
+                jugadores_usados = set()
+                for i in range(idx):
+                    jugadores_usados.update(jornada["partidos"][i].get("pareja_1", []))
+                    jugadores_usados.update(jornada["partidos"][i].get("pareja_2", []))
+
+                jugadores_disp = [j for j in jugadores if j not in jugadores_usados]
+                opciones = [""] + jugadores_disp
 
                 # Info básica
                 c1, c2, c3 = st.columns(3)
-
                 with c1:
-                    if clubs:
-                        partido["lugar"] = st.selectbox(
-                            "Lugar",
-                            clubs,
-                            index=clubs.index(partido.get("lugar", "")) if partido.get("lugar") in clubs else 0,
-                            key=f"lugar_{jornada_index}_{idx}"
-                        )
-                    else:
-                        partido["lugar"] = st.text_input(
-                            "Lugar",
-                            partido.get("lugar", ""),
-                            key=f"lugar_{jornada_index}_{idx}"
-                        )
-
+                    partido["lugar"] = st.selectbox(
+                        "Lugar",
+                        [""] + clubs,
+                        index=0,
+                        key=f"lugar_{jornada_index}_{idx}"
+                    )
                 with c2:
-                    try:
-                        fecha_val = datetime.date.fromisoformat(partido.get("fecha", ""))
-                    except Exception:
-                        fecha_val = datetime.date.today()
-
                     partido["fecha"] = str(
                         st.date_input(
                             "Fecha",
-                            fecha_val,
+                            datetime.date.today(),
                             key=f"fecha_{jornada_index}_{idx}"
                         )
                     )
-
                 with c3:
-                    horas = [
-                        f"{h:02d}:{m:02d}"
-                        for h in range(8, 23)
-                        for m in (0, 30)
-                        if not (h == 22 and m == 30)
-                    ]
                     partido["hora"] = st.selectbox(
                         "Hora",
-                        horas,
-                        index=horas.index(partido.get("hora", "18:00")) if partido.get("hora") in horas else 0,
+                        [f"{h:02d}:{m:02d}" for h in range(8, 23) for m in (0, 30)],
                         key=f"hora_{jornada_index}_{idx}"
                     )
 
                 # Parejas Der / Rev
-                p1_actual = partido.get("pareja_1", [])
-                p2_actual = partido.get("pareja_2", [])
-
-                p1_der = p1_actual[0] if len(p1_actual) > 0 else None
-                p1_rev = p1_actual[1] if len(p1_actual) > 1 else None
-                p2_der = p2_actual[0] if len(p2_actual) > 0 else None
-                p2_rev = p2_actual[1] if len(p2_actual) > 1 else None
-
                 col_p1, col_p2 = st.columns(2)
-
                 with col_p1:
                     st.markdown("**Pareja 1**")
-                    der_p1 = st.selectbox(
-                        "Der",
-                        jugadores,
-                        index=jugadores.index(p1_der) if p1_der in jugadores else 0,
-                        key=f"p1_der_{jornada_index}_{idx}"
-                    )
+                    der_p1 = st.selectbox("Der", opciones, key=f"p1_der_{idx}")
                     rev_p1 = st.selectbox(
                         "Rev",
-                        [j for j in jugadores if j != der_p1],
-                        index=0 if p1_rev not in jugadores else 0,
-                        key=f"p1_rev_{jornada_index}_{idx}"
+                        [""] + [j for j in jugadores_disp if j != der_p1],
+                        key=f"p1_rev_{idx}"
                     )
-
                 with col_p2:
                     st.markdown("**Pareja 2**")
-                    jugadores_p2 = [j for j in jugadores if j not in [der_p1, rev_p1]]
-                    der_p2 = st.selectbox(
-                        "Der",
-                        jugadores_p2,
-                        index=jugadores_p2.index(p2_der) if p2_der in jugadores_p2 else 0,
-                        key=f"p2_der_{jornada_index}_{idx}"
-                    )
+                    der_p2 = st.selectbox("Der", opciones, key=f"p2_der_{idx}")
                     rev_p2 = st.selectbox(
                         "Rev",
-                        [j for j in jugadores_p2 if j != der_p2],
-                        index=0 if p2_rev not in jugadores_p2 else 0,
-                        key=f"p2_rev_{jornada_index}_{idx}"
+                        [""] + [j for j in jugadores_disp if j != der_p2],
+                        key=f"p2_rev_{idx}"
                     )
 
                 partido["pareja_1"] = [der_p1, rev_p1]
@@ -329,49 +290,27 @@ if menu == "Jornadas":
                 # Resultado compacto
                 st.markdown("**Resultado**")
                 r1, r2, r3 = st.columns(3)
-
                 with r1:
-                    partido["set1_p1"] = st.number_input(
-                        "P1", 0, 7, partido.get("set1_p1", 0),
-                        key=f"s1p1_{jornada_index}_{idx}"
-                    )
-                    partido["set1_p2"] = st.number_input(
-                        "P2", 0, 7, partido.get("set1_p2", 0),
-                        key=f"s1p2_{jornada_index}_{idx}"
-                    )
-
+                    partido["set1_p1"] = st.number_input("P1", 0, 7, key=f"s1p1_{idx}")
+                    partido["set1_p2"] = st.number_input("P2", 0, 7, key=f"s1p2_{idx}")
                 with r2:
-                    partido["set2_p1"] = st.number_input(
-                        "P1", 0, 7, partido.get("set2_p1", 0),
-                        key=f"s2p1_{jornada_index}_{idx}"
-                    )
-                    partido["set2_p2"] = st.number_input(
-                        "P2", 0, 7, partido.get("set2_p2", 0),
-                        key=f"s2p2_{jornada_index}_{idx}"
-                    )
-
+                    partido["set2_p1"] = st.number_input("P1", 0, 7, key=f"s2p1_{idx}")
+                    partido["set2_p2"] = st.number_input("P2", 0, 7, key=f"s2p2_{idx}")
                 with r3:
-                    partido["set3_p1"] = st.number_input(
-                        "P1", 0, 7, partido.get("set3_p1", 0),
-                        key=f"s3p1_{jornada_index}_{idx}"
-                    )
-                    partido["set3_p2"] = st.number_input(
-                        "P2", 0, 7, partido.get("set3_p2", 0),
-                        key=f"s3p2_{jornada_index}_{idx}"
-                    )
+                    partido["set3_p1"] = st.number_input("P1", 0, 7, key=f"s3p1_{idx}")
+                    partido["set3_p2"] = st.number_input("P2", 0, 7, key=f"s3p2_{idx}")
 
-                if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
+                if st.button("Guardar", key=f"save_{idx}"):
                     save_data(data)
                     st.success("✅ Guardado")
 
                 st.markdown("</div>", unsafe_allow_html=True)
 
-    # ✅ BOTÓN + CENTRADO SOLO PARA EL 5º PARTIDO
+    # Botón + centrado solo para el 5º partido
     if len(jornada["partidos"]) == 4:
         st.markdown("---")
-        c = st.columns([1, 1, 1])
-        with c[1]:
-            if st.button("➕ Añadir 5º partido"):
+        c = st.columns([1, 2, 1])
+        with cif st.button("➕ Añadir Partido 5"):
                 jornada["partidos"].append({
                     "pareja_1": [],
                     "pareja_2": [],
