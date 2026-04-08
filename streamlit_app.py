@@ -371,7 +371,7 @@ elif menu == "Ranking":
         for j in data["jugadores"]
     }
 
-    # Recorremos jornadas y partidos
+    # Recorrer jornadas y partidos
     for jornada in jornadas:
         for p in jornada.get("partidos", []):
 
@@ -381,28 +381,23 @@ elif menu == "Ranking":
             if len(p1) != 2 or len(p2) != 2:
                 continue
 
-            # Sets
             s1_p1, s1_p2 = p["set1_p1"], p["set1_p2"]
             s2_p1, s2_p2 = p["set2_p1"], p["set2_p2"]
             s3_p1, s3_p2 = p["set3_p1"], p["set3_p2"]
 
-            # ¿Hay set jugado?
             set1_jugado = (s1_p1 + s1_p2) > 0
             set2_jugado = (s2_p1 + s2_p2) > 0
             set3_jugado = (s3_p1 + s3_p2) > 0
 
             if not set1_jugado:
-                continue  # partido no jugado
+                continue
 
-            # Sets ganados
             sets_p1 = (s1_p1 > s1_p2) + (s2_p1 > s2_p2)
             sets_p2 = (s1_p2 > s1_p1) + (s2_p2 > s2_p1)
 
-            # Juegos totales
             juegos_p1 = s1_p1 + s2_p1 + s3_p1
             juegos_p2 = s1_p2 + s2_p2 + s3_p2
 
-            # Actualizar partidos jugados y juegos
             for j in p1:
                 stats[j]["PJ"] += 1
                 stats[j]["TSW"] += juegos_p1
@@ -413,12 +408,8 @@ elif menu == "Ranking":
                 stats[j]["TSW"] += juegos_p2
                 stats[j]["TSL"] += juegos_p1
 
-            # ----------------------------
-            # LÓGICA DE PUNTOS
-            # ----------------------------
-
+            # Puntuación
             if set3_jugado:
-                # Partido decidido en 3er set
                 if s3_p1 > s3_p2:
                     ganadores, perdedores = p1, p2
                 else:
@@ -427,29 +418,24 @@ elif menu == "Ranking":
                 for j in ganadores:
                     stats[j]["PG"] += 1
                     stats[j]["Pts"] += 3
-
                 for j in perdedores:
                     stats[j]["PP"] += 1
                     stats[j]["Pts"] += 1
 
             else:
-                # NO hay set 3
                 if sets_p1 > sets_p2:
                     for j in p1:
                         stats[j]["PG"] += 1
                         stats[j]["Pts"] += 3
                     for j in p2:
                         stats[j]["PP"] += 1
-
                 elif sets_p2 > sets_p1:
                     for j in p2:
                         stats[j]["PG"] += 1
                         stats[j]["Pts"] += 3
                     for j in p1:
                         stats[j]["PP"] += 1
-
                 else:
-                    # Empate real (1–1 sin set 3)
                     for j in p1 + p2:
                         stats[j]["Pts"] += 1
 
@@ -468,33 +454,10 @@ elif menu == "Ranking":
         })
 
     filas.sort(key=lambda x: (x["Pts"], x["PG"], x["Dif"]), reverse=True)
-
     df = pd.DataFrame(filas)
     df.insert(0, "RK", range(1, len(df) + 1))
 
-    st.dataframe(df, use_container_width=True, hide_index=True)
-
-
-    # -------- Crear DataFrame --------
-    filas = []
-    for nombre, s in stats.items():
-        filas.append({
-            "Jugador": nombre,
-            "PJ": s["PJ"],
-            "PG": s["PG"],
-            "PP": s["PP"],
-            "Pts": s["Pts"],
-            "TSW": s["TSW"],
-            "TSL": s["TSL"],
-            "Dif": s["TSW"] - s["TSL"]
-        })
-
-    filas.sort(key=lambda x: (x["Pts"], x["PG"], x["Dif"]), reverse=True)
-
-    df = pd.DataFrame(filas)
-    df.insert(0, "RK", range(1, len(df) + 1))
-
-    # -------- Iconos TOP 3 --------
+    # Iconos TOP 3
     def nombre_con_icono(row):
         if row["RK"] == 1:
             return f"🥇 {row['Jugador']}"
@@ -506,7 +469,7 @@ elif menu == "Ranking":
 
     df["Jugador"] = df.apply(nombre_con_icono, axis=1)
 
-    # -------- Estilo solo en nombre --------
+    # Estilo solo en el nombre
     def style_row(row):
         estilos = ["" for _ in row.index]
         idx = row.index.get_loc("Jugador")
@@ -537,27 +500,14 @@ elif menu == "Ranking":
         .str.replace("🥉 ", "", regex=False)
     )
 
-    jugador_sel = st.selectbox(
-        "Selecciona un jugador",
-        nombres_limpios
-    )
-
+    jugador_sel = st.selectbox("Selecciona un jugador", nombres_limpios)
     fila = df[df["Jugador"].str.contains(jugador_sel, regex=False)].iloc[0]
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Puntos", fila["Pts"])
-    c2.metric("Partidos Jugados", fila["PJ"])
-    c3.metric("Dif. Juegos", fila["Dif"])
+    c2.metric("Partidos jugados", fila["PJ"])
+    c3.metric("Diferencia juegos", fila["Dif"])
 
-    st.write(
-        f"""
-**📊 Estadísticas**
-- ✅ Partidos ganados: {fila['PG']}
-- ❌ Partidos perdidos: {fila['PP']}
-- 🎾 Juegos a favor: {fila['TSW']}
-- 🚫 Juegos en contra: {fila['TSL']}
-"""
-    )
 # ----------------------------
 # LOCATIONS
 # ----------------------------
