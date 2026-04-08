@@ -580,3 +580,67 @@ elif menu == "Locations":
 
         df_locations = pd.DataFrame(data["locations"])
         st.dataframe(df_locations, use_container_width=True)
+
+
+ ----------------------------
+# IMPORT / EXPORT
+# ----------------------------
+elif menu == "Import / Export":
+    st.header("🔄 Importar / Exportar Jornadas")
+
+    st.markdown(
+        """
+        Este apartado sirve para **guardar una copia de las jornadas** o
+        **restaurarlas más adelante**.
+
+        ✅ Incluye solo **jornadas y partidos**  
+        ❌ No modifica jugadores ni locations
+        """
+    )
+
+    # ----------------------------
+    # EXPORTAR
+    # ----------------------------
+    st.markdown("### 📤 Exportar jornadas")
+
+    export_data = {
+        "jornadas": data.get("jornadas", [])
+    }
+
+    export_json = json.dumps(export_data, indent=4, ensure_ascii=False)
+
+    st.download_button(
+        label="⬇️ Descargar backup de jornadas",
+        data=export_json,
+        file_name="padel_jornadas_backup.json",
+        mime="application/json"
+    )
+
+    st.markdown("---")
+
+    # ----------------------------
+    # IMPORTAR
+    # ----------------------------
+    st.markdown("### 📥 Importar jornadas")
+
+    uploaded_file = st.file_uploader(
+        "Selecciona un archivo de backup (.json)",
+        type="json"
+    )
+
+    if uploaded_file is not None:
+        try:
+            imported_data = json.load(uploaded_file)
+
+            if "jornadas" not in imported_data:
+                st.error("❌ El archivo no contiene jornadas válidas")
+            else:
+                if st.button("⚠️ Importar y sobrescribir jornadas actuales"):
+                    data["jornadas"] = imported_data["jornadas"]
+                    save_data(data)
+                    st.success("✅ Jornadas importadas correctamente")
+                    st.rerun()
+
+        except Exception as e:
+            st.error(f"❌ Error al leer el archivo: {e}")
+
