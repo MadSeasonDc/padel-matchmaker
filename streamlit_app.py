@@ -214,7 +214,7 @@ if menu == "Jornadas":
         for col_idx, partido in enumerate(fila):
             idx = fila_idx * 2 + col_idx
 
-            with cols# ---------- MARCO AZUL ----------
+            with cols[col_idx]:  # ---------- MARCO AZUL ----------
                 st.markdown(
                     """
                     <div style="
