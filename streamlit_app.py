@@ -268,31 +268,58 @@ if menu == "Jornadas":
                     key=f"hora_{jornada_index}_{idx}"
                 )
 
-            # Parejas
-            p1, p2 = st.columns(2)
+          
+# ----------------------------
+# PAREJAS (Derecha / Revés)
+# ----------------------------
+col_p1, col_p2 = st.columns(2)
 
-            with p1:
-                pareja1 = st.multiselect(
-                    "👥 Pareja 1",
-                    jugadores,
-                    partido.get("pareja_1", []),
-                    max_selections=2,
-                    key=f"p1_{jornada_index}_{idx}"
-                )
+# Valores actuales (para compatibilidad hacia atrás)
+p1_actual = partido.get("pareja_1", [])
+p2_actual = partido.get("pareja_2", [])
 
-            disponibles = [j for j in jugadores if j not in pareja1]
+p1_der = p1_actual[0] if len(p1_actual) > 0 else None
+p1_rev = p1_actual[1] if len(p1_actual) > 1 else None
 
-            with p2:
-                pareja2 = st.multiselect(
-                    "👥 Pareja 2",
-                    disponibles,
-                    partido.get("pareja_2", []),
-                    max_selections=2,
-                    key=f"p2_{jornada_index}_{idx}"
-                )
+p2_der = p2_actual[0] if len(p2_actual) > 0 else None
+p2_rev = p2_actual[1] if len(p2_actual) > 1 else None
 
-            partido["pareja_1"] = pareja1
-            partido["pareja_2"] = pareja2
+with col_p1:
+    st.markdown("### 👥 Pareja 1")
+    der_p1 = st.selectbox(
+        "Derecha",
+        jugadores,
+        index=jugadores.index(p1_der) if p1_der in jugadores else 0,
+        key=f"p1_der_{jornada_index}_{idx}"
+    )
+    rev_p1 = st.selectbox(
+        "Revés",
+        [j for j in jugadores if j != der_p1],
+        index=0 if p1_rev not in jugadores else max(0, jugadores.index(p1_rev) - 1),
+        key=f"p1_rev_{jornada_index}_{idx}"
+    )
+
+with col_p2:
+    st.markdown("### 👥 Pareja 2")
+    jugadores_p2 = [j for j in jugadores if j not in [der_p1, rev_p1]]
+
+    der_p2 = st.selectbox(
+        "Derecha",
+        jugadores_p2,
+        index=jugadores_p2.index(p2_der) if p2_der in jugadores_p2 else 0,
+        key=f"p2_der_{jornada_index}_{idx}"
+    )
+    rev_p2 = st.selectbox(
+        "Revés",
+        [j for j in jugadores_p2 if j != der_p2],
+        index=0 if p2_rev not in jugadores_p2 else max(0, jugadores_p2.index(p2_rev) - 1),
+        key=f"p2_rev_{jornada_index}_{idx}"
+    )
+
+# Guardar parejas en formato compatible
+partido["pareja_1"] = [der_p1, rev_p1]
+partido["pareja_2"] = [der_p2, rev_p2]
+
 
             # Resultado
             
