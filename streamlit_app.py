@@ -296,22 +296,25 @@ if menu == "Jornadas":
 
             # Resultado
             
+
+# ----------------------------
+# RESULTADO (COMPACTO)
+# ----------------------------
 st.markdown("### 🎾 Resultado")
 
-# Cabecera de sets
-c_set1, c_set2, c_set3 = st.columns(3)
-with c_set1:
+# Cabecera sets
+h1, h2, h3 = st.columns(3)
+with h1:
     st.markdown("**Set 1**")
-with c_set2:
+with h2:
     st.markdown("**Set 2**")
-with c_set3:
+with h3:
     st.markdown("**Set 3**")
 
-# Inputs compactos P1 / P2
-r1, r2, r3 = st.columns(3)
+# Inputs compactos
+c1, c2, c3 = st.columns(3)
 
-# Set 1
-with r1:
+with c1:
     partido["set1_p1"] = st.number_input(
         "P1", 0, 7, partido.get("set1_p1", 0),
         key=f"s1p1_{jornada_index}_{idx}"
@@ -321,8 +324,7 @@ with r1:
         key=f"s1p2_{jornada_index}_{idx}"
     )
 
-# Set 2
-with r2:
+with c2:
     partido["set2_p1"] = st.number_input(
         "P1", 0, 7, partido.get("set2_p1", 0),
         key=f"s2p1_{jornada_index}_{idx}"
@@ -332,8 +334,7 @@ with r2:
         key=f"s2p2_{jornada_index}_{idx}"
     )
 
-# Set 3
-with r3:
+with c3:
     partido["set3_p1"] = st.number_input(
         "P1", 0, 7, partido.get("set3_p1", 0),
         key=f"s3p1_{jornada_index}_{idx}"
@@ -343,10 +344,11 @@ with r3:
         key=f"s3p2_{jornada_index}_{idx}"
     )
 
+# ✅ BOTÓN GUARDAR (MISMO NIVEL QUE st.markdown)
+if st.button("💾 Guardar partido", key=f"save_{jornada_index}_{idx}"):
+    save_data(data)
+    st.success("✅ Partido guardado")
 
-            if st.button("💾 Guardar partido", key=f"save_{jornada_index}_{idx}"):
-                save_data(data)
-                st.success("✅ Partido guardado")
 
     # ----------------------------
     # TAB ➕ (AÑADIR PARTIDO 4 o 5)
