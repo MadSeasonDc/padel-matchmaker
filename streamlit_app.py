@@ -89,7 +89,6 @@ def partido_con_jugadores(p1, p2):
 
 
 def load_data():
-    # -------- Primera ejecución (archivo no existe) --------
     if not os.path.exists(DATA_FILE):
         data = {
             "jugadores": [
@@ -102,64 +101,47 @@ def load_data():
                 for nombre in JUGADORES_INICIALES
             ],
             "jornadas": [
-                {
-                    "numero": 1,
-                    "partidos": [
-                        partido_con_jugadores(
-                            ["Antonio Seoane", "Carlos Ortiz"],
-                            ["Nacho Moros", "Nacho Urbano"]
-                        ),
-                        partido_con_jugadores(
-                            ["Adrian Gomez", "Alvaro Sarmiento"],
-                            ["Manuel Díaz", "Patricia Seoane"]
-                        ),
-                        partido_con_jugadores(
-                            ["Julio Mendez", "Jose Luis Pozuelo"],
-                            ["Juan Carmona", "Jesus Fernandez"]
-                        ),
-                        partido_con_jugadores(
-                            ["Jordi Safont", "Bea Jaen"],
-                            ["Cecile Autran", "Ester Martin"]
-                        ),
-                        partido_con_jugadores(
-                            ["Graciela Martinez", "Alicia Soriano"],
-                            ["Lela Bekauri", "Oriol Palacios"]
-                        ),
-                    ]
-                },
-                {
-                    "numero": 2,
-                    "partidos": [
-                        partido_con_jugadores(
-                            ["Antonio Seoane", "Alvaro Sarmiento"],
-                            ["Carlos Ortiz", "Adrian Gomez"]
-                        ),
-                        partido_con_jugadores(
-                            ["Nacho Moros", "Jesus Fernandez"],
-                            ["Nacho Urbano", "Juan Carmona"]
-                        ),
-                        partido_con_jugadores(
-                            ["Patricia Seoane", "Bea Jaen"],
-                            ["Jordi Safont", "Manuel Díaz"]
-                        ),
-                        partido_con_jugadores(
-                            ["Jose Luis Pozuelo", "Julio Mendez"],
-                            ["Alicia Soriano", "Graciela Martinez"]
-                        ),
-                    ]
-                },
-                {"numero": 3, "partidos": []},
-                {"numero": 4, "partidos": []},
-                {"numero": 5, "partidos": []},
-                {"numero": 6, "partidos": []},
-                {"numero": 7, "partidos": []},
+                {"numero": i + 1, "partidos": []}
+                for i in range(7)
             ],
             "partidos_borrador": [],
             "locations": LOCATIONS_INICIALES.copy()
         }
-
         save_data(data)
         return data
+
+    with open(DATA_FILE, "r") as f:
+        data = json.load(f)
+
+    # Asegurar jugadores
+    if "jugadores" not in data:
+        data["jugadores"] = []
+
+    nombres_existentes = {j["nombre"] for j in data["jugadores"]}
+    for nombre in JUGADORES_INICIALES:
+        if nombre not in nombres_existentes:
+            data["jugadores"].append({
+                "nombre": nombre,
+                "disponible": False,
+                "puntos": 0,
+                "fijo": True
+            })
+
+    # Asegurar jornadas
+    if "jornadas" not in data:
+        data["jornadas"] = [{"numero": i + 1, "partidos": []} for i in range(7)]
+
+    # Asegurar borrador
+    if "partidos_borrador" not in data:
+        data["partidos_borrador"] = []
+
+    # Asegurar locations
+    if "locations" not in data or len(data["locations"]) == 0:
+        data["locations"] = LOCATIONS_INICIALES.copy()
+
+    save_data(data)
+    return data
+
 
     # -------- Cargar archivo existente --------
     with open(DATA_FILE, "r") as f:
