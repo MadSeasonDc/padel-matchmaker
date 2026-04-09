@@ -159,6 +159,8 @@ menu = st.sidebar.radio(
     "Menú",
     ["Jornadas", "Ranking", "Locations", "Import / Export"] )
 
+
+
 # ----------------------------
 # JORNADAS
 # ----------------------------
@@ -167,12 +169,11 @@ if menu == "Jornadas":
 
     st.header("📅 Jornadas")
 
-    # Crear jornadas base si no existen (estructura)
-    if "jornadas" not in data or not data.get("jornadas"):
+    # Crear jornadas base si no existen
+    if not data.get("jornadas"):
         data["jornadas"] = [{"numero": i + 1, "partidos": []} for i in range(7)]
         save_data(data)
 
-    # Selector de jornada
     jornada_index = st.selectbox(
         "Selecciona una jornada",
         range(len(data["jornadas"])),
@@ -186,8 +187,8 @@ if menu == "Jornadas":
     jugadores = sorted(j["nombre"] for j in data["jugadores"])
     clubs = [loc["club"] for loc in data.get("locations", [])]
 
-    # ✅ Crear 4 partidos SOLO si TODAS las jornadas están vacías (primera ejecución)
-    if all(len(j["partidos"]) == 0 for j in data["jornadas"]) and len(jornada["partidos"]) == 0:
+    # Crear 4 partidos por defecto
+    if len(jornada["partidos"]) == 0:
         for _ in range(4):
             jornada["partidos"].append({
                 "pareja_1": [],
@@ -202,7 +203,7 @@ if menu == "Jornadas":
         save_data(data)
         st.rerun()
 
-    # CSS para marco azul usando container nativo
+    # CSS del marco azul (container nativo)
     st.markdown(
         """
         <style>
@@ -218,9 +219,9 @@ if menu == "Jornadas":
         unsafe_allow_html=True
     )
 
-    # --- GRID 2x2 ---
+    # Grid 2x2
     filas = [
-        jornada["partidos"][i:i + 2]
+        jornada["partidos"][i:i+2]
         for i in range(0, len(jornada["partidos"]), 2)
     ]
 
@@ -230,7 +231,9 @@ if menu == "Jornadas":
         for col_idx, partido in enumerate(fila):
             idx = fila_idx * 2 + col_idx
 
-            with colswith st.container(border=True):
+            # Contenedor con borde
+            with cols[col_idx]:
+                with st.container(border=True):
 
                     # Título centrado
                     st.markdown(
@@ -238,9 +241,9 @@ if menu == "Jornadas":
                         unsafe_allow_html=True
                     )
 
-                    # ---------------------------------
+                    # ----------------------------
                     # JUGADORES YA USADOS EN LA JORNADA
-                    # ---------------------------------
+                    # ----------------------------
                     jugadores_usados = set()
                     for p_prev in jornada["partidos"][:idx]:
                         jugadores_usados.update(p_prev.get("pareja_1", []))
@@ -250,7 +253,9 @@ if menu == "Jornadas":
                     jugadores_disponibles = [j for j in jugadores if j not in jugadores_usados]
                     opciones = [""] + jugadores_disponibles
 
-                    # Info básica
+                    # ----------------------------
+                    # INFO BÁSICA
+                    # ----------------------------
                     c1, c2, c3 = st.columns(3)
 
                     with c1:
@@ -280,20 +285,31 @@ if menu == "Jornadas":
                             key=f"hora_{jornada_index}_{idx}"
                         )
 
-                    # Parejas SIN repetición en la jornada
+                    # ----------------------------
+                    # PAREJAS SIN REPETICIONES
+                    # ----------------------------
                     col_p1, col_p2 = st.columns(2)
 
                     with col_p1:
                         st.markdown("**Pareja 1**")
-                        der_p1 = st.selectbox("Der", opciones, key=f"p1_der_{idx}")
+
+                        der_p1 = st.selectbox(
+                            "Der",
+                            opciones,
+                            key=f"p1_der_{idx}"
+                        )
+
+                        disponibles_rev_p1 = [j for j in jugadores_disponibles if j != der_p1]
+
                         rev_p1 = st.selectbox(
                             "Rev",
-                            [""] + [j for j in jugadores_disponibles if j != der_p1],
+                            [""] + disponibles_rev_p1,
                             key=f"p1_rev_{idx}"
                         )
 
                     with col_p2:
                         st.markdown("**Pareja 2**")
+
                         usados_p1 = {der_p1, rev_p1} - {""}
                         disponibles_p2 = [j for j in jugadores_disponibles if j not in usados_p1]
 
@@ -302,19 +318,24 @@ if menu == "Jornadas":
                             [""] + disponibles_p2,
                             key=f"p2_der_{idx}"
                         )
+
+                        disponibles_rev_p2 = [j for j in disponibles_p2 if j != der_p2]
+
                         rev_p2 = st.selectbox(
                             "Rev",
-                            [""] + [j for j in disponibles_p2 if j != der_p2],
+                            [""] + disponibles_rev_p2,
                             key=f"p2_rev_{idx}"
                         )
 
                     partido["pareja_1"] = [der_p1, rev_p1]
                     partido["pareja_2"] = [der_p2, rev_p2]
 
-                    # Resultado
+                    # ----------------------------
+                    # RESULTADO COMPACTO
+                    # ----------------------------
                     st.markdown("**Resultado**")
-                    r1, r2, r3 = st.columns(3)
 
+                    r1, r2, r3 = st.columns(3)
                     with r1:
                         partido["set1_p1"] = st.number_input("P1", 0, 7, key=f"s1p1_{idx}")
                         partido["set1_p2"] = st.number_input("P2", 0, 7, key=f"s1p2_{idx}")
@@ -329,7 +350,9 @@ if menu == "Jornadas":
                         save_data(data)
                         st.success("✅ Guardado")
 
-    # ➕ Botón para 5º partido (centrado)
+    # ----------------------------
+    # BOTÓN + CENTRADO (SOLO 5º PARTIDO)
+    # ----------------------------
     if len(jornada["partidos"]) == 4:
         st.markdown("---")
         _, c, _ = st.columns([1, 1, 1])
@@ -625,4 +648,5 @@ elif menu == "Import / Export":
 
         except Exception as e:
             st.error(f"❌ Error al leer el archivo: {e}")
+
 
