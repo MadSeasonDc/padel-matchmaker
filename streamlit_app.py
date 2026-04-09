@@ -592,6 +592,6 @@ elif menu == "Import / Export":
                     st.rerun()
 
         except Exception as e:
-            st.error(f"❌ Error al leer el archivo: {e}")
+            st.error(f"❌ Error al leer el archivo: {e}") 
 
 
