@@ -323,6 +323,7 @@ if menu == "Jornadas":
 
 
 
+
 # ----------------------------
 # RANKING
 # ----------------------------
@@ -342,8 +343,8 @@ elif menu == "Ranking":
             "PG": 0,
             "PP": 0,
             "Pts": 0,
-            "JG": 0,   # Juegos Ganados
-            "JP": 0    # Juegos Perdidos
+            "JG": 0,
+            "JP": 0
         }
         for j in data["jugadores"]
     }
@@ -413,7 +414,7 @@ elif menu == "Ranking":
                         stats[j]["Pts"] += 1
 
     # ----------------------------
-    # CREAR DATAFRAME
+    # DATAFRAME
     # ----------------------------
     filas = []
     for nombre, s in stats.items():
@@ -433,14 +434,12 @@ elif menu == "Ranking":
     df.insert(0, "RK", range(1, len(df) + 1))
 
     # ----------------------------
-    # NOMBRE CON ICONOS
+    # ICONOS
     # ----------------------------
     def nombre_con_icono(row):
         nombre = row["Jugador"]
-
         if nombre in JUGADORES_LESIONADOS:
             nombre = f"{nombre} ➕"
-
         if row["RK"] == 1:
             return f"🥇 {nombre}"
         elif row["RK"] == 2:
@@ -452,7 +451,7 @@ elif menu == "Ranking":
     df["Jugador"] = df.apply(nombre_con_icono, axis=1)
 
     # ----------------------------
-    # ESTILO (TOP 3 + DIF COLORES)
+    # ESTILO
     # ----------------------------
     def style_row(row):
         estilos = ["" for _ in row.index]
@@ -473,9 +472,6 @@ elif menu == "Ranking":
 
         return estilos
 
-    # ----------------------------
-    # TABLA COMPACTA
-    # ----------------------------
     df_styled = (
         df.style
         .apply(style_row, axis=1)
@@ -489,46 +485,49 @@ elif menu == "Ranking":
         )
     )
 
-    st.dataframe(
-        df_styled,
-        use_container_width=False,
-        hide_index=True
-    )
-
     # ----------------------------
-    # LEYENDA Y SISTEMA DE PUNTOS
+    # LAYOUT: TABLA + LEYENDA
     # ----------------------------
-    st.markdown(
-        """
----
+    col_tabla, col_leyenda = st.columns([3, 1])
 
-### 📘 Leyenda del ranking
+    with col_tabla:
+        st.dataframe(
+            df_styled,
+            use_container_width=False,
+            hide_index=True
+        )
 
-- **RK** → Posición en el ranking  
+    with col_leyenda:
+        with st.container(border=True):
+            st.markdown(
+                """
+### 📘 Leyenda
+
+- **RK** → Posición  
 - **PJ** → Partidos jugados  
 - **PG** → Partidos ganados  
 - **PP** → Partidos perdidos  
-- **Pts** → Puntos totales  
+- **Pts** → Puntos  
 - **JG** → Juegos ganados  
 - **JP** → Juegos perdidos  
-- **Dif** → Diferencia de juegos (**JG − JP**)  
-- ➕ → **No participan más.**
+- **Dif** → JG − JP  
+- ➕ → **No participan más**
 
 ---
 
-### 🏓 Sistema de puntuación
+### 🏓 Puntuación
 
-- ✅ **Partido ganado en 1 set** → **3 puntos**  
-- ✅ **Partido ganado en 2 sets (2‑0)** → **3 puntos**  
-- ✅ **Partido a 3 sets (1‑1 + set decisivo)** → **3 puntos ganador / 1 punto perdedor**  
-- ✅ **Empate sin tercer set (1‑1)** → **1 punto por jugador**
+- ✅ Victoria (1 ó 2 sets) → **3 pts**  
+- ✅ Partido a 3 sets → **3 / 1 pts**  
+- ✅ Empate sin 3.º set → **1 / 1**
 
 **Orden del ranking:**
-1. Puntos (**Pts**)  
-2. Partidos ganados (**PG**)  
-3. Diferencia de juegos (**Dif**)
+1. Pts  
+2. PG  
+3. Dif
 """
-    )
+            )
+
 # ----------------------------
 # LOCATIONS
 # ----------------------------
