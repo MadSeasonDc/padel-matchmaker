@@ -316,6 +316,7 @@ if menu == "Jornadas":
 
 
 
+
 # ----------------------------
 # RANKING
 # ----------------------------
@@ -323,42 +324,6 @@ elif menu == "Ranking":
     import pandas as pd
 
     st.header("🏆 Ranking")
-
-    # ----------------------------
-    # LEYENDA Y SISTEMA DE PUNTOS
-    # ----------------------------
-    st.markdown(
-        """
-### 📘 Leyenda del ranking
-
-- **RK** → Posición en el ranking  
-- **PJ** → Partidos jugados  
-- **PG** → Partidos ganados  
-- **PP** → Partidos perdidos  
-- **Pts** → Puntos totales  
-- **JG** → Juegos ganados  
-- **JP** → Juegos perdidos  
-- **Dif** → Diferencia de juegos (**JG − JP**)
-
----
-
-### 🏓 Sistema de puntuación
-
-El sistema de puntos funciona de la siguiente manera:
-
-- ✅ **Partido ganado en 1 set** → **3 puntos** para el ganador, **0 puntos** para el perdedor  
-- ✅ **Partido ganado en 2 sets (2‑0)** → **3 puntos** para el ganador, **0 puntos** para el perdedor  
-- ✅ **Partido a 3 sets (1‑1 y se juega el 3.º set)**  
-  - Ganador del partido → **3 puntos**  
-  - Perdedor del partido → **1 punto**  
-- ✅ **Empate sin jugar tercer set (1‑1)** → **1 punto para cada pareja**
-
-El ranking se ordena por:
-1. **Puntos (Pts)**
-2. **Partidos ganados (PG)**
-3. **Diferencia de juegos (Dif)**
-"""
-    )
 
     jornadas = data.get("jornadas", [])
 
@@ -491,7 +456,7 @@ El ranking se ordena por:
     def style_row(row):
         estilos = ["" for _ in row.index]
 
-        # TOP 3 solo en nombre
+        # Top 3 (en nombre)
         idx_jugador = row.index.get_loc("Jugador")
         if row["RK"] == 1:
             estilos[idx_jugador] = "background-color:#FFD700;font-weight:bold"
@@ -500,7 +465,7 @@ El ranking se ordena por:
         elif row["RK"] == 3:
             estilos[idx_jugador] = "background-color:#CD7F32"
 
-        # DIF en verde / rojo
+        # Dif en verde / rojo
         idx_dif = row.index.get_loc("Dif")
         if row["Dif"] > 0:
             estilos[idx_dif] = "color:green;font-weight:bold"
@@ -514,6 +479,43 @@ El ranking se ordena por:
         use_container_width=True,
         hide_index=True
     )
+
+    # ----------------------------
+    # LEYENDA Y SISTEMA DE PUNTOS (DEBAJO)
+    # ----------------------------
+    st.markdown(
+        """
+---
+
+### 📘 Leyenda del ranking
+
+- **RK** → Posición en el ranking  
+- **PJ** → Partidos jugados  
+- **PG** → Partidos ganados  
+- **PP** → Partidos perdidos  
+- **Pts** → Puntos totales  
+- **JG** → Juegos ganados  
+- **JP** → Juegos perdidos  
+- **Dif** → Diferencia de juegos (**JG − JP**)
+
+---
+
+### 🏓 Sistema de puntuación
+
+- ✅ **Partido ganado en 1 set** → **3 puntos** para el ganador, **0 puntos** para el perdedor  
+- ✅ **Partido ganado en 2 sets (2‑0)** → **3 puntos** para el ganador, **0 puntos** para el perdedor  
+- ✅ **Partido a 3 sets (1‑1 y se juega el 3.º set)**  
+  - Ganador → **3 puntos**  
+  - Perdedor → **1 punto**  
+- ✅ **Empate sin jugar tercer set (1‑1)** → **1 punto para cada pareja**
+
+**Orden del ranking:**
+1. Puntos (**Pts**)  
+2. Partidos ganados (**PG**)  
+3. Diferencia de juegos (**Dif**)
+"""
+    )
+
 
 
 # ----------------------------
