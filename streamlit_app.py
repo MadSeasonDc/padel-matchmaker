@@ -766,25 +766,12 @@ def generar_pdf_ranking(df):
     return buffer
 
 
+
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
 elif menu == "PDF / PRINT":
-    st.header("📄 PDF / Print")
-
-    st.markdown(
-        """
-Desde aquí puedes generar un **PDF oficial del ranking**  
-en formato limpio y estilo *clasificación de competición*.
-
-- Sin logos
-- Diseño sobrio
-- Ideal para imprimir o compartir
-"""
-    )
-
-    # ----------------------------
-    # RECONSTRUIR RANKING (MISMA LÓGICA)
+    st.header("📄STRUIR RANKING    st.header("📄 PDF / Print")
     # ----------------------------
     jornadas = data.get("jornadas", [])
 
@@ -822,6 +809,7 @@ en formato limpio y estilo *clasificación de competición*.
             sets_p1 = (s1_p1 > s1_p2) + (s2_p1 > s2_p2)
             sets_p2 = (s1_p2 > s1_p1) + (s2_p2 > s2_p1)
 
+            # Juegos y partidos jugados
             for j in p1:
                 stats[j]["PJ"] += 1
                 stats[j]["JG"] += juegos_p1
@@ -832,6 +820,7 @@ en formato limpio y estilo *clasificación de competición*.
                 stats[j]["JG"] += juegos_p2
                 stats[j]["JP"] += juegos_p1
 
+            # Puntuación
             if (s3_p1 + s3_p2) > 0:
                 ganador = p1 if s3_p1 > s3_p2 else p2
                 perdedor = p2 if ganador == p1 else p1
@@ -839,6 +828,7 @@ en formato limpio y estilo *clasificación de competición*.
                 for j in ganador:
                     stats[j]["PG"] += 1
                     stats[j]["Pts"] += 3
+
                 for j in perdedor:
                     stats[j]["PP"] += 1
                     stats[j]["Pts"] += 1
@@ -859,6 +849,9 @@ en formato limpio y estilo *clasificación de competición*.
                     for j in p1 + p2:
                         stats[j]["Pts"] += 1
 
+    # ----------------------------
+    # DATAFRAME FINAL
+    # ----------------------------
     filas = []
     for nombre, s in stats.items():
         filas.append({
@@ -877,7 +870,7 @@ en formato limpio y estilo *clasificación de competición*.
     df.insert(0, "RK", range(1, len(df) + 1))
 
     # ----------------------------
-    # BOTÓN PDF
+    # BOTÓN DE GENERACIÓN PDF
     # ----------------------------
     if st.button("📄 Generar PDF del ranking"):
         pdf_buffer = generar_pdf_ranking(df)
@@ -888,4 +881,18 @@ en formato limpio y estilo *clasificación de competición*.
             file_name="ranking_liga_padel.pdf",
             mime="application/pdf"
         )
+``
+
+    st.markdown(
+        """
+Desde aquí puedes generar un **PDF oficial del ranking**  
+en formato limpio y estilo *clasificación de competición*.
+
+- Sin logos
+- Diseño sobrio
+- Ideal para imprimir o compartir
+"""
+    )
+
+    # ----------------------------
 
