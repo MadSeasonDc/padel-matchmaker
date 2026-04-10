@@ -323,7 +323,6 @@ if menu == "Jornadas":
 
 
 
-
 # ----------------------------
 # RANKING
 # ----------------------------
@@ -497,24 +496,34 @@ elif menu == "Ranking":
     st.markdown("</div>", unsafe_allow_html=True)
 
     # ----------------------------
-    # LEYENDA (EN CUADRO)
+    # LEYENDA (CUADRO AJUSTADO AL TEXTO)
     # ----------------------------
-    with st.container(border=True):
-        st.markdown(
-            """
-### 📘 Leyenda del ranking
-
-- **RK** → Posición  
-- **PJ** → Partidos jugados  
-- **PG** → Partidos ganados  
-- **PP** → Partidos perdidos  
-- **Pts** → Puntos totales  
-- **JG** → Juegos ganados  
-- **JP** → Juegos perdidos  
-- **Dif** → Diferencia de juegos (**JG − JP**)  
-- ➕ → **No participan más.**
-"""
-        )
+    st.markdown(
+        """
+<div style="
+    display: inline-block;
+    border: 1px solid rgba(200,200,200,0.4);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-top: 14px;
+    margin-bottom: 16px;
+">
+<h4 style="margin-top:0;">📘 Leyenda del ranking</h4>
+<ul style="margin-left:0; padding-left:18px;">
+  <li><strong>RK</strong> → Posición</li>
+  <li><strong>PJ</strong> → Partidos jugados</li>
+  <li><strong>PG</strong> → Partidos ganados</li>
+  <li><strong>PP</strong> → Partidos perdidos</li>
+  <li><strong>Pts</strong> → Puntos totales</li>
+  <li><strong>JG</strong> → Juegos ganados</li>
+  <li><strong>JP</strong> → Juegos perdidos</li>
+  <li><strong>Dif</strong> → Diferencia de juegos (<strong>JG − JP</strong>)</li>
+  <li>➕ → <strong>No participan más.</strong></li>
+</ul>
+</div>
+""",
+        unsafe_allow_html=True
+    )
 
     # ----------------------------
     # SISTEMA DE PUNTUACIÓN (SUELTO)
