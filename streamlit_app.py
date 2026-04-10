@@ -486,48 +486,49 @@ elif menu == "Ranking":
     )
 
     # ----------------------------
-    # LAYOUT: TABLA + LEYENDA
+    # TABLA CENTRADA
     # ----------------------------
-    col_tabla, col_leyenda = st.columns([3, 1])
+    st.markdown("<div style='display:flex; justify-content:center;'>", unsafe_allow_html=True)
+    st.dataframe(
+        df_styled,
+        use_container_width=False,
+        hide_index=True
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    with col_tabla:
-        st.dataframe(
-            df_styled,
-            use_container_width=False,
-            hide_index=True
-        )
-
-    with col_leyenda:
-        with st.container(border=True):
-            st.markdown(
-                """
-### 📘 Leyenda
+    # ----------------------------
+    # LEYENDA (EN CUADRO)
+    # ----------------------------
+    with st.container(border=True):
+        st.markdown(
+            """
+### 📘 Leyenda del ranking
 
 - **RK** → Posición  
 - **PJ** → Partidos jugados  
 - **PG** → Partidos ganados  
 - **PP** → Partidos perdidos  
-- **Pts** → Puntos  
+- **Pts** → Puntos totales  
 - **JG** → Juegos ganados  
 - **JP** → Juegos perdidos  
-- **Dif** → JG − JP  
-- ➕ → **No participan más**
-
----
-
-### 🏓 Puntuación
-
-- ✅ Victoria (1 ó 2 sets) → **3 pts**  
-- ✅ Partido a 3 sets → **3 / 1 pts**  
-- ✅ Empate sin 3.º set → **1 / 1**
-
-**Orden del ranking:**
-1. Pts  
-2. PG  
-3. Dif
+- **Dif** → Diferencia de juegos (**JG − JP**)  
+- ➕ → **No participan más.**
 """
-            )
+        )
 
+    # ----------------------------
+    # SISTEMA DE PUNTUACIÓN (SUELTO)
+    # ----------------------------
+    st.markdown(
+        """
+### 🏓 Sistema de puntuación
+
+- ✅ **Partido ganado en 1 set** → **3 puntos**  
+- ✅ **Partido ganado en 2 sets (2‑0)** → **3 puntos**  
+- ✅ **Partido a 3 sets (1‑1 + set decisivo)** → **3 puntos ganador / 1 punto perdedor**  
+- ✅ **Empate sin tercer set (1‑1)** → **1 punto por jugador**
+"""
+    )
 # ----------------------------
 # LOCATIONS
 # ----------------------------
