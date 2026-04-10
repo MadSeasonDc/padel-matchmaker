@@ -364,10 +364,7 @@ elif menu == "Ranking":
             s2_p1, s2_p2 = p["set2_p1"], p["set2_p2"]
             s3_p1, s3_p2 = p["set3_p1"], p["set3_p2"]
 
-            set1_jugado = (s1_p1 + s1_p2) > 0
-            set3_jugado = (s3_p1 + s3_p2) > 0
-
-            if not set1_jugado:
+            if (s1_p1 + s1_p2) == 0:
                 continue
 
             juegos_p1 = s1_p1 + s2_p1 + s3_p1
@@ -376,7 +373,6 @@ elif menu == "Ranking":
             sets_p1 = (s1_p1 > s1_p2) + (s2_p1 > s2_p2)
             sets_p2 = (s1_p2 > s1_p1) + (s2_p2 > s2_p1)
 
-            # Juegos y partidos
             for j in p1:
                 stats[j]["PJ"] += 1
                 stats[j]["JG"] += juegos_p1
@@ -387,8 +383,7 @@ elif menu == "Ranking":
                 stats[j]["JG"] += juegos_p2
                 stats[j]["JP"] += juegos_p1
 
-            # Puntuación
-            if set3_jugado:
+            if (s3_p1 + s3_p2) > 0:
                 if s3_p1 > s3_p2:
                     ganadores, perdedores = p1, p2
                 else:
@@ -400,7 +395,6 @@ elif menu == "Ranking":
                 for j in perdedores:
                     stats[j]["PP"] += 1
                     stats[j]["Pts"] += 1
-
             else:
                 if sets_p1 > sets_p2:
                     for j in p1:
@@ -439,7 +433,7 @@ elif menu == "Ranking":
     df.insert(0, "RK", range(1, len(df) + 1))
 
     # ----------------------------
-    # NOMBRE CON ICONOS (TOP 3 + LESIONADOS)
+    # NOMBRE CON ICONOS
     # ----------------------------
     def nombre_con_icono(row):
         nombre = row["Jugador"]
@@ -458,7 +452,7 @@ elif menu == "Ranking":
     df["Jugador"] = df.apply(nombre_con_icono, axis=1)
 
     # ----------------------------
-    # ESTILO (TOP 3 + DIF VERDE/ROJO)
+    # ESTILO (TOP 3 + DIF COLORES)
     # ----------------------------
     def style_row(row):
         estilos = ["" for _ in row.index]
@@ -479,29 +473,30 @@ elif menu == "Ranking":
 
         return estilos
 
-   
-df_styled = (
-    df.style
-    .apply(style_row, axis=1)
-    .set_properties(
-        subset=["PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"],
-        **{"width": "60px", "text-align": "center"}
+    # ----------------------------
+    # TABLA COMPACTA
+    # ----------------------------
+    df_styled = (
+        df.style
+        .apply(style_row, axis=1)
+        .set_properties(
+            subset=["PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"],
+            **{"width": "55px", "text-align": "center"}
+        )
+        .set_properties(
+            subset=["Jugador"],
+            **{"width": "240px"}
+        )
     )
-    .set_properties(
-        subset=["Jugador"],
-        **{"width": "220px"}
+
+    st.dataframe(
+        df_styled,
+        use_container_width=False,
+        hide_index=True
     )
-)
-
-st.dataframe(
-    df_styled,
-    use_container_width=False,
-    hide_index=True
-)
-
 
     # ----------------------------
-    # LEYENDA Y SISTEMA DE PUNTOS (DEBAJO)
+    # LEYENDA Y SISTEMA DE PUNTOS
     # ----------------------------
     st.markdown(
         """
@@ -517,18 +512,16 @@ st.dataframe(
 - **JG** → Juegos ganados  
 - **JP** → Juegos perdidos  
 - **Dif** → Diferencia de juegos (**JG − JP**)  
-- ➕ → **No participan mas.**
+- ➕ → **No participan más.**
 
 ---
 
 ### 🏓 Sistema de puntuación
 
-- ✅ **Partido ganado en 1 set** → **3 puntos** para el ganador, **0 puntos** para el perdedor  
-- ✅ **Partido ganado en 2 sets (2‑0)** → **3 puntos** para el ganador, **0 puntos** para el perdedor  
-- ✅ **Partido a 3 sets (1‑1 y se juega el 3.º set)**  
-  - Ganador → **3 puntos**  
-  - Perdedor → **1 punto**  
-- ✅ **Empate sin jugar tercer set (1‑1)** → **1 punto para cada pareja**
+- ✅ **Partido ganado en 1 set** → **3 puntos**  
+- ✅ **Partido ganado en 2 sets (2‑0)** → **3 puntos**  
+- ✅ **Partido a 3 sets (1‑1 + set decisivo)** → **3 puntos ganador / 1 punto perdedor**  
+- ✅ **Empate sin tercer set (1‑1)** → **1 punto por jugador**
 
 **Orden del ranking:**
 1. Puntos (**Pts**)  
@@ -536,9 +529,6 @@ st.dataframe(
 3. Diferencia de juegos (**Dif**)
 """
     )
-
-
-
 # ----------------------------
 # LOCATIONS
 # ----------------------------
