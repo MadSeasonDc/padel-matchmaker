@@ -479,11 +479,26 @@ elif menu == "Ranking":
 
         return estilos
 
-    st.dataframe(
-        df.style.apply(style_row, axis=1),
-        use_container_width=True,
-        hide_index=True
+   
+df_styled = (
+    df.style
+    .apply(style_row, axis=1)
+    .set_properties(
+        subset=["PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"],
+        **{"width": "60px", "text-align": "center"}
     )
+    .set_properties(
+        subset=["Jugador"],
+        **{"width": "220px"}
+    )
+)
+
+st.dataframe(
+    df_styled,
+    use_container_width=False,
+    hide_index=True
+)
+
 
     # ----------------------------
     # LEYENDA Y SISTEMA DE PUNTOS (DEBAJO)
