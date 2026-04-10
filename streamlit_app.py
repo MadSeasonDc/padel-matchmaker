@@ -27,6 +27,12 @@ JUGADORES_INICIALES = [
     "Oriol Palacios"
 ]
 
+JUGADORES_LESIONADOS = {
+    "Ester Martin",
+    "Jose Luis Pozuelo"
+}
+
+
 LOCATIONS_INICIALES = [
     {
         "club": "Factory Fit",
