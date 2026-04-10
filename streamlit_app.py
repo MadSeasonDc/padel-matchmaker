@@ -365,7 +365,6 @@ elif menu == "Ranking":
             s3_p1, s3_p2 = p["set3_p1"], p["set3_p2"]
 
             set1_jugado = (s1_p1 + s1_p2) > 0
-            set2_jugado = (s2_p1 + s2_p2) > 0
             set3_jugado = (s3_p1 + s3_p2) > 0
 
             if not set1_jugado:
@@ -377,7 +376,7 @@ elif menu == "Ranking":
             sets_p1 = (s1_p1 > s1_p2) + (s2_p1 > s2_p2)
             sets_p2 = (s1_p2 > s1_p1) + (s2_p2 > s2_p1)
 
-            # Juegos y partidos jugados
+            # Juegos y partidos
             for j in p1:
                 stats[j]["PJ"] += 1
                 stats[j]["JG"] += juegos_p1
@@ -398,7 +397,6 @@ elif menu == "Ranking":
                 for j in ganadores:
                     stats[j]["PG"] += 1
                     stats[j]["Pts"] += 3
-
                 for j in perdedores:
                     stats[j]["PP"] += 1
                     stats[j]["Pts"] += 1
@@ -410,14 +408,12 @@ elif menu == "Ranking":
                         stats[j]["Pts"] += 3
                     for j in p2:
                         stats[j]["PP"] += 1
-
                 elif sets_p2 > sets_p1:
                     for j in p2:
                         stats[j]["PG"] += 1
                         stats[j]["Pts"] += 3
                     for j in p1:
                         stats[j]["PP"] += 1
-
                 else:
                     for j in p1 + p2:
                         stats[j]["Pts"] += 1
@@ -443,26 +439,30 @@ elif menu == "Ranking":
     df.insert(0, "RK", range(1, len(df) + 1))
 
     # ----------------------------
-    # ICONOS TOP 3
+    # NOMBRE CON ICONOS (TOP 3 + LESIONADOS)
     # ----------------------------
     def nombre_con_icono(row):
+        nombre = row["Jugador"]
+
+        if nombre in JUGADORES_LESIONADOS:
+            nombre = f"{nombre} ➕"
+
         if row["RK"] == 1:
-            return f"🥇 {row['Jugador']}"
+            return f"🥇 {nombre}"
         elif row["RK"] == 2:
-            return f"🥈 {row['Jugador']}"
+            return f"🥈 {nombre}"
         elif row["RK"] == 3:
-            return f"🥉 {row['Jugador']}"
-        return row["Jugador"]
+            return f"🥉 {nombre}"
+        return nombre
 
     df["Jugador"] = df.apply(nombre_con_icono, axis=1)
 
     # ----------------------------
-    # ESTILO (TOP 3 + DIF)
+    # ESTILO (TOP 3 + DIF VERDE/ROJO)
     # ----------------------------
     def style_row(row):
         estilos = ["" for _ in row.index]
 
-        # Top 3 (en nombre)
         idx_jugador = row.index.get_loc("Jugador")
         if row["RK"] == 1:
             estilos[idx_jugador] = "background-color:#FFD700;font-weight:bold"
@@ -471,7 +471,6 @@ elif menu == "Ranking":
         elif row["RK"] == 3:
             estilos[idx_jugador] = "background-color:#CD7F32"
 
-        # Dif en verde / rojo
         idx_dif = row.index.get_loc("Dif")
         if row["Dif"] > 0:
             estilos[idx_dif] = "color:green;font-weight:bold"
@@ -502,7 +501,8 @@ elif menu == "Ranking":
 - **Pts** → Puntos totales  
 - **JG** → Juegos ganados  
 - **JP** → Juegos perdidos  
-- **Dif** → Diferencia de juegos (**JG − JP**)
+- **Dif** → Diferencia de juegos (**JG − JP**)  
+- ➕ → **No participan mas.**
 
 ---
 
