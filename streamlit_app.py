@@ -356,14 +356,14 @@ def generar_pdf_ranking(data):
 
     c.setFont("Helvetica", 9)
     leyenda = [
-        "RK   Posición en el ranking",
-        "PJ   Partidos jugados",
-        "PG   Partidos ganados",
-        "PP   Partidos perdidos",
-        "Pts  Puntos totales",
-        "JG   Juegos ganados",
-        "JP   Juegos perdidos",
-        "Dif  Diferencia de juegos (JG - JP)"
+        "RK:   Ranking Actual",
+        "PJ:   Partidos Jugados",
+        "PG:   Partidos Ganados",
+        "PP:   Partidos Perdidos",
+        "Pts:  Puntos Totales,
+        "JG:   Juegos ganados",
+        "JP:   Juegos perdidos",
+        "Dif=  JG - JP"
     ]
 
     for l in leyenda:
