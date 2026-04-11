@@ -689,6 +689,7 @@ elif menu == "Import / Export":
 
 
 
+
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
@@ -698,17 +699,14 @@ elif menu == "PDF / PRINT":
     st.markdown("### 📄 Exportaciones")
 
     # -------- RANKING PDF --------
-  
-if st.button("🏆 Ranking PDF"):
     pdf_buffer = generar_pdf_prueba()
 
     st.download_button(
-        label="⬇️ Descargar PDF de prueba",
+        label="🏆 Descargar Ranking PDF",
         data=pdf_buffer,
         file_name="ranking_prueba.pdf",
         mime="application/pdf"
     )
-
 
     st.markdown("---")
 
@@ -746,11 +744,7 @@ if st.button("🏆 Ranking PDF"):
             st.markdown("#### &nbsp;")
             st.markdown("#### &nbsp;")
 
-            if st.button("⚙️ Generar", key="startlist_generar"):
-                st.info(
-                    f"Generar Startlist para {jornada_startlist} "
-                    "(pendiente de implementar)"
-                )
+            st.button("⚙️ Generar", key="startlist_generar")
 
     # -------- RESULTS --------
     with st.expander("📊 Results", expanded=False):
@@ -786,11 +780,7 @@ if st.button("🏆 Ranking PDF"):
             st.markdown("#### &nbsp;")
             st.markdown("#### &nbsp;")
 
-            if st.button("⚙️ Generar", key="results_generar"):
-                st.info(
-                    f"Generar Results para {jornada_results} "
-                    "(pendiente de implementar)"
-                )
+            st.button("⚙️ Generar", key="results_generar")
 
 
 
