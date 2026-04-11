@@ -1144,3 +1144,15 @@ elif menu == "PDF / PRINT":
                     f"Generar Results para {jornada_results} "
                     "(pendiente de implementar)"
                 )
+
+# -------- RESULTS BOOK (EASTER EGG) --------
+    st.markdown("---")
+
+    if st.button("📕 Generate Results Book"):
+        st.image(
+            "assets/result_book_easter_egg.png",
+            caption="Las aventuras del Result Book",
+            use_container_width=True
+        )
+
+
