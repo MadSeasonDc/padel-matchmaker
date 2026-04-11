@@ -1099,19 +1099,19 @@ elif menu == "PDF / PRINT":
 
     st.markdown("---")
 
-    # -------- Schedule (SIEMPRE VISIBLE) --------
-    with st.expander("📋 Schedule", expanded=False):
+    # -------- SCHEDULE (SIEMPRE VISIBLE) --------
+    with st.expander("📅 Schedule", expanded=False):
 
         col_left, col_right = st.columns([3, 1])
 
         with col_left:
             st.markdown("#### Jornada")
-            jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
 
-            jornada_Schedule = st.selectbox(
+            jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
+            jornada_schedule = st.selectbox(
                 "Selecciona la jornada",
                 jornadas_opciones,
-                key="Schedule_jornada"
+                key="schedule_jornada"
             )
 
             st.markdown("#### Opciones")
@@ -1119,22 +1119,22 @@ elif menu == "PDF / PRINT":
                 "Incluir lugar y hora",
                 value=True,
                 disabled=True,
-                key="Schedule_lugar_hora"
+                key="schedule_lugar_hora"
             )
             st.checkbox(
                 "Ordenar por pista",
                 value=False,
                 disabled=True,
-                key="Schedule_orden_pista"
+                key="schedule_orden_pista"
             )
 
         with col_right:
-            st.markdown("#### &nbsp;")
-            st.markdown("#### &nbsp;")
+            st.markdown("")  # separador visual
+            st.markdown("")
 
-            if st.button("⚙️ Generar", key="Schedule_generar"):
+            if st.button("⚙️ Generar", key="schedule_generar"):
                 st.info(
-                    f"Generar Schedule para {jornada_Schedule} "
+                    f"Generar Schedule para {jornada_schedule} "
                     "(pendiente de implementar)"
                 )
 
@@ -1145,8 +1145,8 @@ elif menu == "PDF / PRINT":
 
         with col_left:
             st.markdown("#### Jornada")
-            jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
 
+            jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
             jornada_results = st.selectbox(
                 "Selecciona la jornada",
                 jornadas_opciones,
@@ -1168,8 +1168,8 @@ elif menu == "PDF / PRINT":
             )
 
         with col_right:
-            st.markdown("#### &nbsp;")
-            st.markdown("#### &nbsp;")
+            st.markdown("")
+            st.markdown("")
 
             if st.button("⚙️ Generar", key="results_generar"):
                 st.info(
