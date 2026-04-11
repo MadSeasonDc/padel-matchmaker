@@ -166,21 +166,100 @@ def save_data(data):
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
-# ===== PDF PRUEBA =====
-def generar_pdf_prueba():
+
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from datetime import date
+import io
+
+
+def generar_pdf_ranking(ranking_rows):
+    """
+    ranking_rows = lista de diccionarios con las keys:
+    RK, Jugador, PJ, PG, PP, Pts, JG, JP, Dif
+    """
+
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
-
     width, height = A4
 
-    c.setFont("Helvetica-Bold", 48)
-    c.drawCentredString(width / 2, height / 2, "PRUEBA")
+    left = 2 * cm
+    right = width - 2 * cm
+    y = height - 2 * cm
+
+    # ===== CABECERA =====
+    c.setFont("Helvetica-Bold", 16)
+    c.drawCentredString(width / 2, y, "🏆 RANKING PÁDEL")
+    y -= 22
+
+    c.setFont("Helvetica", 11)
+    c.drawCentredString(width / 2, y, "Liga Pádel Oficina")
+    y -= 16
+
+    c.setFont("Helvetica", 9)
+    c.drawCentredString(
+        width / 2,
+        y,
+        f"Fecha: {date.today().strftime('%d/%m/%Y')}"
+    )
+    y -= 18
+
+    c.line(left, y, right, y)
+    y -= 14
+
+    # ===== CABECERA TABLA =====
+    headers = ["RK", "Jugador", "PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"]
+    widths = [1.2, 6.2, 1.2, 1.2, 1.2, 1.4, 1.4, 1.4, 1.4]
+
+    c.setFont("Helvetica-Bold", 9)
+    x = left
+    for h, w in zip(headers, widths):
+        c.drawString(x, y, h)
+        x += w * cm
+
+    y -= 8
+    c.line(left, y, right, y)
+    y -= 12
+    c.setFont("Helvetica", 9)
+
+    # ===== FILAS =====
+    for row in ranking_rows:
+        if y < 3 * cm:
+            c.showPage()
+            c.setFont("Helvetica", 9)
+            y = height - 2 * cm
+
+        x = left
+        values = [
+            str(row["RK"]),
+            row["Jugador"],
+            str(row["PJ"]),
+            str(row["PG"]),
+            str(row["PP"]),
+            str(row["Pts"]),
+            str(row["JG"]),
+            str(row["JP"]),
+            f"{row['Dif']:+}"
+        ]
+
+        for v, w in zip(values, widths):
+            c.drawString(x, y, v)
+            x += w * cm
+
+        y -= 12
+
+    # ===== PIE =====
+    y -= 16
+    c.setFont("Helvetica", 8)
+    c.drawString(left, y, "Ranking generado automáticamente desde la aplicación de Pádel.")
 
     c.showPage()
     c.save()
-
     buffer.seek(0)
+
     return buffer
+
 
 
 data = load_data()
