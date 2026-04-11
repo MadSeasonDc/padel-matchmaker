@@ -174,27 +174,27 @@ from datetime import date
 import io
 
 
-def generar_pdf_ranking(ranking_rows):
-    """
-    ranking_rows = lista de diccionarios con las keys:
-    RK, Jugador, PJ, PG, PP, Pts, JG, JP, Dif
-    """
-
+def generar_pdf_ranking(df):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
+    # Márgenes
     left = 2 * cm
     right = width - 2 * cm
-    y = height - 2 * cm
+    top = height - 2 * cm
 
-    # ===== CABECERA =====
-    c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(width / 2, y, "🏆 RANKING PÁDEL")
-    y -= 22
+    # =========================
+    # ENCABEZADO
+    # =========================
+    y = top
+
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString(width / 2, y, "CLASIFICACIÓN RANKING")
+    y -= 18
 
     c.setFont("Helvetica", 11)
-    c.drawCentredString(width / 2, y, "Liga Pádel Oficina")
+    c.drawCentredString(width / 2, y, "Liga de Pádel")
     y -= 16
 
     c.setFont("Helvetica", 9)
@@ -203,32 +203,39 @@ def generar_pdf_ranking(ranking_rows):
         y,
         f"Fecha: {date.today().strftime('%d/%m/%Y')}"
     )
-    y -= 18
+    y -= 20
 
     c.line(left, y, right, y)
-    y -= 14
+    y -= 16
 
-    # ===== CABECERA TABLA =====
-    headers = ["RK", "Jugador", "PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"]
-    widths = [1.2, 6.2, 1.2, 1.2, 1.2, 1.4, 1.4, 1.4, 1.4]
-
+    # =========================
+    # TABLA (contenido variable)
+    # =========================
     c.setFont("Helvetica-Bold", 9)
+    headers = ["RK", "Jugador", "PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"]
+    widths = [1.2, 7.0, 1.2, 1.2, 1.2, 1.4, 1.4, 1.4, 1.4]
+
     x = left
     for h, w in zip(headers, widths):
         c.drawString(x, y, h)
         x += w * cm
 
-    y -= 8
+    y -= 10
     c.line(left, y, right, y)
     y -= 12
+
     c.setFont("Helvetica", 9)
 
-    # ===== FILAS =====
-    for row in ranking_rows:
-        if y < 3 * cm:
+    # Zona reservada inferior (leyenda + footer)
+    footer_y = 2 * cm
+    leyenda_y = footer_y + 4.5 * cm
+
+    for _, row in df.iterrows():
+        # Si llegamos a la zona reservada, nueva página
+        if y < leyenda_y + 15:
             c.showPage()
+            y = top
             c.setFont("Helvetica", 9)
-            y = height - 2 * cm
 
         x = left
         values = [
@@ -249,16 +256,14 @@ def generar_pdf_ranking(ranking_rows):
 
         y -= 12
 
-   
-# ===== SEPARADOR TRAS TABLA =====
-    y -= 8
-    c.line(left, y, right, y)
-    y -= 14
+    # =========================
+    # LEYENDA (FIJA ABAJO)
+    # =========================
+    c.line(left, leyenda_y + 12, right, leyenda_y + 12)
 
-    # ===== LEYENDA =====
     c.setFont("Helvetica-Bold", 9)
-    c.drawString(left, y, "Leyenda:")
-    y -= 12
+    c.drawString(left, leyenda_y, "Leyenda:")
+    y_leg = leyenda_y - 12
 
     c.setFont("Helvetica", 9)
     leyenda = [
@@ -272,28 +277,30 @@ def generar_pdf_ranking(ranking_rows):
         "Dif  Diferencia de juegos (JG - JP)"
     ]
 
-    for item in leyenda:
-        c.drawString(left, y, item)
-        y -= 11
+    for l in leyenda:
+        c.drawString(left, y_leg, l)
+        y_leg -= 11
 
-    # ===== LÍNEA + PIE DE PÁGINA =====
-    y -= 10
-    c.line(left, y, right, y)
-    y -= 16
+    # =========================
+    # FOOTER (PEGADO AL BORDE)
+    # =========================
+    c.line(left, footer_y + 15, right, footer_y + 15)
 
     c.setFont("Helvetica-Oblique", 8)
     c.drawCentredString(
         width / 2,
-        y,
-        "Report provided by Manolo ©. All rights reserved."
+        footer_y,
+        "Report provided by Manuel ©. All rights reserved."
     )
 
-
+    # =========================
+    # FINAL
+    # =========================
     c.showPage()
     c.save()
     buffer.seek(0)
-
     return buffer
+
 
 
 def obtener_ranking_df(data):
