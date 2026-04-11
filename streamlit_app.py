@@ -568,51 +568,43 @@ if menu == "Jornadas":
         save_data(data)
         st.rerun()
 
-    # -------- HELPERS --------
-    def get_pair_val(p, pos):
-        return p[pos] if len(p) > pos else ""
+   
+# -------- HELPERS --------
 
-    def partido_tiene_jugadores_repetidos(partido):
-        jugadores_partido = []
-        for pareja in ("pareja_1", "pareja_2"):
-            jugadores_partido.extend([j for j in partido.get(pareja, []) if j])
-        return len(jugadores_partido) != len(set(jugadores_partido))
+def get_pair_val(p, pos):
+    return p[pos] if len(p) > pos else ""
 
-    def jugadores_usados_en_otros_partidos(jornada, partido_actual):
-        usados = set()
-        for p in jornada.get("partidos", []):
-            if p is partido_actual:
-                continue
-            for pareja in ("pareja_1", "pareja_2"):
-                for j in p.get(pareja, []):
-                    if j:
-                        usados.add(j)
-        return usados
+def partido_tiene_jugadores_repetidos(partido):
+    jugadores_partido = []
+    for pareja in ("pareja_1", "pareja_2"):
+        jugadores_partido.extend([j for j in partido.get(pareja, []) if j])
+    return len(jugadores_partido) != len(set(jugadores_partido))
 
-    
 def partido_incompleto(partido):
     jugadores = []
     for pareja in ("pareja_1", "pareja_2"):
         jugadores.extend([j for j in partido.get(pareja, []) if j])
     return len(jugadores) < 4
 
-    def hay_conflicto_pista_hora(jornada, partido_actual):
+def hay_conflicto_pista_hora(jornada, partido_actual):
     for p in jornada.get("partidos", []):
         if p is partido_actual:
             continue
 
         if (
-            p.get("lugar") and
-            p.get("pista") and
-            p.get("fecha") and
-            p.get("hora") and
-            p.get("lugar") == partido_actual.get("lugar") and
-            p.get("pista") == partido_actual.get("pista") and
-            p.get("fecha") == partido_actual.get("fecha") and
-            p.get("hora") == partido_actual.get("hora")
+            p.get("lugar")
+            and p.get("pista")
+            and p.get("fecha")
+            and p.get("hora")
+            and p.get("lugar") == partido_actual.get("lugar")
+            and p.get("pista") == partido_actual.get("pista")
+            and p.get("fecha") == partido_actual.get("fecha")
+            and p.get("hora") == partido_actual.get("hora")
         ):
             return True
+
     return False
+
 
     # -------- GRID --------
     filas = [
