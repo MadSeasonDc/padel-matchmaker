@@ -76,6 +76,16 @@ LOCATIONS_INICIALES = [
 
 
 
+from pathlib import Path
+import streamlit as st
+
+@st.dialog("📕 Las aventuras del Result Book")
+def mostrar_result_book_easter_egg():
+    imagen_path = Path(__file__).parent / "assets" / "resultbookimage.png"
+    st.image(imagen_path, use_container_width=True)
+    st.markdown("### ¡El Result Book se resiste a ser generado!")
+    st.button("Cerrar")
+
     
  
 
