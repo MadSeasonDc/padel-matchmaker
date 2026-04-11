@@ -85,6 +85,15 @@ def jugadores_usados_en_jornada(jornada):
                     usados.add(jugador)
 
     return usados
+    
+def jugadores_usados_en_partido(partido):
+    usados = set()
+    for pareja in ("pareja_1", "pareja_2"):
+        for j in partido.get(pareja, []):
+            if j:
+                usados.add(j)
+    return usados
+
 
 
 def calcular_ranking_rows(data):
