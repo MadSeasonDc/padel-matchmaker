@@ -934,18 +934,18 @@ elif menu == "PDF / PRINT":
 
     st.markdown("### 📄 Exportaciones")
 
-    # -------- RANKING PDF --------
-    df_ranking = obtener_ranking_df(data)
-    ranking_rows = df_ranking.to_dict(orient="records")
-
+  
+# -------- RANKING PDF --------
+if st.button("🏆 Ranking PDF"):
     pdf_buffer = generar_pdf_ranking(ranking_rows)
 
     st.download_button(
-        label="🏆 Descargar Ranking PDF",
+        label="⬇️ Descargar Ranking PDF",
         data=pdf_buffer,
         file_name="ranking.pdf",
         mime="application/pdf"
     )
+
 
 
 
