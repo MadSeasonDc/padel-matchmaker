@@ -363,7 +363,7 @@ def generar_pdf_ranking(data):
         "Pts:  Puntos Totales",
         "JG:   Juegos ganados",
         "JP:   Juegos perdidos",
-        "Dif=  JG - JP"
+        "Dif:  JG - JP"
     ]
 
     for l in leyenda:
