@@ -876,6 +876,7 @@ elif menu == "Import / Export":
 
 
 
+
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
@@ -885,12 +886,10 @@ elif menu == "PDF / PRINT":
     st.markdown("### 📄 Exportaciones")
 
     # -------- RANKING PDF --------
-   
-df_ranking = obtener_ranking_df(data)
-ranking_rows = df_ranking.to_dict(orient="records")
+    df_ranking = obtener_ranking_df(data)
+    ranking_rows = df_ranking.to_dict(orient="records")
 
-pdf_buffer = generar_pdf_ranking(ranking_rows)
-
+    pdf_buffer = generar_pdf_ranking(ranking_rows)
 
     st.download_button(
         label="🏆 Descargar Ranking PDF",
@@ -898,6 +897,7 @@ pdf_buffer = generar_pdf_ranking(ranking_rows)
         file_name="ranking.pdf",
         mime="application/pdf"
     )
+
 
 
     st.markdown("---")
