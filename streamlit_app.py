@@ -2,6 +2,11 @@ import streamlit as st
 import json
 import os
 
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+import io
+
+
 DATA_FILE = "padel_data.json"
 
 JUGADORES_INICIALES = [
