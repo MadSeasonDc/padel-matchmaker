@@ -660,6 +660,7 @@ elif menu == "Import / Export":
 
 
 
+
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
@@ -682,17 +683,15 @@ elif menu == "PDF / PRINT":
         with col_left:
             st.markdown("#### Jornada")
 
-            # Jornadas fijas de la 1 a la 7
             jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
 
-            jornada_seleccionada = st.selectbox(
+            jornada_seleccionada_startlist = st.selectbox(
                 "Selecciona la jornada",
-                jornadas_opciones
+                jornadas_opciones,
+                key="startlist_jornada"
             )
 
             st.markdown("#### Opciones")
-
-            # Submenús preparados (no activos aún)
             st.checkbox("Incluir lugar y hora", value=True, disabled=True)
             st.checkbox("Ordenar por pista", value=False, disabled=True)
 
@@ -700,14 +699,41 @@ elif menu == "PDF / PRINT":
             st.markdown("#### &nbsp;")
             st.markdown("#### &nbsp;")
 
-            if st.button("⚙️ Generar"):
+            if st.button("⚙️ Generar", key="startlist_generar"):
                 st.info(
-                    f"Generar Startlist para {jornada_seleccionada} "
+                    f"Generar Startlist para {jornada_seleccionada_startlist} "
                     "(pendiente de implementar)"
                 )
 
+    # -------- RESULTS --------
+    with st.expander("📊 Results", expanded=False):
 
+        col_left, col_right = st.columns([3, 1])
 
+        with col_left:
+            st.markdown("#### Jornada")
+
+            jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
+
+            jornada_seleccionada_results = st.selectbox(
+                "Selecciona la jornada",
+                jornadas_opciones,
+                key="results_jornada"
+            )
+
+            st.markdown("#### Opciones")
+            st.checkbox("Incluir sets", value=True, disabled=True)
+            st.checkbox("Ordenar por pista", value=False, disabled=True)
+
+        with col_right:
+            st.markdown("#### &nbsp;")
+            st.markdown("#### &nbsp;")
+
+            if st.button("⚙️ Generar", key="results_generar"):
+                st.info(
+                    f"Generar Results para {jornada_seleccionada_results} "
+                    "(pendiente de implementar)"
+                )
 
 
 
