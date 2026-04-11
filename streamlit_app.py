@@ -657,17 +657,18 @@ elif menu == "Import / Export":
         except Exception as e:
             st.error(f"❌ Error al leer el archivo: {e}") 
 
+
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
 elif menu == "PDF / PRINT":
     st.header("🖨️ PDF / Print")
 
-    st.info(
-        "Este apartado servirá para generar documentos imprimibles "
-        "como rankings o jornadas en PDF.\n\n"
-        "🚧 En construcción."
-    )
+    st.markdown("### 📄 Exportaciones disponibles")
+
+    if st.button("🏆 Ranking PDF"):
+        st.info("Generación del PDF de ranking (pendiente de implementar)")
+
 
 
 
