@@ -535,7 +535,6 @@ menu = st.sidebar.radio(
     ["Jornadas", "Ranking", "Locations", "Import / Export", "PDF / PRINT"] )
 
 
-
 # ----------------------------
 # JORNADAS
 # ----------------------------
@@ -544,6 +543,7 @@ if menu == "Jornadas":
 
     st.header("📅 Jornadas")
 
+    # Asegurar jornadas
     if not data.get("jornadas"):
         data["jornadas"] = [{"numero": i + 1, "partidos": []} for i in range(7)]
         save_data(data)
@@ -561,50 +561,56 @@ if menu == "Jornadas":
     jugadores = sorted(j["nombre"] for j in data["jugadores"])
     clubs = [loc["club"] for loc in data.get("locations", [])]
 
-    # Crear partidos vacíos
+    # Crear partidos vacíos si no existen
     if len(jornada["partidos"]) == 0:
         for _ in range(4):
             jornada["partidos"].append(partido_vacio())
         save_data(data)
         st.rerun()
 
-   
-# -------- HELPERS --------
+    # -------- HELPERS --------
+    def get_pair_val(p, pos):
+        return p[pos] if len(p) > pos else ""
 
-def get_pair_val(p, pos):
-    return p[pos] if len(p) > pos else ""
+    def partido_tiene_jugadores_repetidos(partido):
+        jugadores_partido = []
+        for pareja in ("pareja_1", "pareja_2"):
+            jugadores_partido.extend([j for j in partido.get(pareja, []) if j])
+        return len(jugadores_partido) != len(set(jugadores_partido))
 
-def partido_tiene_jugadores_repetidos(partido):
-    jugadores_partido = []
-    for pareja in ("pareja_1", "pareja_2"):
-        jugadores_partido.extend([j for j in partido.get(pareja, []) if j])
-    return len(jugadores_partido) != len(set(jugadores_partido))
+    def partido_incompleto(partido):
+        jugadores_partido = []
+        for pareja in ("pareja_1", "pareja_2"):
+            jugadores_partido.extend([j for j in partido.get(pareja, []) if j])
+        return len(jugadores_partido) < 4
 
-def partido_incompleto(partido):
-    jugadores = []
-    for pareja in ("pareja_1", "pareja_2"):
-        jugadores.extend([j for j in partido.get(pareja, []) if j])
-    return len(jugadores) < 4
+    def hay_conflicto_pista_hora(jornada, partido_actual):
+        for p in jornada.get("partidos", []):
+            if p is partido_actual:
+                continue
+            if (
+                p.get("lugar")
+                and p.get("pista")
+                and p.get("fecha")
+                and p.get("hora")
+                and p.get("lugar") == partido_actual.get("lugar")
+                and p.get("pista") == partido_actual.get("pista")
+                and p.get("fecha") == partido_actual.get("fecha")
+                and p.get("hora") == partido_actual.get("hora")
+            ):
+                return True
+        return False
 
-def hay_conflicto_pista_hora(jornada, partido_actual):
-    for p in jornada.get("partidos", []):
-        if p is partido_actual:
-            continue
-
-        if (
-            p.get("lugar")
-            and p.get("pista")
-            and p.get("fecha")
-            and p.get("hora")
-            and p.get("lugar") == partido_actual.get("lugar")
-            and p.get("pista") == partido_actual.get("pista")
-            and p.get("fecha") == partido_actual.get("fecha")
-            and p.get("hora") == partido_actual.get("hora")
-        ):
-            return True
-
-    return False
-
+    def jugadores_usados_en_otros_partidos(jornada, partido_actual):
+        usados = set()
+        for p in jornada.get("partidos", []):
+            if p is partido_actual:
+                continue
+            for pareja in ("pareja_1", "pareja_2"):
+                for j in p.get(pareja, []):
+                    if j:
+                        usados.add(j)
+        return usados
 
     # -------- GRID --------
     filas = [
@@ -620,6 +626,7 @@ def hay_conflicto_pista_hora(jornada, partido_actual):
 
             with cols[col_idx]:
                 with st.container(border=True):
+
                     st.markdown(f"### 🎾 Partido {idx + 1}")
 
                     # -------- INFO BÁSICA --------
@@ -670,35 +677,27 @@ def hay_conflicto_pista_hora(jornada, partido_actual):
 
                     with col_p1:
                         st.markdown("**Pareja 1**")
-
                         der1 = st.selectbox(
                             "Der",
                             opciones_validas(get_pair_val(p1, 0)),
-                            index=opciones_validas(get_pair_val(p1, 0)).index(get_pair_val(p1, 0)) if get_pair_val(p1, 0) in opciones_validas(get_pair_val(p1, 0)) else 0,
                             key=f"p1d_{jornada_index}_{idx}"
                         )
-
                         rev1 = st.selectbox(
                             "Rev",
                             opciones_validas(get_pair_val(p1, 1)),
-                            index=opciones_validas(get_pair_val(p1, 1)).index(get_pair_val(p1, 1)) if get_pair_val(p1, 1) in opciones_validas(get_pair_val(p1, 1)) else 0,
                             key=f"p1r_{jornada_index}_{idx}"
                         )
 
                     with col_p2:
                         st.markdown("**Pareja 2**")
-
                         der2 = st.selectbox(
                             "Der",
                             opciones_validas(get_pair_val(p2, 0)),
-                            index=opciones_validas(get_pair_val(p2, 0)).index(get_pair_val(p2, 0)) if get_pair_val(p2, 0) in opciones_validas(get_pair_val(p2, 0)) else 0,
                             key=f"p2d_{jornada_index}_{idx}"
                         )
-
                         rev2 = st.selectbox(
                             "Rev",
                             opciones_validas(get_pair_val(p2, 1)),
-                            index=opciones_validas(get_pair_val(p2, 1)).index(get_pair_val(p2, 1)) if get_pair_val(p2, 1) in opciones_validas(get_pair_val(p2, 1)) else 0,
                             key=f"p2r_{jornada_index}_{idx}"
                         )
 
@@ -717,30 +716,28 @@ def hay_conflicto_pista_hora(jornada, partido_actual):
                     partido["set3_p2"] = s3.number_input("Set3 P2", 0, 7, partido.get("set3_p2", 0), key=f"s3p2_{idx}")
 
                     # -------- GUARDAR --------
-                  
-if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
+                    if st.button("Guardar", key=f"save_{idx}"):
 
-    if partido_incompleto(partido):
-        st.error(
-            "❌ Casi... son 4 jugadores para Guardar… tú puedes, "
-            "que no es subir el Everest en chanclas 🏔️🎾"
-        )
+                        if partido_incompleto(partido):
+                            st.error(
+                                "Casi... son 4 jugadores para Guardar… "
+                                "tú puedes, que no es subir el Everest en chanclas 🏔️🎾"
+                            )
 
-    elif hay_conflicto_pista_hora(jornada, partido):
-        st.error(
-            "❌ Dos partidos, misma pista, misma hora… "
-            "¿pádel o Fútbol 7? 😂"
-        )
+                        elif hay_conflicto_pista_hora(jornada, partido):
+                            st.error(
+                                "Dos partidos, misma pista, misma hora… "
+                                "¿pádel o Fútbol 7? 😂"
+                            )
 
-    elif partido_tiene_jugadores_repetidos(partido):
-        st.error(
-            "❌ No repitas jugadores, que no es el Street Fighter 😂"
-        )
+                        elif partido_tiene_jugadores_repetidos(partido):
+                            st.error(
+                                "❌ No repitas jugadores, que no es el Street Fighter 😂"
+                            )
 
-    else:
-        save_data(data)
-        st.success("✅ Guardado")
-
+                        else:
+                            save_data(data)
+                            st.success("✅ Guardado")
 
 # ----------------------------
 # RANKING
