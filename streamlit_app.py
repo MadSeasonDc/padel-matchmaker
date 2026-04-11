@@ -249,10 +249,45 @@ def generar_pdf_ranking(ranking_rows):
 
         y -= 12
 
-    # ===== PIE =====
+   
+# ===== SEPARADOR TRAS TABLA =====
+    y -= 8
+    c.line(left, y, right, y)
+    y -= 14
+
+    # ===== LEYENDA =====
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(left, y, "Leyenda:")
+    y -= 12
+
+    c.setFont("Helvetica", 9)
+    leyenda = [
+        "RK   Posición en el ranking",
+        "PJ   Partidos jugados",
+        "PG   Partidos ganados",
+        "PP   Partidos perdidos",
+        "Pts  Puntos totales",
+        "JG   Juegos ganados",
+        "JP   Juegos perdidos",
+        "Dif  Diferencia de juegos (JG - JP)"
+    ]
+
+    for item in leyenda:
+        c.drawString(left, y, item)
+        y -= 11
+
+    # ===== LÍNEA + PIE DE PÁGINA =====
+    y -= 10
+    c.line(left, y, right, y)
     y -= 16
-    c.setFont("Helvetica", 8)
-    c.drawString(left, y, "Ranking generado automáticamente desde la aplicación de Pádel.")
+
+    c.setFont("Helvetica-Oblique", 8)
+    c.drawCentredString(
+        width / 2,
+        y,
+        "Report provided by Manolo ©. All rights reserved."
+    )
+
 
     c.showPage()
     c.save()
