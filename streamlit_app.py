@@ -1015,7 +1015,10 @@ elif menu == "PDF / PRINT":
 
   
 # -------- RANKING PDF --------
+
 if st.button("🏆 Ranking PDF"):
+    ranking_rows = calcular_ranking_rows(data)
+
     pdf_buffer = generar_pdf_ranking(ranking_rows)
 
     st.download_button(
@@ -1024,6 +1027,7 @@ if st.button("🏆 Ranking PDF"):
         file_name="ranking.pdf",
         mime="application/pdf"
     )
+
 
 
 
