@@ -78,6 +78,16 @@ LOCATIONS_INICIALES = [
 
     
 
+from pathlib import Path
+
+def mostrar_result_book_easter_egg():
+    imagen_path = Path(__file__).parent / "assets" / "resultbookimage.png"
+    st.image(
+        imagen_path,
+        caption="Las aventuras del Result Book",
+        use_container_width=True
+    )
+
 
 
 
@@ -1148,11 +1158,9 @@ elif menu == "PDF / PRINT":
 # -------- RESULTS BOOK (EASTER EGG) --------
     st.markdown("---")
 
-    if st.button("📕 Generate Results Book"):
-        st.image(
-            "assets/result_book_easter_egg.png",
-            caption="Las aventuras del Result Book",
-            use_container_width=True
-        )
+   
+if st.button("📕 Generate Results Book"):
+    mostrar_result_book_easter_egg()
+
 
 
