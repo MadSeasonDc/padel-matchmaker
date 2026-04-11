@@ -636,48 +636,57 @@ if menu == "Jornadas":
                         key=f"hora_{jornada_index}_{idx}"
                     )
 
-                    # -------- PAREJAS --------
-                    col_p1, col_p2 = st.columns(2)
+                    
+                   # -------- PAREJAS --------
+col_p1, col_p2 = st.columns(2)
 
-                    p1 = partido.get("pareja_1", [])
-                    p2 = partido.get("pareja_2", [])
+p1 = partido.get("pareja_1", [])
+p2 = partido.get("pareja_2", [])
 
-                    with col_p1:
-                        st.markdown("**Pareja 1**")
+usados_otros = jugadores_usados_en_otros_partidos(jornada, partido)
 
-                        der1 = st.selectbox(
-                            "Der",
-                            [""] + jugadores,
-                            index=([""] + jugadores).index(get_pair_val(p1, 0)) if get_pair_val(p1, 0) in jugadores else 0,
-                            key=f"p1d_{jornada_index}_{idx}"
-                        )
+def opciones_validas(actual):
+    return [""] + [
+        j for j in jugadores
+        if j == actual or j not in usados_otros
+    ]
 
-                        rev1 = st.selectbox(
-                            "Rev",
-                            [""] + jugadores,
-                            index=([""] + jugadores).index(get_pair_val(p1, 1)) if get_pair_val(p1, 1) in jugadores else 0,
-                            key=f"p1r_{jornada_index}_{idx}"
-                        )
+with col_p1:
+    st.markdown("**Pareja 1**")
 
-                    with col_p2:
-                        st.markdown("**Pareja 2**")
+    der1 = st.selectbox(
+        "Der",
+        opciones_validas(get_pair_val(p1, 0)),
+        index=opciones_validas(get_pair_val(p1, 0)).index(get_pair_val(p1, 0)) if get_pair_val(p1, 0) in opciones_validas(get_pair_val(p1, 0)) else 0,
+        key=f"p1d_{jornada_index}_{idx}"
+    )
 
-                        der2 = st.selectbox(
-                            "Der",
-                            [""] + jugadores,
-                            index=([""] + jugadores).index(get_pair_val(p2, 0)) if get_pair_val(p2, 0) in jugadores else 0,
-                            key=f"p2d_{jornada_index}_{idx}"
-                        )
+    rev1 = st.selectbox(
+        "Rev",
+        opciones_validas(get_pair_val(p1, 1)),
+        index=opciones_validas(get_pair_val(p1, 1)).index(get_pair_val(p1, 1)) if get_pair_val(p1, 1) in opciones_validas(get_pair_val(p1, 1)) else 0,
+        key=f"p1r_{jornada_index}_{idx}"
+    )
 
-                        rev2 = st.selectbox(
-                            "Rev",
-                            [""] + jugadores,
-                            index=([""] + jugadores).index(get_pair_val(p2, 1)) if get_pair_val(p2, 1) in jugadores else 0,
-                            key=f"p2r_{jornada_index}_{idx}"
-                        )
+with col_p2:
+    st.markdown("**Pareja 2**")
 
-                    partido["pareja_1"] = [der1, rev1]
-                    partido["pareja_2"] = [der2, rev2]
+    der2 = st.selectbox(
+        "Der",
+        opciones_validas(get_pair_val(p2, 0)),
+        index=opciones_validas(get_pair_val(p2, 0)).index(get_pair_val(p2, 0)) if get_pair_val(p2, 0) in opciones_validas(get_pair_val(p2, 0)) else 0,
+        key=f"p2d_{jornada_index}_{idx}"
+    )
+
+    rev2 = st.selectbox(
+        "Rev",
+        opciones_validas(get_pair_val(p2, 1)),
+        index=opciones_validas(get_pair_val(p2, 1)).index(get_pair_val(p2, 1)) if get_pair_val(p2, 1) in opciones_validas(get_pair_val(p2, 1)) else 0,
+        key=f"p2r_{jornada_index}_{idx}"
+    )
+
+partido["pareja_1"] = [der1, rev1]
+partido["pareja_2"] = [der2, rev2]
 
                     # -------- RESULTADO --------
                     st.markdown("**Resultado**")
