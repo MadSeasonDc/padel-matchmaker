@@ -701,12 +701,17 @@ elif menu == "PDF / PRINT":
     # -------- RANKING PDF --------
     pdf_buffer = generar_pdf_prueba()
 
-    st.download_button(
+    if st.download_button(
         label="🏆 Descargar Ranking PDF",
         data=pdf_buffer,
         file_name="ranking_prueba.pdf",
-        mime="application/pdf"
-    )
+        mime="application/pdf",
+        key="download_ranking_pdf"
+    ):
+        st.session_state.ranking_pdf_descargado = True
+
+    if st.session_state.ranking_pdf_descargado:
+        st.success("✅ Ranking PDF se descargó correctamente")
 
     st.markdown("---")
 
@@ -744,7 +749,12 @@ elif menu == "PDF / PRINT":
             st.markdown("#### &nbsp;")
             st.markdown("#### &nbsp;")
 
-            st.button("⚙️ Generar", key="startlist_generar")
+            if st.button("⚙️ Generar", key="startlist_generar"):
+                # FUTURO: aquí irá la generación real del PDF
+                st.session_state.startlist_pdf_descargado = True
+
+        if st.session_state.startlist_pdf_descargado:
+            st.success("✅ Startlist PDF se descargó correctamente")
 
     # -------- RESULTS --------
     with st.expander("📊 Results", expanded=False):
@@ -780,7 +790,12 @@ elif menu == "PDF / PRINT":
             st.markdown("#### &nbsp;")
             st.markdown("#### &nbsp;")
 
-            st.button("⚙️ Generar", key="results_generar")
+            if st.button("⚙️ Generar", key="results_generar"):
+                # FUTURO: aquí irá la generación real del PDF
+                st.session_state.results_pdf_descargado = True
+
+        if st.session_state.results_pdf_descargado:
+            st.success("✅ Results PDF se descargó correctamente")
 
 
 
