@@ -1000,7 +1000,6 @@ elif menu == "Import / Export":
 
 
 
-
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
@@ -1009,35 +1008,27 @@ elif menu == "PDF / PRINT":
 
     st.markdown("### 📄 Exportaciones")
 
-  
-# -------- RANKING PDF --------
+    # -------- RANKING PDF --------
+    if st.button("🏆 Ranking PDF"):
+        ranking_rows = calcular_ranking_rows(data)
+        pdf_buffer = generar_pdf_ranking(ranking_rows)
 
-if st.button("🏆 Ranking PDF"):
-    ranking_rows = calcular_ranking_rows(data)
-
-    pdf_buffer = generar_pdf_ranking(ranking_rows)
-
-    st.download_button(
-        label="⬇️ Descargar Ranking PDF",
-        data=pdf_buffer,
-        file_name="ranking.pdf",
-        mime="application/pdf"
-    )
-
-
-
-
+        st.download_button(
+            label="⬇️ Descargar Ranking PDF",
+            data=pdf_buffer,
+            file_name="ranking.pdf",
+            mime="application/pdf"
+        )
 
     st.markdown("---")
 
-    # -------- STARTLIST --------
+    # -------- STARTLIST (SIEMPRE VISIBLE) --------
     with st.expander("📋 Startlist", expanded=False):
 
         col_left, col_right = st.columns([3, 1])
 
         with col_left:
             st.markdown("#### Jornada")
-
             jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
 
             jornada_startlist = st.selectbox(
@@ -1064,16 +1055,19 @@ if st.button("🏆 Ranking PDF"):
             st.markdown("#### &nbsp;")
             st.markdown("#### &nbsp;")
 
-            st.button("⚙️ Generar", key="startlist_generar")
+            if st.button("⚙️ Generar", key="startlist_generar"):
+                st.info(
+                    f"Generar Startlist para {jornada_startlist} "
+                    "(pendiente de implementar)"
+                )
 
-    # -------- RESULTS --------
+    # -------- RESULTS (SIEMPRE VISIBLE) --------
     with st.expander("📊 Results", expanded=False):
 
         col_left, col_right = st.columns([3, 1])
 
         with col_left:
             st.markdown("#### Jornada")
-
             jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
 
             jornada_results = st.selectbox(
@@ -1100,8 +1094,11 @@ if st.button("🏆 Ranking PDF"):
             st.markdown("#### &nbsp;")
             st.markdown("#### &nbsp;")
 
-            st.button("⚙️ Generar", key="results_generar")
-
+            if st.button("⚙️ Generar", key="results_generar"):
+                st.info(
+                    f"Generar Results para {jornada_results} "
+                    "(pendiente de implementar)"
+                )
 
 
 
