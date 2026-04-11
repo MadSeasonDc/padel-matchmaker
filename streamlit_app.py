@@ -561,7 +561,7 @@ if menu == "Jornadas":
                     st.markdown(f"### 🎾 Partido {idx + 1}")
 
                     # -------- INFO BÁSICA --------
-                    c1, c2, c3 = st.columns(3)
+                    c1, c2, c3, c4 = st.columns(4)
 
                     # Lugar
                     lugar_opciones = [""] + clubs
@@ -573,6 +573,19 @@ if menu == "Jornadas":
                         index=lugar_idx,
                         key=f"lugar_{jornada_index}_{idx}"
                     )
+
+                      # Fecha
+pistas = [""] + [str(i) for i in range(1, 15)]
+pista_val = str(partido.get("pista", ""))
+pista_idx = pistas.index(pista_val) if pista_val in pistas else 0
+
+partido["pista"] = c2.selectbox(
+    "Pista",
+    pistas,
+    index=pista_idx,
+    key=f"pista_{jornada_index}_{idx}"
+)
+
 
                     # Fecha
                     try:
