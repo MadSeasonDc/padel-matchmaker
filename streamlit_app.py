@@ -776,7 +776,7 @@ elif menu == "PDF / PRINT":
     st.markdown("### 📄 Exportaciones")
 
     # -------- RANKING PDF --------
-    pdf_buffer = generar_pdf_prueba()
+   pdf_buffer = generar_pdf_ranking(ranking_demo)
 
     st.download_button(
         label="🏆 Descargar Ranking PDF",
