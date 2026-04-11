@@ -510,7 +510,7 @@ menu = st.sidebar.radio(
 
 
 # ----------------------------
-# JORNADAS (PASO 2: GRID + AUTO-CREACIÓN)
+# JORNADAS
 # ----------------------------
 if menu == "Jornadas":
     import datetime
@@ -535,16 +535,14 @@ if menu == "Jornadas":
     jugadores = sorted(j["nombre"] for j in data["jugadores"])
     clubs = [loc["club"] for loc in data.get("locations", [])]
 
-    # ✅ Crear 4 partidos AUTOMÁTICAMENTE solo si esta jornada está vacía
+    # Crear 4 partidos si la jornada está vacía
     if len(jornada["partidos"]) == 0:
         for _ in range(4):
             jornada["partidos"].append(partido_vacio())
         save_data(data)
         st.rerun()
 
-    # ----------------------------
     # GRID 2x2
-    # ----------------------------
     filas = [
         jornada["partidos"][i:i + 2]
         for i in range(0, len(jornada["partidos"]), 2)
@@ -574,18 +572,16 @@ if menu == "Jornadas":
                         key=f"lugar_{jornada_index}_{idx}"
                     )
 
-                      # Fecha
-pistas = [""] + [str(i) for i in range(1, 15)]
-pista_val = str(partido.get("pista", ""))
-pista_idx = pistas.index(pista_val) if pista_val in pistas else 0
-
-partido["pista"] = c2.selectbox(
-    "Pista",
-    pistas,
-    index=pista_idx,
-    key=f"pista_{jornada_index}_{idx}"
-)
-
+                    # Pista
+                    pistas = [""] + [str(i) for i in range(1, 15)]
+                    pista_val = str(partido.get("pista", ""))
+                    pista_idx = pistas.index(pista_val) if pista_val in pistas else 0
+                    partido["pista"] = c2.selectbox(
+                        "Pista",
+                        pistas,
+                        index=pista_idx,
+                        key=f"pista_{jornada_index}_{idx}"
+                    )
 
                     # Fecha
                     try:
@@ -594,21 +590,25 @@ partido["pista"] = c2.selectbox(
                         fecha_val = datetime.date.today()
 
                     partido["fecha"] = str(
-                        c2.date_input("Fecha", fecha_val, key=f"fecha_{jornada_index}_{idx}")
+                        c3.date_input(
+                            "Fecha",
+                            fecha_val,
+                            key=f"fecha_{jornada_index}_{idx}"
+                        )
                     )
 
                     # Hora
                     horas = [f"{h:02d}:{m:02d}" for h in range(8, 23) for m in (0, 30)]
                     hora_val = partido.get("hora", "18:00")
                     hora_idx = horas.index(hora_val) if hora_val in horas else 0
-                    partido["hora"] = c3.selectbox(
+                    partido["hora"] = c4.selectbox(
                         "Hora",
                         horas,
                         index=hora_idx,
                         key=f"hora_{jornada_index}_{idx}"
                     )
 
-                    # -------- PAREJAS (SIN REGLAS EXTRA) --------
+                    # -------- PAREJAS --------
                     col_p1, col_p2 = st.columns(2)
 
                     def get_pair_val(p, pos):
@@ -621,25 +621,33 @@ partido["pista"] = c2.selectbox(
 
                     with col_p1:
                         st.markdown("**Pareja 1**")
-
-                        der1_val = get_pair_val(p1, 0)
-                        der1_idx = opciones.index(der1_val) if der1_val in opciones else 0
-                        der1 = st.selectbox("Der", opciones, index=der1_idx, key=f"p1d_{idx}")
-
-                        rev1_val = get_pair_val(p1, 1)
-                        rev1_idx = opciones.index(rev1_val) if rev1_val in opciones else 0
-                        rev1 = st.selectbox("Rev", opciones, index=rev1_idx, key=f"p1r_{idx}")
+                        der1 = st.selectbox(
+                            "Der",
+                            opciones,
+                            index=opciones.index(get_pair_val(p1, 0)) if get_pair_val(p1, 0) in opciones else 0,
+                            key=f"p1d_{jornada_index}_{idx}"
+                        )
+                        rev1 = st.selectbox(
+                            "Rev",
+                            opciones,
+                            index=opciones.index(get_pair_val(p1, 1)) if get_pair_val(p1, 1) in opciones else 0,
+                            key=f"p1r_{jornada_index}_{idx}"
+                        )
 
                     with col_p2:
                         st.markdown("**Pareja 2**")
-
-                        der2_val = get_pair_val(p2, 0)
-                        der2_idx = opciones.index(der2_val) if der2_val in opciones else 0
-                        der2 = st.selectbox("Der", opciones, index=der2_idx, key=f"p2d_{idx}")
-
-                        rev2_val = get_pair_val(p2, 1)
-                        rev2_idx = opciones.index(rev2_val) if rev2_val in opciones else 0
-                        rev2 = st.selectbox("Rev", opciones, index=rev2_idx, key=f"p2r_{idx}")
+                        der2 = st.selectbox(
+                            "Der",
+                            opciones,
+                            index=opciones.index(get_pair_val(p2, 0)) if get_pair_val(p2, 0) in opciones else 0,
+                            key=f"p2d_{jornada_index}_{idx}"
+                        )
+                        rev2 = st.selectbox(
+                            "Rev",
+                            opciones,
+                            index=opciones.index(get_pair_val(p2, 1)) if get_pair_val(p2, 1) in opciones else 0,
+                            key=f"p2r_{jornada_index}_{idx}"
+                        )
 
                     partido["pareja_1"] = [der1, rev1]
                     partido["pareja_2"] = [der2, rev2]
@@ -672,8 +680,6 @@ partido["pista"] = c2.selectbox(
                     if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
                         save_data(data)
                         st.success("✅ Guardado")
-
-
 
 
 # ----------------------------
