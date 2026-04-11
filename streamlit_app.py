@@ -641,7 +641,7 @@ if menu == "Jornadas":
                     if st.button("Guardar", key=f"save_{idx}"):
                         save_data(data)
                         st.success("✅ Guardado")
-``
+
 
 # ----------------------------
 # RANKING
