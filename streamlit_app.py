@@ -730,13 +730,13 @@ if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
 
     if partido_incompleto(partido):
         st.error(
-            "Casi... son 4 jugadores para Guardar… tú puedes, "
+            "❌ Casi... son 4 jugadores para Guardar… tú puedes, "
             "que no es subir el Everest en chanclas 🏔️🎾"
         )
 
     elif hay_conflicto_pista_hora(jornada, partido):
         st.error(
-            "Dos partidos, misma pista, misma hora… "
+            "❌ Dos partidos, misma pista, misma hora… "
             "¿pádel o Fútbol 7? 😂"
         )
 
