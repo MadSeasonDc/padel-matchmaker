@@ -173,13 +173,6 @@ from reportlab.lib.units import cm
 from datetime import date
 import io
 
-import pandas as pd
-
-def generar_pdf_ranking(df):
-    # Asegurar DataFrame
-    if not isinstance(df, pd.DataFrame):
-        df = pd.DataFrame(df)
-
 
 def generar_pdf_ranking(df):
     buffer = io.BytesIO()
