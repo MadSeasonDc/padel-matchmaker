@@ -268,6 +268,21 @@ st.set_page_config(page_title="Pádel Matchmaker", layout="wide")
 st.title("🏓 Pádel Matchmaker")
 
 
+
+
+
+ranking_demo = [
+    {"RK": 1, "Jugador": "Antonio Seoane", "PJ": 0, "PG": 0, "PP": 0, "Pts": 0, "JG": 0, "JP": 0, "Dif": 0},
+    {"RK": 2, "Jugador": "Carlos Ortiz", "PJ": 0, "PG": 0, "PP": 0, "Pts": 0, "JG": 0, "JP": 0, "Dif": 0},
+    {"RK": 3, "Jugador": "Nacho Moros", "PJ": 0, "PG": 0, "PP": 0, "Pts": 0, "JG": 0, "JP": 0, "Dif": 0},
+]
+
+
+
+
+
+
+
 menu = st.sidebar.radio(
     "Menú",
     ["Jornadas", "Ranking", "Locations", "Import / Export", "PDF / PRINT"] )
@@ -767,25 +782,25 @@ elif menu == "Import / Export":
 
 
 
+
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
-
-
 elif menu == "PDF / PRINT":
     st.header("🖨️ PDF / Print")
 
     st.markdown("### 📄 Exportaciones")
 
     # -------- RANKING PDF --------
- pdf_buffer = generar_pdf_ranking(ranking_demo)
+    pdf_buffer = generar_pdf_ranking(ranking_demo)
 
     st.download_button(
         label="🏆 Descargar Ranking PDF",
         data=pdf_buffer,
-        file_name="ranking_prueba.pdf",
+        file_name="ranking.pdf",
         mime="application/pdf"
     )
+
 
     st.markdown("---")
 
