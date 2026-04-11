@@ -698,8 +698,17 @@ elif menu == "PDF / PRINT":
     st.markdown("### 📄 Exportaciones")
 
     # -------- RANKING PDF --------
-    if st.button("🏆 Ranking PDF"):
-        st.info("Generación del PDF de ranking (pendiente de implementar)")
+  
+if st.button("🏆 Ranking PDF"):
+    pdf_buffer = generar_pdf_prueba()
+
+    st.download_button(
+        label="⬇️ Descargar PDF de prueba",
+        data=pdf_buffer,
+        file_name="ranking_prueba.pdf",
+        mime="application/pdf"
+    )
+
 
     st.markdown("---")
 
