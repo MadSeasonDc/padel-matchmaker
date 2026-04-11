@@ -261,6 +261,99 @@ def generar_pdf_ranking(ranking_rows):
     return buffer
 
 
+def obtener_ranking_df(data):
+    import pandas as pd
+
+    jornadas = data.get("jornadas", [])
+
+    # Inicializar estadísticas
+    stats = {
+        j["nombre"]: {
+            "PJ": 0, "PG": 0, "PP": 0,
+            "Pts": 0, "JG": 0, "JP": 0
+        }
+        for j in data["jugadores"]
+    }
+
+    for jornada in jornadas:
+        for p in jornada.get("partidos", []):
+
+            p1 = p.get("pareja_1", [])
+            p2 = p.get("pareja_2", [])
+
+            if len(p1) != 2 or len(p2) != 2:
+                continue
+
+            s1_p1, s1_p2 = p["set1_p1"], p["set1_p2"]
+            s2_p1, s2_p2 = p["set2_p1"], p["set2_p2"]
+            s3_p1, s3_p2 = p["set3_p1"], p["set3_p2"]
+
+            if (s1_p1 + s1_p2) == 0:
+                continue
+
+            juegos_p1 = s1_p1 + s2_p1 + s3_p1
+            juegos_p2 = s1_p2 + s2_p2 + s3_p2
+
+            sets_p1 = (s1_p1 > s1_p2) + (s2_p1 > s2_p2)
+            sets_p2 = (s1_p2 > s1_p1) + (s2_p2 > s2_p1)
+
+            for j in p1:
+                stats[j]["PJ"] += 1
+                stats[j]["JG"] += juegos_p1
+                stats[j]["JP"] += juegos_p2
+
+            for j in p2:
+                stats[j]["PJ"] += 1
+                stats[j]["JG"] += juegos_p2
+                stats[j]["JP"] += juegos_p1
+
+            if (s3_p1 + s3_p2) > 0:
+                ganadores = p1 if s3_p1 > s3_p2 else p2
+                perdedores = p2 if ganadores == p1 else p1
+
+                for j in ganadores:
+                    stats[j]["PG"] += 1
+                    stats[j]["Pts"] += 3
+                for j in perdedores:
+                    stats[j]["PP"] += 1
+                    stats[j]["Pts"] += 1
+            else:
+                if sets_p1 > sets_p2:
+                    for j in p1:
+                        stats[j]["PG"] += 1
+                        stats[j]["Pts"] += 3
+                    for j in p2:
+                        stats[j]["PP"] += 1
+                elif sets_p2 > sets_p1:
+                    for j in p2:
+                        stats[j]["PG"] += 1
+                        stats[j]["Pts"] += 3
+                    for j in p1:
+                        stats[j]["PP"] += 1
+                else:
+                    for j in p1 + p2:
+                        stats[j]["Pts"] += 1
+
+    # Convertir a DataFrame
+    filas = []
+    for nombre, s in stats.items():
+        filas.append({
+            "Jugador": nombre,
+            "PJ": s["PJ"],
+            "PG": s["PG"],
+            "PP": s["PP"],
+            "Pts": s["Pts"],
+            "JG": s["JG"],
+            "JP": s["JP"],
+            "Dif": s["JG"] - s["JP"]
+        })
+
+    filas.sort(key=lambda x: (x["Pts"], x["PG"], x["Dif"]), reverse=True)
+    df = pd.DataFrame(filas)
+    df.insert(0, "RK", range(1, len(df) + 1))
+
+    return df
+
 
 data = load_data()
 
@@ -792,7 +885,12 @@ elif menu == "PDF / PRINT":
     st.markdown("### 📄 Exportaciones")
 
     # -------- RANKING PDF --------
-    pdf_buffer = generar_pdf_ranking(ranking_demo)
+   
+df_ranking = obtener_ranking_df(data)
+ranking_rows = df_ranking.to_dict(orient="records")
+
+pdf_buffer = generar_pdf_ranking(ranking_rows)
+
 
     st.download_button(
         label="🏆 Descargar Ranking PDF",
