@@ -90,6 +90,17 @@ def partido_tiene_jugadores_repetidos(partido):
 
 
 
+def jugadores_usados_en_otros_partidos(jornada, partido_actual):
+    usados = set()
+    for p in jornada.get("partidos", []):
+        if p is partido_actual:
+            continue
+        for pareja in ("pareja_1", "pareja_2"):
+            for j in p.get(pareja, []):
+                if j:
+                    usados.add(j)
+    return usados
+
 
 
 def calcular_ranking_rows(data):
