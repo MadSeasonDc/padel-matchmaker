@@ -659,6 +659,7 @@ elif menu == "Import / Export":
 
 
 
+
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
@@ -667,38 +668,36 @@ elif menu == "PDF / PRINT":
 
     st.markdown("### 📄 Exportaciones")
 
-    # Botón existente (ranking)
+    # -------- RANKING PDF --------
     if st.button("🏆 Ranking PDF"):
         st.info("Generación del PDF de ranking (pendiente de implementar)")
 
     st.markdown("---")
 
-    # ========== STARTLIST ==========
+    # -------- STARTLIST --------
     with st.expander("📋 Startlist", expanded=False):
 
-        # Layout: selector a la izquierda, botón a la derecha
         col_left, col_right = st.columns([3, 1])
 
         with col_left:
             st.markdown("#### Jornada")
 
-            jornadas_opciones = [
-                f"Jornada {j['numero']}"
-                for j in data.get("jornadas", [])
-            ]
+            # Jornadas fijas de la 1 a la 7
+            jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
 
             jornada_seleccionada = st.selectbox(
                 "Selecciona la jornada",
                 jornadas_opciones
             )
 
-            # Submenús futuros (placeholders)
             st.markdown("#### Opciones")
+
+            # Submenús preparados (no activos aún)
             st.checkbox("Incluir lugar y hora", value=True, disabled=True)
             st.checkbox("Ordenar por pista", value=False, disabled=True)
 
         with col_right:
-            st.markdown("#### &nbsp;")  # separador visual
+            st.markdown("#### &nbsp;")
             st.markdown("#### &nbsp;")
 
             if st.button("⚙️ Generar"):
@@ -706,6 +705,7 @@ elif menu == "PDF / PRINT":
                     f"Generar Startlist para {jornada_seleccionada} "
                     "(pendiente de implementar)"
                 )
+
 
 
 
