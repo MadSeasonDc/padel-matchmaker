@@ -158,6 +158,7 @@ def partido_vacio():
         "pareja_1": [],
         "pareja_2": [],
         "lugar": "",
+        "pista": "",
         "fecha": "",
         "hora": "18:00",
         "set1_p1": 0, "set1_p2": 0,
