@@ -1076,14 +1076,11 @@ elif menu == "Import / Export":
 
 
 
-
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
 elif menu == "PDF / PRINT":
     st.header("🖨️ PDF / Print")
-
-    st.markdown("### 📄 Exportaciones")
 
     # -------- RANKING PDF --------
     if st.button("🏆 Ranking PDF"):
@@ -1099,37 +1096,23 @@ elif menu == "PDF / PRINT":
 
     st.markdown("---")
 
-    # -------- SCHEDULE (SIEMPRE VISIBLE) --------
+    # -------- SCHEDULE --------
     with st.expander("📅 Schedule", expanded=False):
 
         col_left, col_right = st.columns([3, 1])
 
         with col_left:
             st.markdown("#### Jornada")
-
             jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
+
             jornada_schedule = st.selectbox(
                 "Selecciona la jornada",
                 jornadas_opciones,
                 key="schedule_jornada"
             )
 
-            st.markdown("#### Opciones")
-            st.checkbox(
-                "Incluir lugar y hora",
-                value=True,
-                disabled=True,
-                key="schedule_lugar_hora"
-            )
-            st.checkbox(
-                "Ordenar por pista",
-                value=False,
-                disabled=True,
-                key="schedule_orden_pista"
-            )
-
         with col_right:
-            st.markdown("")  # separador visual
+            st.markdown("")
             st.markdown("")
 
             if st.button("⚙️ Generar", key="schedule_generar"):
@@ -1138,33 +1121,19 @@ elif menu == "PDF / PRINT":
                     "(pendiente de implementar)"
                 )
 
-    # -------- RESULTS (SIEMPRE VISIBLE) --------
+    # -------- RESULTS --------
     with st.expander("📊 Results", expanded=False):
 
         col_left, col_right = st.columns([3, 1])
 
         with col_left:
             st.markdown("#### Jornada")
-
             jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
+
             jornada_results = st.selectbox(
                 "Selecciona la jornada",
                 jornadas_opciones,
                 key="results_jornada"
-            )
-
-            st.markdown("#### Opciones")
-            st.checkbox(
-                "Incluir sets",
-                value=True,
-                disabled=True,
-                key="results_incluir_sets"
-            )
-            st.checkbox(
-                "Ordenar por pista",
-                value=False,
-                disabled=True,
-                key="results_orden_pista"
             )
 
         with col_right:
@@ -1176,6 +1145,3 @@ elif menu == "PDF / PRINT":
                     f"Generar Results para {jornada_results} "
                     "(pendiente de implementar)"
                 )
-
-
-
