@@ -163,7 +163,7 @@ st.title("🏓 Pádel Matchmaker")
 
 menu = st.sidebar.radio(
     "Menú",
-    ["Jornadas", "Ranking", "Locations", "Import / Export"] )
+    ["Jornadas", "Ranking", "Locations", "Import / Export", "PDF / PRINT"] )
 
 
 
@@ -656,6 +656,18 @@ elif menu == "Import / Export":
 
         except Exception as e:
             st.error(f"❌ Error al leer el archivo: {e}") 
+
+# ----------------------------
+# PDF / PRINT
+# ----------------------------
+elif menu == "PDF / PRINT":
+    st.header("🖨️ PDF / Print")
+
+    st.info(
+        "Este apartado servirá para generar documentos imprimibles "
+        "como rankings o jornadas en PDF.\n\n"
+        "🚧 En construcción."
+    )
 
 
 
