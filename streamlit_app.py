@@ -360,7 +360,7 @@ def generar_pdf_ranking(data):
         "PJ:   Partidos Jugados",
         "PG:   Partidos Ganados",
         "PP:   Partidos Perdidos",
-        "Pts:  Puntos Totales,
+        "Pts:  Puntos Totales",
         "JG:   Juegos ganados",
         "JP:   Juegos perdidos",
         "Dif=  JG - JP"
