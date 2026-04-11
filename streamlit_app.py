@@ -589,6 +589,31 @@ if menu == "Jornadas":
                         usados.add(j)
         return usados
 
+    
+def partido_incompleto(partido):
+    jugadores = []
+    for pareja in ("pareja_1", "pareja_2"):
+        jugadores.extend([j for j in partido.get(pareja, []) if j])
+    return len(jugadores) < 4
+
+    def hay_conflicto_pista_hora(jornada, partido_actual):
+    for p in jornada.get("partidos", []):
+        if p is partido_actual:
+            continue
+
+        if (
+            p.get("lugar") and
+            p.get("pista") and
+            p.get("fecha") and
+            p.get("hora") and
+            p.get("lugar") == partido_actual.get("lugar") and
+            p.get("pista") == partido_actual.get("pista") and
+            p.get("fecha") == partido_actual.get("fecha") and
+            p.get("hora") == partido_actual.get("hora")
+        ):
+            return True
+    return False
+
     # -------- GRID --------
     filas = [
         jornada["partidos"][i:i + 2]
@@ -700,12 +725,30 @@ if menu == "Jornadas":
                     partido["set3_p2"] = s3.number_input("Set3 P2", 0, 7, partido.get("set3_p2", 0), key=f"s3p2_{idx}")
 
                     # -------- GUARDAR --------
-                    if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
-                        if partido_tiene_jugadores_repetidos(partido):
-                            st.error("❌ No repitas jugadores, que no es el Street Fighter 😂")
-                        else:
-                            save_data(data)
-                            st.success("✅ Guardado")
+                  
+if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
+
+    if partido_incompleto(partido):
+        st.error(
+            "Casi... son 4 jugadores para Guardar… tú puedes, "
+            "que no es subir el Everest en chanclas 🏔️🎾"
+        )
+
+    elif hay_conflicto_pista_hora(jornada, partido):
+        st.error(
+            "Dos partidos, misma pista, misma hora… "
+            "¿pádel o Fútbol 7? 😂"
+        )
+
+    elif partido_tiene_jugadores_repetidos(partido):
+        st.error(
+            "❌ No repitas jugadores, que no es el Street Fighter 😂"
+        )
+
+    else:
+        save_data(data)
+        st.success("✅ Guardado")
+
 
 # ----------------------------
 # RANKING
