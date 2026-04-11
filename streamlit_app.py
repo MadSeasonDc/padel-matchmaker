@@ -160,6 +160,29 @@ def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
+
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+
+
+# ===== PDF PRUEBA =====
+def generar_pdf_prueba():
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+
+    width, height = A4
+
+    c.setFont("Helvetica-Bold", 48)
+    c.drawCentredString(width / 2, height / 2, "PRUEBA")
+
+    c.showPage()
+    c.save()
+
+    buffer.seek(0)
+    return buffer
+
+
 data = load_data()
 
 st.set_page_config(page_title="Pádel Matchmaker", layout="wide")
