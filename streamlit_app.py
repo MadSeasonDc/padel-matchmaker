@@ -379,7 +379,7 @@ def generar_pdf_ranking(data):
     c.drawCentredString(
         width / 2,
         footer_y,
-        "Report provided by Manuel ©. All rights reserved."
+        "Report provided by Manolo ©. All rights reserved."
     )
 
     c.showPage()
@@ -492,11 +492,7 @@ st.title("🏓 Pádel Matchmaker")
 
 
 
-ranking_demo = [
-    {"RK": 1, "Jugador": "Antonio Seoane", "PJ": 0, "PG": 0, "PP": 0, "Pts": 0, "JG": 0, "JP": 0, "Dif": 0},
-    {"RK": 2, "Jugador": "Carlos Ortiz", "PJ": 0, "PG": 0, "PP": 0, "Pts": 0, "JG": 0, "JP": 0, "Dif": 0},
-    {"RK": 3, "Jugador": "Nacho Moros", "PJ": 0, "PG": 0, "PP": 0, "Pts": 0, "JG": 0, "JP": 0, "Dif": 0},
-]
+
 
 
 
