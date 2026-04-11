@@ -702,7 +702,7 @@ if menu == "Jornadas":
                     # -------- GUARDAR --------
                     if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
                         if partido_tiene_jugadores_repetidos(partido):
-                            st.error("❌ No repitas jugadores, que no es Street Fighter 😂")
+                            st.error("❌ No repitas jugadores, que no es el Street Fighter 😂")
                         else:
                             save_data(data)
                             st.success("✅ Guardado")
