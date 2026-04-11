@@ -551,27 +551,12 @@ if menu == "Jornadas":
     jugadores = sorted(j["nombre"] for j in data["jugadores"])
     clubs = [loc["club"] for loc in data.get("locations", [])]
 
-    # Crear partidos vacíos si no existen
     if len(jornada["partidos"]) == 0:
         for _ in range(4):
             jornada["partidos"].append(partido_vacio())
         save_data(data)
         st.rerun()
 
-    # -------- HELPERS --------
-    def get_pair_val(p, pos):
-        return p[pos] if len(p) > pos else ""
-
-    def jugadores_usados_en_jornada(jornada):
-        usados = set()
-        for p in jornada.get("partidos", []):
-            for pareja in ("pareja_1", "pareja_2"):
-                for j in p.get(pareja, []):
-                    if j:
-                        usados.add(j)
-        return usados
-
-    # -------- GRID --------
     filas = [
         jornada["partidos"][i:i + 2]
         for i in range(0, len(jornada["partidos"]), 2)
@@ -622,66 +607,32 @@ if menu == "Jornadas":
                         key=f"hora_{jornada_index}_{idx}"
                     )
 
-                    # -------- PAREJAS --------
-                    col_p1, col_p2 = st.columns(2)
+                    # -------- JUGADORES DEL PARTIDO --------
+                    st.markdown("**Jugadores del partido**")
 
-                    usados = jugadores_usados_en_jornada(jornada)
+                    jugadores_partido = st.multiselect(
+                        "Selecciona hasta 4 jugadores",
+                        jugadores,
+                        default=partido.get("jugadores", []),
+                        max_selections=4,
+                        key=f"jugadores_{jornada_index}_{idx}"
+                    )
 
-                    p1 = partido.get("pareja_1", [])
-                    p2 = partido.get("pareja_2", [])
+                    partido["jugadores"] = jugadores_partido
 
-                    with col_p1:
-                        st.markdown("**Pareja 1**")
+                    # Asignar parejas automáticamente
+                    if len(jugadores_partido) >= 2:
+                        partido["pareja_1"] = jugadores_partido[:2]
+                    else:
+                        partido["pareja_1"] = []
 
-                        opciones = [""] + [
-                            j for j in jugadores
-                            if j == get_pair_val(p1, 0) or j not in usados
-                        ]
-                        der1 = st.selectbox(
-                            "Der",
-                            opciones,
-                            index=opciones.index(get_pair_val(p1, 0)) if get_pair_val(p1, 0) in opciones else 0,
-                            key=f"p1d_{jornada_index}_{idx}"
-                        )
+                    if len(jugadores_partido) == 4:
+                        partido["pareja_2"] = jugadores_partido[2:]
+                    else:
+                        partido["pareja_2"] = []
 
-                        opciones = [""] + [
-                            j for j in jugadores
-                            if j == get_pair_val(p1, 1) or j not in usados
-                        ]
-                        rev1 = st.selectbox(
-                            "Rev",
-                            opciones,
-                            index=opciones.index(get_pair_val(p1, 1)) if get_pair_val(p1, 1) in opciones else 0,
-                            key=f"p1r_{jornada_index}_{idx}"
-                        )
-
-                    with col_p2:
-                        st.markdown("**Pareja 2**")
-
-                        opciones = [""] + [
-                            j for j in jugadores
-                            if j == get_pair_val(p2, 0) or j not in usados
-                        ]
-                        der2 = st.selectbox(
-                            "Der",
-                            opciones,
-                            index=opciones.index(get_pair_val(p2, 0)) if get_pair_val(p2, 0) in opciones else 0,
-                            key=f"p2d_{jornada_index}_{idx}"
-                        )
-
-                        opciones = [""] + [
-                            j for j in jugadores
-                            if j == get_pair_val(p2, 1) or j not in usados
-                        ]
-                        rev2 = st.selectbox(
-                            "Rev",
-                            opciones,
-                            index=opciones.index(get_pair_val(p2, 1)) if get_pair_val(p2, 1) in opciones else 0,
-                            key=f"p2r_{jornada_index}_{idx}"
-                        )
-
-                    partido["pareja_1"] = [der1, rev1]
-                    partido["pareja_2"] = [der2, rev2]
+                    if len(jugadores_partido) < 4:
+                        st.warning("⚠️ El partido necesita 4 jugadores")
 
                     # -------- RESULTADO --------
                     st.markdown("**Resultado**")
@@ -697,7 +648,6 @@ if menu == "Jornadas":
                     if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
                         save_data(data)
                         st.success("✅ Guardado")
-
 # ----------------------------
 # RANKING
 # ----------------------------
