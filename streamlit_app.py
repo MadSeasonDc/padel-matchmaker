@@ -1075,7 +1075,6 @@ elif menu == "Import / Export":
 
 
 
-
 # ----------------------------
 # PDF / PRINT
 # ----------------------------
@@ -1096,8 +1095,8 @@ elif menu == "PDF / PRINT":
 
     st.markdown("---")
 
-    # -------- SCHEDULE --------
-    with st.expander("📅 Schedule", expanded=False):
+    # -------- SCHEDULE (SIEMPRE ABIERTO) --------
+    with st.expander("📅 Schedule", expanded=True):
 
         col_left, col_right = st.columns([3, 1])
 
@@ -1121,8 +1120,8 @@ elif menu == "PDF / PRINT":
                     "(pendiente de implementar)"
                 )
 
-    # -------- RESULTS --------
-    with st.expander("📊 Results", expanded=False):
+    # -------- RESULTS (SIEMPRE ABIERTO) --------
+    with st.expander("📊 Results", expanded=True):
 
         col_left, col_right = st.columns([3, 1])
 
