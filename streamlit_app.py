@@ -166,15 +166,27 @@ def save_data(data):
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
-
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 from datetime import date
 import io
+import pandas as pd
 
 
-def generar_pdf_ranking(df):
+def generar_pdf_ranking(data):
+    """
+    data puede ser:
+    - una lista de diccionarios
+    - o un pandas.DataFrame
+    """
+
+    # ✅ Asegurar DataFrame (CLAVE para que no falle)
+    if not isinstance(data, pd.DataFrame):
+        df = pd.DataFrame(data)
+    else:
+        df = data
+
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
@@ -209,12 +221,12 @@ def generar_pdf_ranking(df):
     y -= 16
 
     # =========================
-    # TABLA (contenido variable)
+    # TABLA
     # =========================
-    c.setFont("Helvetica-Bold", 9)
     headers = ["RK", "Jugador", "PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"]
     widths = [1.2, 7.0, 1.2, 1.2, 1.2, 1.4, 1.4, 1.4, 1.4]
 
+    c.setFont("Helvetica-Bold", 9)
     x = left
     for h, w in zip(headers, widths):
         c.drawString(x, y, h)
@@ -223,15 +235,13 @@ def generar_pdf_ranking(df):
     y -= 10
     c.line(left, y, right, y)
     y -= 12
-
     c.setFont("Helvetica", 9)
 
-    # Zona reservada inferior (leyenda + footer)
+    # Zona reservada inferior
     footer_y = 2 * cm
     leyenda_y = footer_y + 4.5 * cm
 
     for _, row in df.iterrows():
-        # Si llegamos a la zona reservada, nueva página
         if y < leyenda_y + 15:
             c.showPage()
             y = top
@@ -239,15 +249,15 @@ def generar_pdf_ranking(df):
 
         x = left
         values = [
-            str(row["RK"]),
-            row["Jugador"],
-            str(row["PJ"]),
-            str(row["PG"]),
-            str(row["PP"]),
-            str(row["Pts"]),
-            str(row["JG"]),
-            str(row["JP"]),
-            f"{row['Dif']:+}"
+            str(row.get("RK", "")),
+            str(row.get("Jugador", "")),
+            str(row.get("PJ", "")),
+            str(row.get("PG", "")),
+            str(row.get("PP", "")),
+            str(row.get("Pts", "")),
+            str(row.get("JG", "")),
+            str(row.get("JP", "")),
+            f"{row.get('Dif', 0):+}"
         ]
 
         for v, w in zip(values, widths):
@@ -282,7 +292,7 @@ def generar_pdf_ranking(df):
         y_leg -= 11
 
     # =========================
-    # FOOTER (PEGADO AL BORDE)
+    # FOOTER
     # =========================
     c.line(left, footer_y + 15, right, footer_y + 15)
 
@@ -293,14 +303,11 @@ def generar_pdf_ranking(df):
         "Report provided by Manuel ©. All rights reserved."
     )
 
-    # =========================
-    # FINAL
-    # =========================
     c.showPage()
     c.save()
     buffer.seek(0)
-    return buffer
 
+    return buffer
 
 
 def obtener_ranking_df(data):
