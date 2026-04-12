@@ -840,6 +840,56 @@ if menu == "Jornadas":
 
                     partido["pareja_1"] = [der1, rev1]
                     partido["pareja_2"] = [der2, rev2]
+                    
+# -------- RESULTADO --------
+st.markdown("**Resultado**")
+s1, s2, s3 = st.columns(3)
+
+partido["set1_p1"] = s1.number_input(
+    "Set1 P1",
+    min_value=0,
+    max_value=7,
+    value=partido.get("set1_p1", 0),
+    key=f"s1p1_{jornada_index}_{idx}"
+)
+partido["set1_p2"] = s1.number_input(
+    "Set1 P2",
+    min_value=0,
+    max_value=7,
+    value=partido.get("set1_p2", 0),
+    key=f"s1p2_{jornada_index}_{idx}"
+)
+
+partido["set2_p1"] = s2.number_input(
+    "Set2 P1",
+    min_value=0,
+    max_value=7,
+    value=partido.get("set2_p1", 0),
+    key=f"s2p1_{jornada_index}_{idx}"
+)
+partido["set2_p2"] = s2.number_input(
+    "Set2 P2",
+    min_value=0,
+    max_value=7,
+    value=partido.get("set2_p2", 0),
+    key=f"s2p2_{jornada_index}_{idx}"
+)
+
+partido["set3_p1"] = s3.number_input(
+    "Set3 P1",
+    min_value=0,
+    max_value=7,
+    value=partido.get("set3_p1", 0),
+    key=f"s3p1_{jornada_index}_{idx}"
+)
+partido["set3_p2"] = s3.number_input(
+    "Set3 P2",
+    min_value=0,
+    max_value=7,
+    value=partido.get("set3_p2", 0),
+    key=f"s3p2_{jornada_index}_{idx}"
+)
+
 
                     # -------- GUARDAR --------
                     if st.button("Guardar", key=f"save_{idx}"):
