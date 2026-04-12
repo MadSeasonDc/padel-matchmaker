@@ -4,7 +4,7 @@ import os
 
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-import io
+import io 
 
 
 DATA_FILE = "padel_data.json"
