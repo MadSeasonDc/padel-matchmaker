@@ -293,6 +293,117 @@ def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from datetime import date
+import io
+
+
+def generar_pdf_schedule(jornada):
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    # Márgenes
+    left = 2 * cm
+    right = width - 2 * cm
+    top = height - 2 * cm
+
+    # =========================
+    # ENCABEZADO
+    # =========================
+    y = top
+
+    c.setFont("Helvetica-Bold", 15)
+    c.drawCentredString(
+        width / 2,
+        y,
+        f"JORNADA {jornada['numero']} – HORARIO"
+    )
+    y -= 20
+
+    c.setFont("Helvetica", 11)
+    c.drawCentredString(
+        width / 2,
+        y,
+        "Liga de Pádel Empresa"
+    )
+    y -= 16
+
+    c.setFont("Helvetica", 9)
+    c.drawCentredString(
+        width / 2,
+        y,
+        f"Documento generado el {date.today().strftime('%d/%m/%Y')}"
+    )
+    y -= 20
+
+    c.line(left, y, right, y)
+    y -= 18
+
+    # =========================
+    # CUERPO – PARTIDOS
+    # =========================
+    c.setFont("Helvetica", 10)
+
+    footer_y = 2 * cm
+
+    for idx, partido in enumerate(jornada.get("partidos", [])):
+        division = f"División {idx + 1}"
+
+        # Salto de página si llegamos al footer
+        if y < footer_y + 60:
+            c.showPage()
+            y = top
+            c.setFont("Helvetica", 10)
+
+        # --- TÍTULO DIVISIÓN ---
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(left, y, division)
+        y -= 14
+
+        c.setFont("Helvetica", 9)
+
+        fecha = partido.get("fecha", "")
+        hora = partido.get("hora", "")
+        lugar = partido.get("lugar", "")
+        pista = partido.get("pista", "")
+
+        linea_info = f"{fecha}   {hora}   |   {lugar}   |   Pista {pista}"
+        c.drawString(left, y, linea_info)
+        y -= 14
+
+        pareja_1 = partido.get("pareja_1", [])
+        pareja_2 = partido.get("pareja_2", [])
+
+        eq1 = " / ".join(pareja_1) if len(pareja_1) == 2 else "—"
+        eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
+
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(left + 20, y, f"{eq1}   vs.   {eq2}")
+        y -= 22
+
+    # =========================
+    # FOOTER – IGUAL QUE RANKING
+    # =========================
+    c.line(left, footer_y + 15, right, footer_y + 15)
+
+    c.setFont("Helvetica-Oblique", 8)
+    c.drawCentredString(
+        width / 2,
+        footer_y,
+        "Report provided by Manolo ©. All rights reserved."
+    )
+
+    # =========================
+    # FINAL
+    # =========================
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+    return buffer
+
 
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
