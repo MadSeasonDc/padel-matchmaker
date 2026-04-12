@@ -1094,9 +1094,6 @@ elif menu == "Import / Export":
 
 
 
-# ----------------------------
-# PDF / PRINT
-# ----------------------------
 elif menu == "PDF / PRINT":
     st.header("🖨️ PDF / Print")
 
@@ -1104,7 +1101,6 @@ elif menu == "PDF / PRINT":
     if st.button("🏆 Ranking PDF"):
         ranking_rows = calcular_ranking_rows(data)
         pdf_buffer = generar_pdf_ranking(ranking_rows)
-
         st.download_button(
             label="⬇️ Descargar Ranking PDF",
             data=pdf_buffer,
@@ -1114,62 +1110,37 @@ elif menu == "PDF / PRINT":
 
     st.markdown("---")
 
-    # -------- SCHEDULE (SIEMPRE ABIERTO) --------
+    # -------- SCHEDULE --------
     with st.expander("📅 Schedule", expanded=True):
-
         col_left, col_right = st.columns([3, 1])
-
         with col_left:
-            st.markdown("#### Jornada")
-            jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
-
             jornada_schedule = st.selectbox(
                 "Selecciona la jornada",
-                jornadas_opciones,
+                [f"Jornada {i}" for i in range(1, 8)],
                 key="schedule_jornada"
             )
-
         with col_right:
-            st.markdown("")
-            st.markdown("")
-
             if st.button("⚙️ Generar", key="schedule_generar"):
-                st.info(
-                    f"Generar Schedule para {jornada_schedule} "
-                    "(pendiente de implementar)"
-                )
+                st.info(f"Generar Schedule para {jornada_schedule}")
 
-    # -------- RESULTS (SIEMPRE ABIERTO) --------
+    # -------- RESULTS --------
     with st.expander("📊 Results", expanded=True):
-
         col_left, col_right = st.columns([3, 1])
-
         with col_left:
-            st.markdown("#### Jornada")
-            jornadas_opciones = [f"Jornada {i}" for i in range(1, 8)]
-
             jornada_results = st.selectbox(
                 "Selecciona la jornada",
-                jornadas_opciones,
+                [f"Jornada {i}" for i in range(1, 8)],
                 key="results_jornada"
             )
-
         with col_right:
-            st.markdown("")
-            st.markdown("")
-
             if st.button("⚙️ Generar", key="results_generar"):
-                st.info(
-                    f"Generar Results para {jornada_results} "
-                    "(pendiente de implementar)"
-                )
+                st.info(f"Generar Results para {jornada_results}")
 
-# -------- RESULTS BOOK (EASTER EGG) --------
+    # -------- RESULTS BOOK (EASTER EGG) --------
     st.markdown("---")
 
-   
-if st.button("📕 Generate Results Book"):
-    mostrar_result_book_easter_egg()
+    if st.button("📕 Generate Results Book"):
+        mostrar_result_book_easter_egg()
 
 
 
