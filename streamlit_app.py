@@ -299,6 +299,7 @@ def save_data(data):
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
+from reportlab.lib.utils import ImageReader
 from datetime import date
 import io
 
@@ -308,44 +309,94 @@ def generar_pdf_results(jornada):
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
-    # Márgenes
     left = 2 * cm
     right = width - 2 * cm
     top = height - 2 * cm
     footer_y = 2 * cm
     y = top
 
-    # =========================
-    # ENCABEZADO
-    # =========================
-    c.setFont("Helvetica-Bold", 15)
-    c.drawCentredString(width / 2, y, f"JORNADA {jornada['numero']} – RESULTS")
-    y -= 16
+    logo_path = "assets/Logo padel.png"
+    logo_size = 2.0 * cm
 
+    # =========================
+    # LOGO (MISMA POSICIÓN QUE RANKING Y SCHEDULE)
+    # =========================
+    c.drawImage(
+        ImageReader(logo_path),
+        left - 0.3 * cm,
+        y - logo_size + 20,
+        width=logo_size,
+        height=logo_size,
+        mask="auto"
+    )
+
+    # =========================
+    # TÍTULO
+    # =========================
+    c.setFont("Helvetica-Bold", 16)
+    c.drawCentredString(
+        width / 2,
+        y - 6,
+        f"JORNADA {jornada['numero']} – RESULTS"
+    )
+    y -= 31
+
+    # =========================
+    # SUBTÍTULO
+    # =========================
     c.setFont("Helvetica", 11)
     c.drawCentredString(width / 2, y, "Liga de Pádel Atos MEV")
-    y -= 14
-
-    c.line(left, y, right, y)
-    y -= 16
+    y -= 22
 
     # =========================
-    # CUERPO – DIVISIONES
+    # LÍNEA
+    # =========================
+    c.line(left, y, right, y)
+    y -= 34
+
+    # =========================
+    # DIVISIONES
     # =========================
     for idx, partido in enumerate(jornada.get("partidos", [])):
-        if y < footer_y + 120:
+
+        if y < footer_y + 125:
             c.showPage()
             y = top
 
-        # 🔽 Altura ajustada al milímetro
+            # Repetir encabezado en nueva página
+            c.drawImage(
+                ImageReader(logo_path),
+                left - 0.3 * cm,
+                y - logo_size + 20,
+                width=logo_size,
+                height=logo_size,
+                mask="auto"
+            )
+
+            c.setFont("Helvetica-Bold", 16)
+            c.drawCentredString(
+                width / 2,
+                y - 6,
+                f"JORNADA {jornada['numero']} – RESULTS"
+            )
+            y -= 31
+
+            c.setFont("Helvetica", 11)
+            c.drawCentredString(width / 2, y, "Liga de Pádel Atos MEV")
+            y -= 22
+
+            c.line(left, y, right, y)
+            y -= 34
+
+        # Altura de celda (compactada)
         cell_height = 118
         cell_top = y
 
-        # --- Celda ---
+        # Caja
         c.rect(left, y - cell_height + 8, right - left, cell_height, stroke=1, fill=0)
-        y -= 12
+        y -= 14
 
-        # --- División ---
+        # División
         c.setFont("Helvetica-Bold", 11)
         c.drawString(left + 8, y, f"División {idx + 1}")
         y -= 12
@@ -355,7 +406,7 @@ def generar_pdf_results(jornada):
         lugar = partido.get("lugar", "")
         pista = partido.get("pista", "")
 
-        # --- Fecha / Hora ---
+        # Fecha / Hora
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Fecha:")
         c.setFont("Helvetica", 9)
@@ -367,7 +418,7 @@ def generar_pdf_results(jornada):
         c.drawString(left + 265, y, hora)
         y -= 10
 
-        # --- Lugar / Pista ---
+        # Lugar / Pista
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Lugar:")
         c.setFont("Helvetica", 9)
@@ -377,10 +428,10 @@ def generar_pdf_results(jornada):
         c.drawString(left + 230, y, "Pista:")
         c.setFont("Helvetica", 9)
         c.drawString(left + 265, y, str(pista))
-        y -= 12
+        y -= 14
 
         # =========================
-        # TABLA DE SETS (COMPACTA)
+        # TABLA DE SETS
         # =========================
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
@@ -402,7 +453,6 @@ def generar_pdf_results(jornada):
         col_set2 = left + 320
         col_set3 = left + 380
 
-        # Encabezados
         c.setFont("Helvetica-Bold", 9)
         c.drawString(col_set1, y, "Set 1")
         c.drawString(col_set2, y, "Set 2")
@@ -410,7 +460,6 @@ def generar_pdf_results(jornada):
             c.drawString(col_set3, y, "Set 3")
         y -= 9
 
-        # Equipo A
         c.setFont("Helvetica-Bold", 9)
         c.drawString(col_name, y, eq1)
         c.setFont("Helvetica", 9)
@@ -420,7 +469,6 @@ def generar_pdf_results(jornada):
             c.drawString(col_set3, y, str(set3_p1))
         y -= 9
 
-        # Equipo B
         c.setFont("Helvetica-Bold", 9)
         c.drawString(col_name, y, eq2)
         c.setFont("Helvetica", 9)
@@ -429,7 +477,6 @@ def generar_pdf_results(jornada):
         if mostrar_set3:
             c.drawString(col_set3, y, str(set3_p2))
 
-        # 🔽 Menos aire final
         y = cell_top - cell_height - 8
 
     # =========================
