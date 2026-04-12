@@ -300,6 +300,13 @@ from datetime import date
 import io
 
 
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from datetime import date
+import io
+
+
 def generar_pdf_schedule(jornada):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -309,6 +316,7 @@ def generar_pdf_schedule(jornada):
     left = 2 * cm
     right = width - 2 * cm
     top = height - 2 * cm
+    footer_y = 2 * cm
 
     # =========================
     # ENCABEZADO
@@ -340,40 +348,54 @@ def generar_pdf_schedule(jornada):
     y -= 20
 
     c.line(left, y, right, y)
-    y -= 18
+    y -= 20
 
     # =========================
-    # CUERPO – PARTIDOS
+    # CUERPO – DIVISIONES
     # =========================
-    c.setFont("Helvetica", 10)
-
-    footer_y = 2 * cm
-
     for idx, partido in enumerate(jornada.get("partidos", [])):
-        division = f"División {idx + 1}"
-
-        # Salto de página si llegamos al footer
-        if y < footer_y + 60:
+        if y < footer_y + 90:
             c.showPage()
             y = top
             c.setFont("Helvetica", 10)
 
-        # --- TÍTULO DIVISIÓN ---
+        division = f"División {idx + 1}"
+
+        # ---- TÍTULO DIVISIÓN ----
         c.setFont("Helvetica-Bold", 11)
         c.drawString(left, y, division)
         y -= 14
-
-        c.setFont("Helvetica", 9)
 
         fecha = partido.get("fecha", "")
         hora = partido.get("hora", "")
         lugar = partido.get("lugar", "")
         pista = partido.get("pista", "")
 
-        linea_info = f"{fecha}   {hora}   |   {lugar}   |   Pista {pista}"
-        c.drawString(left, y, linea_info)
+        # ---- FECHA / HORA ----
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(left, y, "Fecha:")
+        c.setFont("Helvetica", 9)
+        c.drawString(left + 35, y, fecha)
+
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(left + 150, y, "Hora:")
+        c.setFont("Helvetica", 9)
+        c.drawString(left + 185, y, hora)
+        y -= 12
+
+        # ---- LUGAR / PISTA ----
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(left, y, "Lugar:")
+        c.setFont("Helvetica", 9)
+        c.drawString(left + 35, y, lugar)
+
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(left + 300, y, "Pista:")
+        c.setFont("Helvetica", 9)
+        c.drawString(left + 345, y, str(pista))
         y -= 14
 
+        # ---- CRUCE DE EQUIPOS ----
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
 
@@ -382,10 +404,10 @@ def generar_pdf_schedule(jornada):
 
         c.setFont("Helvetica-Bold", 10)
         c.drawString(left + 20, y, f"{eq1}   vs.   {eq2}")
-        y -= 22
+        y -= 24
 
     # =========================
-    # FOOTER – IGUAL QUE RANKING
+    # FOOTER (IGUAL QUE RANKING)
     # =========================
     c.line(left, footer_y + 15, right, footer_y + 15)
 
@@ -403,6 +425,7 @@ def generar_pdf_schedule(jornada):
     c.save()
     buffer.seek(0)
     return buffer
+``
 
 
 from reportlab.lib.pagesizes import A4
