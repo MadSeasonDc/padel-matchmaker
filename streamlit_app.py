@@ -615,64 +615,52 @@ def generar_pdf_ranking(ranking_rows):
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
-    # Márgenes
     left = 2 * cm
     right = width - 2 * cm
     top = height - 2 * cm
     footer_y = 2 * cm
     y = top
 
-    # =========================
-    # LOGO (UN POCO MÁS ARRIBA)
-    # =========================
+    # -------- LOGO --------
     logo_path = "assets/Logo padel.png"
     logo_size = 2.0 * cm
 
     c.drawImage(
         ImageReader(logo_path),
         left - 0.3 * cm,
-        y - logo_size + 20,   # ⬆️ subido un poco más
+        y - logo_size + 20,
         width=logo_size,
         height=logo_size,
         mask="auto"
     )
 
-    # =========================
-    # TÍTULO (UN POCO MÁS ABAJO)
-    # =========================
+    # -------- TÍTULO --------
     c.setFont("Helvetica-Bold", 16)
     c.drawCentredString(width / 2, y - 6, "RANKING GENERAL")
-    y -= 31   # ⬇️ título baja un poco más
+    y -= 31
 
-    # =========================
-    # SUBTÍTULO
-    # =========================
     c.setFont("Helvetica", 11)
     c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
     y -= 22
 
-    # =========================
-    # LÍNEA SEPARADORA
-    # =========================
+    # -------- LÍNEA --------
     c.line(left, y, right, y)
-    y -= 34   # ⬇️ más aire antes de la tabla
+    y -= 34
 
-    # =========================
-    # CABECERA DE TABLA
-    # =========================
+    # -------- CABECERA TABLA --------
     c.setFont("Helvetica-Bold", 9)
 
     headers = ["RK", "Jugador", "PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"]
     col_x = [
-        left,
-        left + 1.3 * cm,
-        left + 9.0 * cm,
-        left + 10.7 * cm,
-        left + 12.4 * cm,
-        left + 14.1 * cm,
-        left + 15.8 * cm,
-        left + 17.5 * cm,
-        left + 19.2 * cm,
+        left,                 # RK
+        left + 1.3 * cm,      # Jugador
+        left + 8.4 * cm,      # PJ
+        left + 10.0 * cm,     # PG
+        left + 11.6 * cm,     # PP
+        left + 13.2 * cm,     # Pts
+        left + 14.8 * cm,     # JG
+        left + 16.4 * cm,     # JP
+        left + 18.0 * cm,     # Dif
     ]
 
     for header, x in zip(headers, col_x):
@@ -680,26 +668,15 @@ def generar_pdf_ranking(ranking_rows):
 
     y -= 12
     c.line(left, y, right, y)
-    y -= 14   # ✅ más espacio antes del primer jugador
+    y -= 14
 
-    # =========================
-    # FILAS DE RANKING
-    # =========================
+    # -------- FILAS --------
     c.setFont("Helvetica", 9)
 
     for row in ranking_rows:
         if y < footer_y + 40:
             c.showPage()
             y = top
-
-            # Repetir cabecera en nueva página
-            c.setFont("Helvetica-Bold", 9)
-            for header, x in zip(headers, col_x):
-                c.drawString(x, y, header)
-            y -= 12
-            c.line(left, y, right, y)
-            y -= 14
-            c.setFont("Helvetica", 9)
 
         values = [
             row["RK"],
@@ -718,9 +695,7 @@ def generar_pdf_ranking(ranking_rows):
 
         y -= 11
 
-    # =========================
-    # FOOTER
-    # =========================
+    # -------- FOOTER --------
     c.setFont("Helvetica", 8)
     c.drawRightString(
         right,
@@ -737,14 +712,11 @@ def generar_pdf_ranking(ranking_rows):
         "Report provided by Manolo ©. All rights reserved."
     )
 
-    # =========================
-    # FINAL
-    # =========================
     c.showPage()
     c.save()
     buffer.seek(0)
     return buffer
-
+``
 
 def obtener_ranking_df(data):
     import pandas as pd
