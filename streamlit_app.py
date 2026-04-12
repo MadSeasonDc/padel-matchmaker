@@ -615,7 +615,7 @@ def generar_pdf_ranking(ranking_rows):
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
-    # Márgenes base
+    # Márgenes
     left = 2 * cm
     right = width - 2 * cm
     top = height - 2 * cm
@@ -623,36 +623,39 @@ def generar_pdf_ranking(ranking_rows):
     y = top
 
     # =========================
-    # LOGO (MÁS ARRIBA, MÁS PEQUEÑO)
+    # LOGO (UN POCO MÁS ARRIBA)
     # =========================
     logo_path = "assets/Logo padel.png"
-    logo_size = 2.0 * cm   # 🔽 un poco más pequeño
+    logo_size = 2.0 * cm
 
     c.drawImage(
         ImageReader(logo_path),
-        left - 0.3 * cm,         # 🔽 ligeramente más a la izquierda
-        y - logo_size + 16,      # 🔼 bastante más arriba
+        left - 0.3 * cm,
+        y - logo_size + 20,   # ⬆️ subido un poco más
         width=logo_size,
         height=logo_size,
         mask="auto"
     )
 
     # =========================
-    # ENCABEZADO (NO TOCAR)
+    # TÍTULO (UN POCO MÁS ABAJO)
     # =========================
     c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(width / 2, y, "RANKING GENERAL")
-    y -= 25
+    c.drawCentredString(width / 2, y - 6, "RANKING GENERAL")
+    y -= 31   # ⬇️ título baja un poco más
 
+    # =========================
+    # SUBTÍTULO
+    # =========================
     c.setFont("Helvetica", 11)
     c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
-    y -= 20
+    y -= 22
 
     # =========================
-    # LÍNEA SEPARADORA (MÁS ABAJO)
+    # LÍNEA SEPARADORA
     # =========================
     c.line(left, y, right, y)
-    y -= 32   # ⬇️ bajamos tabla un par de líneas más
+    y -= 34   # ⬇️ más aire antes de la tabla
 
     # =========================
     # CABECERA DE TABLA
@@ -675,9 +678,9 @@ def generar_pdf_ranking(ranking_rows):
     for header, x in zip(headers, col_x):
         c.drawString(x, y, header)
 
-    y -= 10
+    y -= 12
     c.line(left, y, right, y)
-    y -= 8
+    y -= 14   # ✅ más espacio antes del primer jugador
 
     # =========================
     # FILAS DE RANKING
@@ -693,9 +696,9 @@ def generar_pdf_ranking(ranking_rows):
             c.setFont("Helvetica-Bold", 9)
             for header, x in zip(headers, col_x):
                 c.drawString(x, y, header)
-            y -= 10
+            y -= 12
             c.line(left, y, right, y)
-            y -= 8
+            y -= 14
             c.setFont("Helvetica", 9)
 
         values = [
@@ -713,7 +716,7 @@ def generar_pdf_ranking(ranking_rows):
         for value, x in zip(values, col_x):
             c.drawString(x, y, str(value))
 
-        y -= 10
+        y -= 11
 
     # =========================
     # FOOTER
