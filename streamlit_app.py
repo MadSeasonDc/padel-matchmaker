@@ -325,34 +325,35 @@ def generar_pdf_results(jornada):
     # =========================
     c.setFont("Helvetica-Bold", 15)
     c.drawCentredString(width / 2, y, f"JORNADA {jornada['numero']} – RESULTS")
-    y -= 18
+    y -= 16
 
     c.setFont("Helvetica", 11)
     c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
-    y -= 18
+    y -= 14
 
     c.line(left, y, right, y)
-    y -= 20
+    y -= 16
 
     # =========================
     # CUERPO – DIVISIONES
     # =========================
     for idx, partido in enumerate(jornada.get("partidos", [])):
-        if y < footer_y + 170:
+        if y < footer_y + 135:
             c.showPage()
             y = top
 
-        cell_height = 150
+        # 🔽 REDUCCIÓN DE ALTURA
+        cell_height = 125
         cell_top = y
 
         # --- Celda ---
-        c.rect(left, y - cell_height + 10, right - left, cell_height, stroke=1, fill=0)
-        y -= 18
+        c.rect(left, y - cell_height + 8, right - left, cell_height, stroke=1, fill=0)
+        y -= 14
 
         # --- División ---
         c.setFont("Helvetica-Bold", 11)
         c.drawString(left + 8, y, f"División {idx + 1}")
-        y -= 14
+        y -= 12
 
         fecha = partido.get("fecha", "")
         hora = partido.get("hora", "")
@@ -369,7 +370,7 @@ def generar_pdf_results(jornada):
         c.drawString(left + 230, y, "Hora:")
         c.setFont("Helvetica", 9)
         c.drawString(left + 265, y, hora)
-        y -= 12
+        y -= 10
 
         # --- Lugar / Pista ---
         c.setFont("Helvetica-Bold", 9)
@@ -381,10 +382,10 @@ def generar_pdf_results(jornada):
         c.drawString(left + 230, y, "Pista:")
         c.setFont("Helvetica", 9)
         c.drawString(left + 265, y, str(pista))
-        y -= 20
+        y -= 14
 
         # =========================
-        # EQUIPOS (NOMBRES)
+        # NOMBRES DE EQUIPOS
         # =========================
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
@@ -393,7 +394,7 @@ def generar_pdf_results(jornada):
         eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
 
         # =========================
-        # TABLA DE SETS
+        # TABLA DE SETS (COMPACTA)
         # =========================
         set1_p1 = partido.get("set1_p1", 0)
         set1_p2 = partido.get("set1_p2", 0)
@@ -415,7 +416,7 @@ def generar_pdf_results(jornada):
         c.drawString(col_set2, y, "Set 2")
         if mostrar_set3:
             c.drawString(col_set3, y, "Set 3")
-        y -= 12
+        y -= 10
 
         # Equipo A
         c.setFont("Helvetica-Bold", 9)
@@ -425,7 +426,7 @@ def generar_pdf_results(jornada):
         c.drawString(col_set2, y, str(set2_p1))
         if mostrar_set3:
             c.drawString(col_set3, y, str(set3_p1))
-        y -= 12
+        y -= 10
 
         # Equipo B
         c.setFont("Helvetica-Bold", 9)
@@ -436,7 +437,8 @@ def generar_pdf_results(jornada):
         if mostrar_set3:
             c.drawString(col_set3, y, str(set3_p2))
 
-        y = cell_top - cell_height - 15
+        # 🔽 Menos espacio entre celdas
+        y = cell_top - cell_height - 10
 
     # =========================
     # FOOTER
@@ -444,7 +446,7 @@ def generar_pdf_results(jornada):
     c.setFont("Helvetica", 8)
     c.drawRightString(
         right,
-        footer_y + 22,
+        footer_y + 20,
         f"Documento generado el {date.today().strftime('%d/%m/%Y')}"
     )
 
@@ -461,8 +463,6 @@ def generar_pdf_results(jornada):
     c.save()
     buffer.seek(0)
     return buffer
-
-
 
 
 
