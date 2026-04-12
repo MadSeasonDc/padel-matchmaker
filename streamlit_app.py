@@ -293,18 +293,8 @@ def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
-from datetime import date
-import io
 
 
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
-from datetime import date
-import io
 
 
 from reportlab.lib.pagesizes import A4
@@ -348,20 +338,19 @@ def generar_pdf_schedule(jornada):
     # CUERPO – DIVISIONES
     # =========================
     for idx, partido in enumerate(jornada.get("partidos", [])):
-        # Control de salto de página
-        if y < footer_y + 120:
+        # Salto de página si no cabe la celda completa
+        if y < footer_y + 140:
             c.showPage()
             y = top
 
+        cell_height = 110
         cell_top = y
-        cell_height = 100
 
-        # --- DIBUJAR CELDA ---
+        # ----- Celda -----
         c.rect(left, y - cell_height + 10, right - left, cell_height, stroke=1, fill=0)
-
         y -= 18
 
-        # --- TÍTULO DIVISIÓN ---
+        # ----- División -----
         c.setFont("Helvetica-Bold", 11)
         c.drawString(left + 8, y, f"División {idx + 1}")
         y -= 14
@@ -371,47 +360,52 @@ def generar_pdf_schedule(jornada):
         lugar = partido.get("lugar", "")
         pista = partido.get("pista", "")
 
-        # --- FECHA / HORA ---
+        # ----- Fecha / Hora -----
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Fecha:")
         c.setFont("Helvetica", 9)
         c.drawString(left + 45, y, fecha)
 
         c.setFont("Helvetica-Bold", 9)
-        c.drawString(left + 220, y, "Hora:")
+        c.drawString(left + 230, y, "Hora:")
         c.setFont("Helvetica", 9)
-        c.drawString(left + 260, y, hora)
+        c.drawString(left + 265, y, hora)
         y -= 12
 
-        # --- LUGAR / PISTA ---
+        # ----- Lugar / Pista -----
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Lugar:")
         c.setFont("Helvetica", 9)
         c.drawString(left + 45, y, lugar)
 
         c.setFont("Helvetica-Bold", 9)
-        c.drawString(left + 220, y, "Pista:")
+        c.drawString(left + 230, y, "Pista:")
         c.setFont("Helvetica", 9)
-        c.drawString(left + 260, y, str(pista))
+        c.drawString(left + 265, y, str(pista))
         y -= 16
 
-        # --- EQUIPOS ---
-        c.setFont("Helvetica-Bold", 9)
-        c.drawString(left + 8, y, "Equipo A")
-        c.drawString(left + 250, y, "Equipo B")
-        y -= 12
-
+        # ----- Equipos centrados -----
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
 
         eq1 = " / ".join(pareja_1) if len(pareja_1) == 2 else "—"
         eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
 
-        c.setFont("Helvetica-Bold", 10)
-        c.drawString(left + 8, y, eq1)
-        c.drawString(left + 180, y, "vs.")
-        c.drawString(left + 210, y, eq2)
+        col_A_center = left + 140
+        col_B_center = left + 380
+        vs_center = left + 260
 
+        c.setFont("Helvetica-Bold", 9)
+        c.drawCentredString(col_A_center, y, "Equipo A")
+        c.drawCentredString(col_B_center, y, "Equipo B")
+        y -= 12
+
+        c.setFont("Helvetica-Bold", 10)
+        c.drawCentredString(col_A_center, y, eq1)
+        c.drawCentredString(vs_center, y, "vs.")
+        c.drawCentredString(col_B_center, y, eq2)
+
+        # Posición para la siguiente celda
         y = cell_top - cell_height - 15
 
     # =========================
@@ -424,8 +418,10 @@ def generar_pdf_schedule(jornada):
         f"Documento generado el {date.today().strftime('%d/%m/%Y')}"
     )
 
+    # Línea footer
     c.line(left, footer_y + 15, right, footer_y + 15)
 
+    # Firma Manolo
     c.setFont("Helvetica-Oblique", 8)
     c.drawCentredString(
         width / 2,
@@ -437,6 +433,7 @@ def generar_pdf_schedule(jornada):
     c.save()
     buffer.seek(0)
     return buffer
+
 
 
 
