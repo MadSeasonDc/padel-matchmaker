@@ -492,7 +492,7 @@ def generar_pdf_schedule(jornada):
     c.drawImage(
         ImageReader(logo_path),
         left - 0.3 * cm,
-        y - logo_size + 20,   # EXACTAMENTE IGUAL QUE RANKING
+        y - logo_size + 20,
         width=logo_size,
         height=logo_size,
         mask="auto"
@@ -527,12 +527,12 @@ def generar_pdf_schedule(jornada):
     # =========================
     for idx, partido in enumerate(jornada.get("partidos", [])):
 
-        # Control salto de página
-        if y < footer_y + 140:
+        # Salto de página
+        if y < footer_y + 130:
             c.showPage()
             y = top
 
-            # Redibujar logo en nueva página
+            # Repetir encabezado + logo
             c.drawImage(
                 ImageReader(logo_path),
                 left - 0.3 * cm,
@@ -549,13 +549,15 @@ def generar_pdf_schedule(jornada):
                 f"JORNADA {jornada['numero']} – HORARIO"
             )
             y -= 31
+
             c.setFont("Helvetica", 11)
             c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
             y -= 22
+
             c.line(left, y, right, y)
             y -= 34
 
-        # Altura de celda (la ya validada)
+        # Altura de celda
         cell_height = 120
         cell_top = y
 
@@ -597,15 +599,18 @@ def generar_pdf_schedule(jornada):
         c.drawString(left + 265, y, str(pista))
         y -= 16
 
-        # Equipos
+        # =========================
+        # EQUIPOS (AJUSTADOS AL MARGEN)
+        # =========================
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
 
         eq1 = " / ".join(pareja_1) if len(pareja_1) == 2 else "—"
         eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
 
-        col_A = left + 150
-        col_B = left + 420
+        # 🔽 NUEVAS POSICIONES (MÁS JUNTAS)
+        col_A = left + 170
+        col_B = left + 360
         vs_x = (col_A + col_B) / 2
 
         c.setFont("Helvetica-Bold", 10)
@@ -613,6 +618,7 @@ def generar_pdf_schedule(jornada):
         c.drawCentredString(vs_x, y, "vs.")
         c.drawCentredString(col_B, y, eq2)
 
+        # Siguiente división
         y = cell_top - cell_height - 10
 
     # =========================
@@ -638,15 +644,6 @@ def generar_pdf_schedule(jornada):
     c.save()
     buffer.seek(0)
     return buffer
-
-
-
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
-from reportlab.lib.utils import ImageReader
-from datetime import date
-import io
 
 
 from reportlab.lib.pagesizes import A4
