@@ -294,11 +294,6 @@ def save_data(data):
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
-from datetime import date
-import io
 
 
 from reportlab.lib.pagesizes import A4
@@ -476,7 +471,7 @@ def generar_pdf_schedule(jornada):
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
-    # Márgenes base
+    # Márgenes
     left = 2 * cm
     right = width - 2 * cm
     top = height - 2 * cm
@@ -517,22 +512,20 @@ def generar_pdf_schedule(jornada):
     y -= 22
 
     # =========================
-    # LÍNEA SEPARADORA
+    # LÍNEA
     # =========================
     c.line(left, y, right, y)
     y -= 34
 
     # =========================
-    # CUERPO – DIVISIONES
+    # DIVISIONES
     # =========================
     for idx, partido in enumerate(jornada.get("partidos", [])):
 
-        # Salto de página
-        if y < footer_y + 130:
+        if y < footer_y + 125:
             c.showPage()
             y = top
 
-            # Repetir encabezado + logo
             c.drawImage(
                 ImageReader(logo_path),
                 left - 0.3 * cm,
@@ -557,11 +550,11 @@ def generar_pdf_schedule(jornada):
             c.line(left, y, right, y)
             y -= 34
 
-        # Altura de celda
-        cell_height = 120
+        # 🔽 Altura reducida
+        cell_height = 112
         cell_top = y
 
-        # Celda
+        # Caja
         c.rect(left, y - cell_height + 8, right - left, cell_height, stroke=1, fill=0)
         y -= 14
 
@@ -597,10 +590,12 @@ def generar_pdf_schedule(jornada):
         c.drawString(left + 230, y, "Pista:")
         c.setFont("Helvetica", 9)
         c.drawString(left + 265, y, str(pista))
-        y -= 16
+
+        # ✅ Más aire entre datos y equipos
+        y -= 22
 
         # =========================
-        # EQUIPOS (AJUSTADOS AL MARGEN)
+        # EQUIPOS (COMPACTOS)
         # =========================
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
@@ -608,7 +603,6 @@ def generar_pdf_schedule(jornada):
         eq1 = " / ".join(pareja_1) if len(pareja_1) == 2 else "—"
         eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
 
-        # 🔽 NUEVAS POSICIONES (MÁS JUNTAS)
         col_A = left + 170
         col_B = left + 360
         vs_x = (col_A + col_B) / 2
@@ -618,8 +612,8 @@ def generar_pdf_schedule(jornada):
         c.drawCentredString(vs_x, y, "vs.")
         c.drawCentredString(col_B, y, eq2)
 
-        # Siguiente división
-        y = cell_top - cell_height - 10
+        # 🔽 menos espacio inferior
+        y = cell_top - cell_height - 8
 
     # =========================
     # FOOTER
