@@ -466,6 +466,7 @@ def generar_pdf_results(jornada):
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
+from reportlab.lib.utils import ImageReader
 from datetime import date
 import io
 
@@ -475,7 +476,7 @@ def generar_pdf_schedule(jornada):
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
-    # Márgenes
+    # Márgenes base
     left = 2 * cm
     right = width - 2 * cm
     top = height - 2 * cm
@@ -483,50 +484,96 @@ def generar_pdf_schedule(jornada):
     y = top
 
     # =========================
-    # ENCABEZADO
+    # LOGO (MISMA POSICIÓN QUE RANKING)
     # =========================
-    c.setFont("Helvetica-Bold", 15)
+    logo_path = "assets/Logo padel.png"
+    logo_size = 2.0 * cm
+
+    c.drawImage(
+        ImageReader(logo_path),
+        left - 0.3 * cm,
+        y - logo_size + 20,   # EXACTAMENTE IGUAL QUE RANKING
+        width=logo_size,
+        height=logo_size,
+        mask="auto"
+    )
+
+    # =========================
+    # TÍTULO
+    # =========================
+    c.setFont("Helvetica-Bold", 16)
     c.drawCentredString(
         width / 2,
-        y,
+        y - 6,
         f"JORNADA {jornada['numero']} – HORARIO"
     )
-    y -= 18
+    y -= 31
 
+    # =========================
+    # SUBTÍTULO
+    # =========================
     c.setFont("Helvetica", 11)
     c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
-    y -= 20
+    y -= 22
 
+    # =========================
+    # LÍNEA SEPARADORA
+    # =========================
     c.line(left, y, right, y)
-    y -= 20
+    y -= 34
 
     # =========================
     # CUERPO – DIVISIONES
     # =========================
     for idx, partido in enumerate(jornada.get("partidos", [])):
-        # Salto de página si no cabe la celda completa
+
+        # Control salto de página
         if y < footer_y + 140:
             c.showPage()
             y = top
 
-        cell_height = 110
+            # Redibujar logo en nueva página
+            c.drawImage(
+                ImageReader(logo_path),
+                left - 0.3 * cm,
+                y - logo_size + 20,
+                width=logo_size,
+                height=logo_size,
+                mask="auto"
+            )
+
+            c.setFont("Helvetica-Bold", 16)
+            c.drawCentredString(
+                width / 2,
+                y - 6,
+                f"JORNADA {jornada['numero']} – HORARIO"
+            )
+            y -= 31
+            c.setFont("Helvetica", 11)
+            c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
+            y -= 22
+            c.line(left, y, right, y)
+            y -= 34
+
+        # Altura de celda (la ya validada)
+        cell_height = 120
         cell_top = y
 
-        # ----- Celda -----
-        c.rect(left, y - cell_height + 10, right - left, cell_height, stroke=1, fill=0)
-        y -= 18
+        # Celda
+        c.rect(left, y - cell_height + 8, right - left, cell_height, stroke=1, fill=0)
+        y -= 14
 
-        # ----- División -----
+        # División
         c.setFont("Helvetica-Bold", 11)
         c.drawString(left + 8, y, f"División {idx + 1}")
-        y -= 14
+        y -= 12
 
         fecha = partido.get("fecha", "")
         hora = partido.get("hora", "")
         lugar = partido.get("lugar", "")
         pista = partido.get("pista", "")
 
-        # ----- Fecha / Hora -----
+        # Fecha / Hora
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Fecha:")
         c.setFont("Helvetica", 9)
@@ -536,9 +583,9 @@ def generar_pdf_schedule(jornada):
         c.drawString(left + 230, y, "Hora:")
         c.setFont("Helvetica", 9)
         c.drawString(left + 265, y, hora)
-        y -= 12
+        y -= 10
 
-        # ----- Lugar / Pista -----
+        # Lugar / Pista
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Lugar:")
         c.setFont("Helvetica", 9)
@@ -550,44 +597,36 @@ def generar_pdf_schedule(jornada):
         c.drawString(left + 265, y, str(pista))
         y -= 16
 
-        # ----- Equipos centrados -----
+        # Equipos
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
 
         eq1 = " / ".join(pareja_1) if len(pareja_1) == 2 else "—"
         eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
 
-        col_A_center = left + 140
-        col_B_center = left + 380
-        vs_center = left + 260
-
-        c.setFont("Helvetica-Bold", 9)
-        c.drawCentredString(col_A_center, y, "Equipo A")
-        c.drawCentredString(col_B_center, y, "Equipo B")
-        y -= 12
+        col_A = left + 150
+        col_B = left + 420
+        vs_x = (col_A + col_B) / 2
 
         c.setFont("Helvetica-Bold", 10)
-        c.drawCentredString(col_A_center, y, eq1)
-        c.drawCentredString(vs_center, y, "vs.")
-        c.drawCentredString(col_B_center, y, eq2)
+        c.drawCentredString(col_A, y, eq1)
+        c.drawCentredString(vs_x, y, "vs.")
+        c.drawCentredString(col_B, y, eq2)
 
-        # Posición para la siguiente celda
-        y = cell_top - cell_height - 15
+        y = cell_top - cell_height - 10
 
     # =========================
-    # FOOTER SUPERIOR
+    # FOOTER
     # =========================
     c.setFont("Helvetica", 8)
     c.drawRightString(
         right,
-        footer_y + 22,
+        footer_y + 20,
         f"Documento generado el {date.today().strftime('%d/%m/%Y')}"
     )
 
-    # Línea footer
     c.line(left, footer_y + 15, right, footer_y + 15)
 
-    # Firma Manolo
     c.setFont("Helvetica-Oblique", 8)
     c.drawCentredString(
         width / 2,
