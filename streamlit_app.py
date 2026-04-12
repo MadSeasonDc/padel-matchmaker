@@ -294,7 +294,6 @@ def save_data(data):
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
-
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
@@ -339,11 +338,10 @@ def generar_pdf_results(jornada):
         cell_height = 150
         cell_top = y
 
-        # --- Celda ---
         c.rect(left, y - cell_height + 10, right - left, cell_height, stroke=1, fill=0)
         y -= 18
 
-        # --- División ---
+        # ---- División ----
         c.setFont("Helvetica-Bold", 11)
         c.drawString(left + 8, y, f"División {idx + 1}")
         y -= 14
@@ -353,7 +351,7 @@ def generar_pdf_results(jornada):
         lugar = partido.get("lugar", "")
         pista = partido.get("pista", "")
 
-        # --- Fecha / Hora ---
+        # ---- Fecha / Hora ----
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Fecha:")
         c.setFont("Helvetica", 9)
@@ -365,7 +363,7 @@ def generar_pdf_results(jornada):
         c.drawString(left + 265, y, hora)
         y -= 12
 
-        # --- Lugar / Pista ---
+        # ---- Lugar / Pista ----
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Lugar:")
         c.setFont("Helvetica", 9)
@@ -377,7 +375,9 @@ def generar_pdf_results(jornada):
         c.drawString(left + 265, y, str(pista))
         y -= 18
 
-        # --- Equipos ---
+        # =========================
+        # EQUIPOS
+        # =========================
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
 
@@ -388,6 +388,7 @@ def generar_pdf_results(jornada):
         col_B = left + 380
         vs_x = (col_A + col_B) / 2
 
+        # Títulos en negrita (EXPLÍCITO)
         c.setFont("Helvetica-Bold", 9)
         c.drawCentredString(col_A, y, "Equipo A")
         c.drawCentredString(col_B, y, "Equipo B")
@@ -400,33 +401,43 @@ def generar_pdf_results(jornada):
         y -= 20
 
         # =========================
-        # TABLA DE SETS (estilo Excel)
+        # TABLA DE SETS (DINÁMICA)
         # =========================
+        set1_p1 = partido.get("set1_p1", 0)
+        set1_p2 = partido.get("set1_p2", 0)
+        set2_p1 = partido.get("set2_p1", 0)
+        set2_p2 = partido.get("set2_p2", 0)
+        set3_p1 = partido.get("set3_p1", 0)
+        set3_p2 = partido.get("set3_p2", 0)
+
+        mostrar_set3 = not (set3_p1 == 0 and set3_p2 == 0)
+
         set_y = y
         col_label = left + 40
         col_set1 = left + 220
         col_set2 = left + 300
         col_set3 = left + 380
 
-        # Encabezados
         c.setFont("Helvetica-Bold", 9)
         c.drawString(col_set1, set_y, "Set 1")
         c.drawString(col_set2, set_y, "Set 2")
-        c.drawString(col_set3, set_y, "Set 3")
+        if mostrar_set3:
+            c.drawString(col_set3, set_y, "Set 3")
         set_y -= 12
 
-        # Valores
         c.setFont("Helvetica", 9)
         c.drawString(col_label, set_y, "Equipo A")
-        c.drawString(col_set1, set_y, str(partido.get("set1_p1", "")))
-        c.drawString(col_set2, set_y, str(partido.get("set2_p1", "")))
-        c.drawString(col_set3, set_y, str(partido.get("set3_p1", "")))
+        c.drawString(col_set1, set_y, str(set1_p1))
+        c.drawString(col_set2, set_y, str(set2_p1))
+        if mostrar_set3:
+            c.drawString(col_set3, set_y, str(set3_p1))
         set_y -= 12
 
         c.drawString(col_label, set_y, "Equipo B")
-        c.drawString(col_set1, set_y, str(partido.get("set1_p2", "")))
-        c.drawString(col_set2, set_y, str(partido.get("set2_p2", "")))
-        c.drawString(col_set3, set_y, str(partido.get("set3_p2", "")))
+        c.drawString(col_set1, set_y, str(set1_p2))
+        c.drawString(col_set2, set_y, str(set2_p2))
+        if mostrar_set3:
+            c.drawString(col_set3, set_y, str(set3_p2))
 
         y = cell_top - cell_height - 15
 
