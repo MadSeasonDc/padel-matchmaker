@@ -425,7 +425,7 @@ def generar_pdf_schedule(jornada):
     c.save()
     buffer.seek(0)
     return buffer
-``
+
 
 
 from reportlab.lib.pagesizes import A4
