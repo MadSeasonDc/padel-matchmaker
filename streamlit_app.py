@@ -307,6 +307,13 @@ from datetime import date
 import io
 
 
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from datetime import date
+import io
+
+
 def generar_pdf_schedule(jornada):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -317,34 +324,21 @@ def generar_pdf_schedule(jornada):
     right = width - 2 * cm
     top = height - 2 * cm
     footer_y = 2 * cm
+    y = top
 
     # =========================
     # ENCABEZADO
     # =========================
-    y = top
-
     c.setFont("Helvetica-Bold", 15)
     c.drawCentredString(
         width / 2,
         y,
         f"JORNADA {jornada['numero']} – HORARIO"
     )
-    y -= 20
+    y -= 18
 
     c.setFont("Helvetica", 11)
-    c.drawCentredString(
-        width / 2,
-        y,
-        "Liga de Pádel Empresa"
-    )
-    y -= 16
-
-    c.setFont("Helvetica", 9)
-    c.drawCentredString(
-        width / 2,
-        y,
-        f"Documento generado el {date.today().strftime('%d/%m/%Y')}"
-    )
+    c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
     y -= 20
 
     c.line(left, y, right, y)
@@ -354,16 +348,22 @@ def generar_pdf_schedule(jornada):
     # CUERPO – DIVISIONES
     # =========================
     for idx, partido in enumerate(jornada.get("partidos", [])):
-        if y < footer_y + 90:
+        # Control de salto de página
+        if y < footer_y + 120:
             c.showPage()
             y = top
-            c.setFont("Helvetica", 10)
 
-        division = f"División {idx + 1}"
+        cell_top = y
+        cell_height = 100
 
-        # ---- TÍTULO DIVISIÓN ----
+        # --- DIBUJAR CELDA ---
+        c.rect(left, y - cell_height + 10, right - left, cell_height, stroke=1, fill=0)
+
+        y -= 18
+
+        # --- TÍTULO DIVISIÓN ---
         c.setFont("Helvetica-Bold", 11)
-        c.drawString(left, y, division)
+        c.drawString(left + 8, y, f"División {idx + 1}")
         y -= 14
 
         fecha = partido.get("fecha", "")
@@ -371,31 +371,36 @@ def generar_pdf_schedule(jornada):
         lugar = partido.get("lugar", "")
         pista = partido.get("pista", "")
 
-        # ---- FECHA / HORA ----
+        # --- FECHA / HORA ---
         c.setFont("Helvetica-Bold", 9)
-        c.drawString(left, y, "Fecha:")
+        c.drawString(left + 8, y, "Fecha:")
         c.setFont("Helvetica", 9)
-        c.drawString(left + 35, y, fecha)
+        c.drawString(left + 45, y, fecha)
 
         c.setFont("Helvetica-Bold", 9)
-        c.drawString(left + 150, y, "Hora:")
+        c.drawString(left + 220, y, "Hora:")
         c.setFont("Helvetica", 9)
-        c.drawString(left + 185, y, hora)
+        c.drawString(left + 260, y, hora)
         y -= 12
 
-        # ---- LUGAR / PISTA ----
+        # --- LUGAR / PISTA ---
         c.setFont("Helvetica-Bold", 9)
-        c.drawString(left, y, "Lugar:")
+        c.drawString(left + 8, y, "Lugar:")
         c.setFont("Helvetica", 9)
-        c.drawString(left + 35, y, lugar)
+        c.drawString(left + 45, y, lugar)
 
         c.setFont("Helvetica-Bold", 9)
-        c.drawString(left + 300, y, "Pista:")
+        c.drawString(left + 220, y, "Pista:")
         c.setFont("Helvetica", 9)
-        c.drawString(left + 345, y, str(pista))
-        y -= 14
+        c.drawString(left + 260, y, str(pista))
+        y -= 16
 
-        # ---- CRUCE DE EQUIPOS ----
+        # --- EQUIPOS ---
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(left + 8, y, "Equipo A")
+        c.drawString(left + 250, y, "Equipo B")
+        y -= 12
+
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
 
@@ -403,12 +408,22 @@ def generar_pdf_schedule(jornada):
         eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
 
         c.setFont("Helvetica-Bold", 10)
-        c.drawString(left + 20, y, f"{eq1}   vs.   {eq2}")
-        y -= 24
+        c.drawString(left + 8, y, eq1)
+        c.drawString(left + 180, y, "vs.")
+        c.drawString(left + 210, y, eq2)
+
+        y = cell_top - cell_height - 15
 
     # =========================
-    # FOOTER (IGUAL QUE RANKING)
+    # FOOTER SUPERIOR
     # =========================
+    c.setFont("Helvetica", 8)
+    c.drawRightString(
+        right,
+        footer_y + 22,
+        f"Documento generado el {date.today().strftime('%d/%m/%Y')}"
+    )
+
     c.line(left, footer_y + 15, right, footer_y + 15)
 
     c.setFont("Helvetica-Oblique", 8)
@@ -418,9 +433,6 @@ def generar_pdf_schedule(jornada):
         "Report provided by Manolo ©. All rights reserved."
     )
 
-    # =========================
-    # FINAL
-    # =========================
     c.showPage()
     c.save()
     buffer.seek(0)
