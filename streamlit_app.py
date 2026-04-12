@@ -610,18 +610,27 @@ from datetime import date
 import io
 
 
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from reportlab.lib.utils import ImageReader
+from datetime import date
+import io
+
+
 def generar_pdf_ranking(ranking_rows):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
+    # Márgenes
     left = 2 * cm
     right = width - 2 * cm
     top = height - 2 * cm
     footer_y = 2 * cm
     y = top
 
-    # -------- LOGO --------
+    # ---------- LOGO ----------
     logo_path = "assets/Logo padel.png"
     logo_size = 2.0 * cm
 
@@ -634,33 +643,34 @@ def generar_pdf_ranking(ranking_rows):
         mask="auto"
     )
 
-    # -------- TÍTULO --------
+    # ---------- TÍTULO ----------
     c.setFont("Helvetica-Bold", 16)
     c.drawCentredString(width / 2, y - 6, "RANKING GENERAL")
     y -= 31
 
+    # ---------- SUBTÍTULO ----------
     c.setFont("Helvetica", 11)
     c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
     y -= 22
 
-    # -------- LÍNEA --------
+    # ---------- LÍNEA ----------
     c.line(left, y, right, y)
     y -= 34
 
-    # -------- CABECERA TABLA --------
+    # ---------- CABECERA DE TABLA ----------
     c.setFont("Helvetica-Bold", 9)
 
     headers = ["RK", "Jugador", "PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"]
     col_x = [
         left,                 # RK
         left + 1.3 * cm,      # Jugador
-        left + 8.4 * cm,      # PJ
-        left + 10.0 * cm,     # PG
-        left + 11.6 * cm,     # PP
-        left + 13.2 * cm,     # Pts
-        left + 14.8 * cm,     # JG
-        left + 16.4 * cm,     # JP
-        left + 18.0 * cm,     # Dif
+        left + 7.6 * cm,      # PJ
+        left + 9.0 * cm,      # PG
+        left + 10.4 * cm,     # PP
+        left + 11.8 * cm,     # Pts
+        left + 13.2 * cm,     # JG
+        left + 14.6 * cm,     # JP
+        left + 16.0 * cm,     # Dif
     ]
 
     for header, x in zip(headers, col_x):
@@ -670,7 +680,7 @@ def generar_pdf_ranking(ranking_rows):
     c.line(left, y, right, y)
     y -= 14
 
-    # -------- FILAS --------
+    # ---------- FILAS ----------
     c.setFont("Helvetica", 9)
 
     for row in ranking_rows:
@@ -687,15 +697,24 @@ def generar_pdf_ranking(ranking_rows):
             row["Pts"],
             row["JG"],
             row["JP"],
-            row["Dif"],
         ]
 
-        for value, x in zip(values, col_x):
+        # Pintar columnas excepto Dif
+        for value, x in zip(values, col_x[:-1]):
             c.drawString(x, y, str(value))
+
+        # Dif con signo +
+        dif = row["Dif"]
+        if dif > 0:
+            dif_text = f"+{dif}"
+        else:
+            dif_text = str(dif)
+
+        c.drawString(col_x[-1], y, dif_text)
 
         y -= 11
 
-    # -------- FOOTER --------
+    # ---------- FOOTER ----------
     c.setFont("Helvetica", 8)
     c.drawRightString(
         right,
