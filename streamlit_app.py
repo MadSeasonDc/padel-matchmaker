@@ -748,7 +748,6 @@ if menu == "Jornadas":
 
             with cols[col_idx]:
                 with st.container(border=True):
-
                     st.markdown(f"### 🎾 Partido {idx + 1}")
 
                     # -------- INFO BÁSICA --------
@@ -798,98 +797,39 @@ if menu == "Jornadas":
 
                     with col_p1:
                         st.markdown("**Pareja 1**")
-
                         opts = opciones_validas(get_pair_val(p1, 0))
                         val = get_pair_val(p1, 0)
-                        der1 = st.selectbox(
-                            "Der",
-                            opts,
-                            index=opts.index(val) if val in opts else 0,
-                            key=f"p1d_{jornada_index}_{idx}"
-                        )
+                        der1 = st.selectbox("Der", opts, index=opts.index(val) if val in opts else 0, key=f"p1d_{jornada_index}_{idx}")
 
                         opts = opciones_validas(get_pair_val(p1, 1))
                         val = get_pair_val(p1, 1)
-                        rev1 = st.selectbox(
-                            "Rev",
-                            opts,
-                            index=opts.index(val) if val in opts else 0,
-                            key=f"p1r_{jornada_index}_{idx}"
-                        )
+                        rev1 = st.selectbox("Rev", opts, index=opts.index(val) if val in opts else 0, key=f"p1r_{jornada_index}_{idx}")
 
                     with col_p2:
                         st.markdown("**Pareja 2**")
-
                         opts = opciones_validas(get_pair_val(p2, 0))
                         val = get_pair_val(p2, 0)
-                        der2 = st.selectbox(
-                            "Der",
-                            opts,
-                            index=opts.index(val) if val in opts else 0,
-                            key=f"p2d_{jornada_index}_{idx}"
-                        )
+                        der2 = st.selectbox("Der", opts, index=opts.index(val) if val in opts else 0, key=f"p2d_{jornada_index}_{idx}")
 
                         opts = opciones_validas(get_pair_val(p2, 1))
                         val = get_pair_val(p2, 1)
-                        rev2 = st.selectbox(
-                            "Rev",
-                            opts,
-                            index=opts.index(val) if val in opts else 0,
-                            key=f"p2r_{jornada_index}_{idx}"
-                        )
+                        rev2 = st.selectbox("Rev", opts, index=opts.index(val) if val in opts else 0, key=f"p2r_{jornada_index}_{idx}")
 
                     partido["pareja_1"] = [der1, rev1]
                     partido["pareja_2"] = [der2, rev2]
-                    
-# -------- RESULTADO --------
-st.markdown("**Resultado**")
-s1, s2, s3 = st.columns(3)
 
-partido["set1_p1"] = s1.number_input(
-    "Set1 P1",
-    min_value=0,
-    max_value=7,
-    value=partido.get("set1_p1", 0),
-    key=f"s1p1_{jornada_index}_{idx}"
-)
-partido["set1_p2"] = s1.number_input(
-    "Set1 P2",
-    min_value=0,
-    max_value=7,
-    value=partido.get("set1_p2", 0),
-    key=f"s1p2_{jornada_index}_{idx}"
-)
+                    # -------- RESULTADO (SETS) --------
+                    st.markdown("**Resultado**")
+                    s1, s2, s3 = st.columns(3)
 
-partido["set2_p1"] = s2.number_input(
-    "Set2 P1",
-    min_value=0,
-    max_value=7,
-    value=partido.get("set2_p1", 0),
-    key=f"s2p1_{jornada_index}_{idx}"
-)
-partido["set2_p2"] = s2.number_input(
-    "Set2 P2",
-    min_value=0,
-    max_value=7,
-    value=partido.get("set2_p2", 0),
-    key=f"s2p2_{jornada_index}_{idx}"
-)
+                    partido["set1_p1"] = s1.number_input("Set1 P1", 0, 7, partido.get("set1_p1", 0), key=f"s1p1_{jornada_index}_{idx}")
+                    partido["set1_p2"] = s1.number_input("Set1 P2", 0, 7, partido.get("set1_p2", 0), key=f"s1p2_{jornada_index}_{idx}")
 
-partido["set3_p1"] = s3.number_input(
-    "Set3 P1",
-    min_value=0,
-    max_value=7,
-    value=partido.get("set3_p1", 0),
-    key=f"s3p1_{jornada_index}_{idx}"
-)
-partido["set3_p2"] = s3.number_input(
-    "Set3 P2",
-    min_value=0,
-    max_value=7,
-    value=partido.get("set3_p2", 0),
-    key=f"s3p2_{jornada_index}_{idx}"
-)
+                    partido["set2_p1"] = s2.number_input("Set2 P1", 0, 7, partido.get("set2_p1", 0), key=f"s2p1_{jornada_index}_{idx}")
+                    partido["set2_p2"] = s2.number_input("Set2 P2", 0, 7, partido.get("set2_p2", 0), key=f"s2p2_{jornada_index}_{idx}")
 
+                    partido["set3_p1"] = s3.number_input("Set3 P1", 0, 7, partido.get("set3_p1", 0), key=f"s3p1_{jornada_index}_{idx}")
+                    partido["set3_p2"] = s3.number_input("Set3 P2", 0, 7, partido.get("set3_p2", 0), key=f"s3p2_{jornada_index}_{idx}")
 
                     # -------- GUARDAR --------
                     if st.button("Guardar", key=f"save_{idx}"):
