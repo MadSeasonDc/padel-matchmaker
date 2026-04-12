@@ -664,7 +664,6 @@ menu = st.sidebar.radio(
     "Menú",
     ["Jornadas", "Ranking", "Locations", "Import / Export", "PDF / PRINT"] )
 
-
 # ----------------------------
 # JORNADAS
 # ----------------------------
@@ -673,7 +672,6 @@ if menu == "Jornadas":
 
     st.header("📅 Jornadas")
 
-    # Asegurar jornadas
     if not data.get("jornadas"):
         data["jornadas"] = [{"numero": i + 1, "partidos": []} for i in range(7)]
         save_data(data)
@@ -686,12 +684,10 @@ if menu == "Jornadas":
 
     jornada = data["jornadas"][jornada_index]
     st.subheader(f"🗂 Jornada {jornada['numero']}")
-    st.write(f"Partidos: {len(jornada['partidos'])} / 5")
 
     jugadores = sorted(j["nombre"] for j in data["jugadores"])
     clubs = [loc["club"] for loc in data.get("locations", [])]
 
-    # Crear partidos vacíos si no existen
     if len(jornada["partidos"]) == 0:
         for _ in range(4):
             jornada["partidos"].append(partido_vacio())
@@ -703,27 +699,23 @@ if menu == "Jornadas":
         return p[pos] if len(p) > pos else ""
 
     def partido_tiene_jugadores_repetidos(partido):
-        jugadores_partido = []
+        js = []
         for pareja in ("pareja_1", "pareja_2"):
-            jugadores_partido.extend([j for j in partido.get(pareja, []) if j])
-        return len(jugadores_partido) != len(set(jugadores_partido))
+            js.extend([j for j in partido.get(pareja, []) if j])
+        return len(js) != len(set(js))
 
     def partido_incompleto(partido):
-        jugadores_partido = []
+        js = []
         for pareja in ("pareja_1", "pareja_2"):
-            jugadores_partido.extend([j for j in partido.get(pareja, []) if j])
-        return len(jugadores_partido) < 4
+            js.extend([j for j in partido.get(pareja, []) if j])
+        return len(js) < 4
 
     def hay_conflicto_pista_hora(jornada, partido_actual):
         for p in jornada.get("partidos", []):
             if p is partido_actual:
                 continue
             if (
-                p.get("lugar")
-                and p.get("pista")
-                and p.get("fecha")
-                and p.get("hora")
-                and p.get("lugar") == partido_actual.get("lugar")
+                p.get("lugar") == partido_actual.get("lugar")
                 and p.get("pista") == partido_actual.get("pista")
                 and p.get("fecha") == partido_actual.get("fecha")
                 and p.get("hora") == partido_actual.get("hora")
@@ -796,7 +788,6 @@ if menu == "Jornadas":
 
                     # -------- PAREJAS --------
                     col_p1, col_p2 = st.columns(2)
-
                     usados_otros = jugadores_usados_en_otros_partidos(jornada, partido)
 
                     p1 = partido.get("pareja_1", [])
@@ -807,43 +798,48 @@ if menu == "Jornadas":
 
                     with col_p1:
                         st.markdown("**Pareja 1**")
+
+                        opts = opciones_validas(get_pair_val(p1, 0))
+                        val = get_pair_val(p1, 0)
                         der1 = st.selectbox(
                             "Der",
-                            opciones_validas(get_pair_val(p1, 0)),
+                            opts,
+                            index=opts.index(val) if val in opts else 0,
                             key=f"p1d_{jornada_index}_{idx}"
                         )
+
+                        opts = opciones_validas(get_pair_val(p1, 1))
+                        val = get_pair_val(p1, 1)
                         rev1 = st.selectbox(
                             "Rev",
-                            opciones_validas(get_pair_val(p1, 1)),
+                            opts,
+                            index=opts.index(val) if val in opts else 0,
                             key=f"p1r_{jornada_index}_{idx}"
                         )
 
                     with col_p2:
                         st.markdown("**Pareja 2**")
+
+                        opts = opciones_validas(get_pair_val(p2, 0))
+                        val = get_pair_val(p2, 0)
                         der2 = st.selectbox(
                             "Der",
-                            opciones_validas(get_pair_val(p2, 0)),
+                            opts,
+                            index=opts.index(val) if val in opts else 0,
                             key=f"p2d_{jornada_index}_{idx}"
                         )
+
+                        opts = opciones_validas(get_pair_val(p2, 1))
+                        val = get_pair_val(p2, 1)
                         rev2 = st.selectbox(
                             "Rev",
-                            opciones_validas(get_pair_val(p2, 1)),
+                            opts,
+                            index=opts.index(val) if val in opts else 0,
                             key=f"p2r_{jornada_index}_{idx}"
                         )
 
                     partido["pareja_1"] = [der1, rev1]
                     partido["pareja_2"] = [der2, rev2]
-
-                    # -------- RESULTADO --------
-                    st.markdown("**Resultado**")
-                    s1, s2, s3 = st.columns(3)
-
-                    partido["set1_p1"] = s1.number_input("Set1 P1", 0, 7, partido.get("set1_p1", 0), key=f"s1p1_{idx}")
-                    partido["set1_p2"] = s1.number_input("Set1 P2", 0, 7, partido.get("set1_p2", 0), key=f"s1p2_{idx}")
-                    partido["set2_p1"] = s2.number_input("Set2 P1", 0, 7, partido.get("set2_p1", 0), key=f"s2p1_{idx}")
-                    partido["set2_p2"] = s2.number_input("Set2 P2", 0, 7, partido.get("set2_p2", 0), key=f"s2p2_{idx}")
-                    partido["set3_p1"] = s3.number_input("Set3 P1", 0, 7, partido.get("set3_p1", 0), key=f"s3p1_{idx}")
-                    partido["set3_p2"] = s3.number_input("Set3 P2", 0, 7, partido.get("set3_p2", 0), key=f"s3p2_{idx}")
 
                     # -------- GUARDAR --------
                     if st.button("Guardar", key=f"save_{idx}"):
@@ -868,6 +864,7 @@ if menu == "Jornadas":
                         else:
                             save_data(data)
                             st.success("✅ Guardado")
+                            
 
 # ----------------------------
 # RANKING
