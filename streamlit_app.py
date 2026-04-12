@@ -294,6 +294,7 @@ def save_data(data):
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
+
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
@@ -317,16 +318,12 @@ def generar_pdf_results(jornada):
     # ENCABEZADO
     # =========================
     c.setFont("Helvetica-Bold", 15)
-    c.drawCentredString(
-        width / 2,
-        y,
-        f"JORNADA {jornada['numero']} – RESULTS"
-    )
+    c.drawCentredString(width / 2, y, f"JORNADA {jornada['numero']} – RESULTS")
     y -= 18
 
     c.setFont("Helvetica", 11)
     c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
-    y -= 20
+    y -= 18
 
     c.line(left, y, right, y)
     y -= 20
@@ -335,19 +332,18 @@ def generar_pdf_results(jornada):
     # CUERPO – DIVISIONES
     # =========================
     for idx, partido in enumerate(jornada.get("partidos", [])):
-        # Salto de página si no cabe la celda
-        if y < footer_y + 150:
+        if y < footer_y + 170:
             c.showPage()
             y = top
 
-        cell_height = 125
+        cell_height = 150
         cell_top = y
 
-        # ---- Celda ----
+        # --- Celda ---
         c.rect(left, y - cell_height + 10, right - left, cell_height, stroke=1, fill=0)
         y -= 18
 
-        # ---- División ----
+        # --- División ---
         c.setFont("Helvetica-Bold", 11)
         c.drawString(left + 8, y, f"División {idx + 1}")
         y -= 14
@@ -357,7 +353,7 @@ def generar_pdf_results(jornada):
         lugar = partido.get("lugar", "")
         pista = partido.get("pista", "")
 
-        # ---- Fecha / Hora ----
+        # --- Fecha / Hora ---
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Fecha:")
         c.setFont("Helvetica", 9)
@@ -369,7 +365,7 @@ def generar_pdf_results(jornada):
         c.drawString(left + 265, y, hora)
         y -= 12
 
-        # ---- Lugar / Pista ----
+        # --- Lugar / Pista ---
         c.setFont("Helvetica-Bold", 9)
         c.drawString(left + 8, y, "Lugar:")
         c.setFont("Helvetica", 9)
@@ -379,48 +375,63 @@ def generar_pdf_results(jornada):
         c.drawString(left + 230, y, "Pista:")
         c.setFont("Helvetica", 9)
         c.drawString(left + 265, y, str(pista))
-        y -= 16
+        y -= 18
 
-        # ---- Equipos centrados ----
+        # --- Equipos ---
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
 
         eq1 = " / ".join(pareja_1) if len(pareja_1) == 2 else "—"
         eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
 
-        col_A_center = left + 140
-        col_B_center = left + 380
-        vs_center = left + 260
+        col_A = left + 110
+        col_B = left + 380
+        vs_x = (col_A + col_B) / 2
 
         c.setFont("Helvetica-Bold", 9)
-        c.drawCentredString(col_A_center, y, "Equipo A")
-        c.drawCentredString(col_B_center, y, "Equipo B")
+        c.drawCentredString(col_A, y, "Equipo A")
+        c.drawCentredString(col_B, y, "Equipo B")
         y -= 12
 
         c.setFont("Helvetica-Bold", 10)
-        c.drawCentredString(col_A_center, y, eq1)
-        c.drawCentredString(vs_center, y, "vs.")
-        c.drawCentredString(col_B_center, y, eq2)
-        y -= 16
+        c.drawCentredString(col_A, y, eq1)
+        c.drawCentredString(vs_x, y, "vs.")
+        c.drawCentredString(col_B, y, eq2)
+        y -= 20
 
-        # ---- RESULTADOS SETS ----
-        sets = []
-        for i in (1, 2, 3):
-            p1 = partido.get(f"set{i}_p1", 0)
-            p2 = partido.get(f"set{i}_p2", 0)
-            if p1 != 0 or p2 != 0:
-                sets.append(f"{p1}-{p2}")
+        # =========================
+        # TABLA DE SETS (estilo Excel)
+        # =========================
+        set_y = y
+        col_label = left + 40
+        col_set1 = left + 220
+        col_set2 = left + 300
+        col_set3 = left + 380
 
-        resultado = "   ".join(sets) if sets else "Sin resultado"
+        # Encabezados
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(col_set1, set_y, "Set 1")
+        c.drawString(col_set2, set_y, "Set 2")
+        c.drawString(col_set3, set_y, "Set 3")
+        set_y -= 12
 
-        c.setFont("Helvetica-Bold", 10)
-        c.drawCentredString(width / 2, y, resultado)
+        # Valores
+        c.setFont("Helvetica", 9)
+        c.drawString(col_label, set_y, "Equipo A")
+        c.drawString(col_set1, set_y, str(partido.get("set1_p1", "")))
+        c.drawString(col_set2, set_y, str(partido.get("set2_p1", "")))
+        c.drawString(col_set3, set_y, str(partido.get("set3_p1", "")))
+        set_y -= 12
 
-        # Posición siguiente celda
+        c.drawString(col_label, set_y, "Equipo B")
+        c.drawString(col_set1, set_y, str(partido.get("set1_p2", "")))
+        c.drawString(col_set2, set_y, str(partido.get("set2_p2", "")))
+        c.drawString(col_set3, set_y, str(partido.get("set3_p2", "")))
+
         y = cell_top - cell_height - 15
 
     # =========================
-    # FOOTER SUPERIOR
+    # FOOTER
     # =========================
     c.setFont("Helvetica", 8)
     c.drawRightString(
@@ -442,7 +453,6 @@ def generar_pdf_results(jornada):
     c.save()
     buffer.seek(0)
     return buffer
-
 
 
 
