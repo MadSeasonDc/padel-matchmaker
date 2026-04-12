@@ -323,7 +323,7 @@ def generar_pdf_results(jornada):
     y -= 16
 
     c.setFont("Helvetica", 11)
-    c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
+    c.drawCentredString(width / 2, y, "Liga de Pádel Atos MEV")
     y -= 14
 
     c.line(left, y, right, y)
@@ -508,7 +508,7 @@ def generar_pdf_schedule(jornada):
     # SUBTÍTULO
     # =========================
     c.setFont("Helvetica", 11)
-    c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
+    c.drawCentredString(width / 2, y, "Liga de Pádel Atos MEV")
     y -= 22
 
     # =========================
@@ -680,7 +680,7 @@ def generar_pdf_ranking(ranking_rows):
 
     # ---------- SUBTÍTULO ----------
     c.setFont("Helvetica", 11)
-    c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
+    c.drawCentredString(width / 2, y, "Liga de Pádel Atos MEV")
     y -= 22
 
     # ---------- LÍNEA ----------
