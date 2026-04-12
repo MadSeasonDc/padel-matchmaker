@@ -606,24 +606,12 @@ def generar_pdf_schedule(jornada):
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
+from reportlab.lib.utils import ImageReader
 from datetime import date
 import io
-import pandas as pd
 
 
-def generar_pdf_ranking(data):
-    """
-    data puede ser:
-    - una lista de diccionarios
-    - o un pandas.DataFrame
-    """
-
-    # ✅ Asegurar DataFrame (CLAVE para que no falle)
-    if not isinstance(data, pd.DataFrame):
-        df = pd.DataFrame(data)
-    else:
-        df = data
-
+def generar_pdf_ranking(ranking_rows):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
@@ -632,105 +620,109 @@ def generar_pdf_ranking(data):
     left = 2 * cm
     right = width - 2 * cm
     top = height - 2 * cm
+    footer_y = 2 * cm
+    y = top
+
+    # =========================
+    # LOGO
+    # =========================
+    logo_path = "assets/Logo padel.png"
+    logo_size = 2.2 * cm
+
+    c.drawImage(
+        ImageReader(logo_path),
+        left,
+        y - logo_size + 2,
+        width=logo_size,
+        height=logo_size,
+        mask="auto"
+    )
 
     # =========================
     # ENCABEZADO
     # =========================
-    y = top
-
-    c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(width / 2, y, "CLASIFICACIÓN RANKING")
-    y -= 18
+    c.setFont("Helvetica-Bold", 16)
+    c.drawCentredString(width / 2, y, "RANKING GENERAL")
+    y -= 25
 
     c.setFont("Helvetica", 11)
-    c.drawCentredString(width / 2, y, "Liga de Pádel")
-    y -= 16
-
-    c.setFont("Helvetica", 9)
-    c.drawCentredString(
-        width / 2,
-        y,
-        f"Fecha: {date.today().strftime('%d/%m/%Y')}"
-    )
-    y -= 20
+    c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
+    y -= 18
 
     c.line(left, y, right, y)
-    y -= 16
+    y -= 18
 
     # =========================
-    # TABLA
+    # CABECERA TABLA
     # =========================
-    headers = ["RK", "Jugador", "PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"]
-    widths = [1.2, 7.0, 1.2, 1.2, 1.2, 1.4, 1.4, 1.4, 1.4]
-
     c.setFont("Helvetica-Bold", 9)
-    x = left
-    for h, w in zip(headers, widths):
-        c.drawString(x, y, h)
-        x += w * cm
+
+    headers = ["RK", "Jugador", "PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"]
+    col_x = [
+        left,
+        left + 1.3 * cm,
+        left + 9.0 * cm,
+        left + 10.7 * cm,
+        left + 12.4 * cm,
+        left + 14.1 * cm,
+        left + 15.8 * cm,
+        left + 17.5 * cm,
+        left + 19.2 * cm,
+    ]
+
+    for header, x in zip(headers, col_x):
+        c.drawString(x, y, header)
 
     y -= 10
     c.line(left, y, right, y)
-    y -= 12
+    y -= 8
+
+    # =========================
+    # FILAS DE DATOS
+    # =========================
     c.setFont("Helvetica", 9)
 
-    # Zona reservada inferior
-    footer_y = 2 * cm
-    leyenda_y = footer_y + 4.5 * cm
-
-    for _, row in df.iterrows():
-        if y < leyenda_y + 15:
+    for row in ranking_rows:
+        if y < footer_y + 40:
             c.showPage()
             y = top
+
+            # Volver a dibujar cabecera en nueva página
+            c.setFont("Helvetica-Bold", 9)
+            for header, x in zip(headers, col_x):
+                c.drawString(x, y, header)
+            y -= 10
+            c.line(left, y, right, y)
+            y -= 8
             c.setFont("Helvetica", 9)
 
-        x = left
         values = [
-            str(row.get("RK", "")),
-            str(row.get("Jugador", "")),
-            str(row.get("PJ", "")),
-            str(row.get("PG", "")),
-            str(row.get("PP", "")),
-            str(row.get("Pts", "")),
-            str(row.get("JG", "")),
-            str(row.get("JP", "")),
-            f"{row.get('Dif', 0):+}"
+            row["RK"],
+            row["Jugador"],
+            row["PJ"],
+            row["PG"],
+            row["PP"],
+            row["Pts"],
+            row["JG"],
+            row["JP"],
+            row["Dif"],
         ]
 
-        for v, w in zip(values, widths):
-            c.drawString(x, y, v)
-            x += w * cm
+        for value, x in zip(values, col_x):
+            c.drawString(x, y, str(value))
 
-        y -= 12
-
-    # =========================
-    # LEYENDA (FIJA ABAJO)
-    # =========================
-    c.line(left, leyenda_y + 12, right, leyenda_y + 12)
-
-    c.setFont("Helvetica-Bold", 9)
-    c.drawString(left, leyenda_y, "Leyenda:")
-    y_leg = leyenda_y - 12
-
-    c.setFont("Helvetica", 9)
-    leyenda = [
-        "RK:   Ranking Actual",
-        "PJ:   Partidos Jugados",
-        "PG:   Partidos Ganados",
-        "PP:   Partidos Perdidos",
-        "Pts:  Puntos Totales",
-        "JG:   Juegos ganados",
-        "JP:   Juegos perdidos",
-        "Dif:  JG - JP"
-    ]
-
-    for l in leyenda:
-        c.drawString(left, y_leg, l)
-        y_leg -= 11
+        y -= 10
 
     # =========================
     # FOOTER
     # =========================
+    c.setFont("Helvetica", 8)
+    c.drawRightString(
+        right,
+        footer_y + 20,
+        f"Documento generado el {date.today().strftime('%d/%m/%Y')}"
+    )
+
     c.line(left, footer_y + 15, right, footer_y + 15)
 
     c.setFont("Helvetica-Oblique", 8)
@@ -740,10 +732,12 @@ def generar_pdf_ranking(data):
         "Report provided by Manolo ©. All rights reserved."
     )
 
+    # =========================
+    # FINAL
+    # =========================
     c.showPage()
     c.save()
     buffer.seek(0)
-
     return buffer
 
 
