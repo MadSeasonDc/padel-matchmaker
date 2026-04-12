@@ -716,7 +716,6 @@ def generar_pdf_ranking(ranking_rows):
     c.save()
     buffer.seek(0)
     return buffer
-``
 
 def obtener_ranking_df(data):
     import pandas as pd
