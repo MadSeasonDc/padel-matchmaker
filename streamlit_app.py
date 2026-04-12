@@ -602,15 +602,6 @@ def generar_pdf_schedule(jornada):
 
 
 
-
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
-from reportlab.lib.utils import ImageReader
-from datetime import date
-import io
-
-
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
@@ -624,7 +615,7 @@ def generar_pdf_ranking(ranking_rows):
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
-    # Márgenes
+    # Márgenes base
     left = 2 * cm
     right = width - 2 * cm
     top = height - 2 * cm
@@ -632,22 +623,22 @@ def generar_pdf_ranking(ranking_rows):
     y = top
 
     # =========================
-    # LOGO (SUBIDO)
+    # LOGO (MÁS ARRIBA, MÁS PEQUEÑO)
     # =========================
     logo_path = "assets/Logo padel.png"
-    logo_size = 2.2 * cm
+    logo_size = 2.0 * cm   # 🔽 un poco más pequeño
 
     c.drawImage(
         ImageReader(logo_path),
-        left,
-        y - logo_size + 10,   # ⬆️ logo más arriba
+        left - 0.3 * cm,         # 🔽 ligeramente más a la izquierda
+        y - logo_size + 16,      # 🔼 bastante más arriba
         width=logo_size,
         height=logo_size,
         mask="auto"
     )
 
     # =========================
-    # ENCABEZADO
+    # ENCABEZADO (NO TOCAR)
     # =========================
     c.setFont("Helvetica-Bold", 16)
     c.drawCentredString(width / 2, y, "RANKING GENERAL")
@@ -655,10 +646,13 @@ def generar_pdf_ranking(ranking_rows):
 
     c.setFont("Helvetica", 11)
     c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
-    y -= 18
+    y -= 20
 
+    # =========================
+    # LÍNEA SEPARADORA (MÁS ABAJO)
+    # =========================
     c.line(left, y, right, y)
-    y -= 26   # ⬇️ tabla más abajo (más aire)
+    y -= 32   # ⬇️ bajamos tabla un par de líneas más
 
     # =========================
     # CABECERA DE TABLA
