@@ -338,17 +338,17 @@ def generar_pdf_results(jornada):
     # CUERPO – DIVISIONES
     # =========================
     for idx, partido in enumerate(jornada.get("partidos", [])):
-        if y < footer_y + 135:
+        if y < footer_y + 120:
             c.showPage()
             y = top
 
-        # 🔽 REDUCCIÓN DE ALTURA
-        cell_height = 125
+        # 🔽 Altura ajustada al milímetro
+        cell_height = 118
         cell_top = y
 
         # --- Celda ---
         c.rect(left, y - cell_height + 8, right - left, cell_height, stroke=1, fill=0)
-        y -= 14
+        y -= 12
 
         # --- División ---
         c.setFont("Helvetica-Bold", 11)
@@ -382,10 +382,10 @@ def generar_pdf_results(jornada):
         c.drawString(left + 230, y, "Pista:")
         c.setFont("Helvetica", 9)
         c.drawString(left + 265, y, str(pista))
-        y -= 14
+        y -= 12
 
         # =========================
-        # NOMBRES DE EQUIPOS
+        # TABLA DE SETS (COMPACTA)
         # =========================
         pareja_1 = partido.get("pareja_1", [])
         pareja_2 = partido.get("pareja_2", [])
@@ -393,9 +393,6 @@ def generar_pdf_results(jornada):
         eq1 = " / ".join(pareja_1) if len(pareja_1) == 2 else "—"
         eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
 
-        # =========================
-        # TABLA DE SETS (COMPACTA)
-        # =========================
         set1_p1 = partido.get("set1_p1", 0)
         set1_p2 = partido.get("set1_p2", 0)
         set2_p1 = partido.get("set2_p1", 0)
@@ -416,7 +413,7 @@ def generar_pdf_results(jornada):
         c.drawString(col_set2, y, "Set 2")
         if mostrar_set3:
             c.drawString(col_set3, y, "Set 3")
-        y -= 10
+        y -= 9
 
         # Equipo A
         c.setFont("Helvetica-Bold", 9)
@@ -426,7 +423,7 @@ def generar_pdf_results(jornada):
         c.drawString(col_set2, y, str(set2_p1))
         if mostrar_set3:
             c.drawString(col_set3, y, str(set3_p1))
-        y -= 10
+        y -= 9
 
         # Equipo B
         c.setFont("Helvetica-Bold", 9)
@@ -437,8 +434,8 @@ def generar_pdf_results(jornada):
         if mostrar_set3:
             c.drawString(col_set3, y, str(set3_p2))
 
-        # 🔽 Menos espacio entre celdas
-        y = cell_top - cell_height - 10
+        # 🔽 Menos aire final
+        y = cell_top - cell_height - 8
 
     # =========================
     # FOOTER
@@ -463,7 +460,6 @@ def generar_pdf_results(jornada):
     c.save()
     buffer.seek(0)
     return buffer
-
 
 
 
