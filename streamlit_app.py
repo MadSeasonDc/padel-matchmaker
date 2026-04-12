@@ -611,6 +611,14 @@ from datetime import date
 import io
 
 
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from reportlab.lib.utils import ImageReader
+from datetime import date
+import io
+
+
 def generar_pdf_ranking(ranking_rows):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -624,7 +632,7 @@ def generar_pdf_ranking(ranking_rows):
     y = top
 
     # =========================
-    # LOGO
+    # LOGO (SUBIDO)
     # =========================
     logo_path = "assets/Logo padel.png"
     logo_size = 2.2 * cm
@@ -632,7 +640,7 @@ def generar_pdf_ranking(ranking_rows):
     c.drawImage(
         ImageReader(logo_path),
         left,
-        y - logo_size + 2,
+        y - logo_size + 10,   # ⬆️ logo más arriba
         width=logo_size,
         height=logo_size,
         mask="auto"
@@ -650,10 +658,10 @@ def generar_pdf_ranking(ranking_rows):
     y -= 18
 
     c.line(left, y, right, y)
-    y -= 18
+    y -= 26   # ⬇️ tabla más abajo (más aire)
 
     # =========================
-    # CABECERA TABLA
+    # CABECERA DE TABLA
     # =========================
     c.setFont("Helvetica-Bold", 9)
 
@@ -678,7 +686,7 @@ def generar_pdf_ranking(ranking_rows):
     y -= 8
 
     # =========================
-    # FILAS DE DATOS
+    # FILAS DE RANKING
     # =========================
     c.setFont("Helvetica", 9)
 
@@ -687,7 +695,7 @@ def generar_pdf_ranking(ranking_rows):
             c.showPage()
             y = top
 
-            # Volver a dibujar cabecera en nueva página
+            # Repetir cabecera en nueva página
             c.setFont("Helvetica-Bold", 9)
             for header, x in zip(headers, col_x):
                 c.drawString(x, y, header)
