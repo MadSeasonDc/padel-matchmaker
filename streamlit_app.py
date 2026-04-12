@@ -672,9 +672,19 @@ if menu == "Jornadas":
 
     st.header("📅 Jornadas")
 
-    if not data.get("jornadas"):
-        data["jornadas"] = [{"numero": i + 1, "partidos": []} for i in range(7)]
-        save_data(data)
+    # ---------- Asegurar jornadas ----------
+    if "jornadas" not in data:
+        data["jornadas"] = []
+
+    # Asegurar siempre 7 jornadas
+    for i in range(7):
+        if len(data["jornadas"]) <= i:
+            data["jornadas"].append({
+                "numero": i + 1,
+                "partidos": []
+            })
+
+    save_data(data)
 
     jornada_index = st.selectbox(
         "Selecciona una jornada",
@@ -685,35 +695,36 @@ if menu == "Jornadas":
     jornada = data["jornadas"][jornada_index]
     st.subheader(f"🗂 Jornada {jornada['numero']}")
 
-    # ----- AVISO JORNADA ESPECIAL (5 PARTIDOS) -----
-    num_partidos = len(jornada.get("partidos", []))
-    if num_partidos == 5:
+    # ---------- Aviso jornada especial ----------
+    if len(jornada["partidos"]) == 5:
         st.info("ℹ️ Esta jornada tiene 5 partidos (jornada especial)")
 
     jugadores = sorted(j["nombre"] for j in data["jugadores"])
     clubs = [loc["club"] for loc in data.get("locations", [])]
 
+    # ---------- Crear partidos si no existen ----------
     if len(jornada["partidos"]) == 0:
-        for _ in range(4):
+        num_partidos = 5 if jornada["numero"] == 1 else 4
+        for _ in range(num_partidos):
             jornada["partidos"].append(partido_vacio())
         save_data(data)
         st.rerun()
 
-    # -------- HELPERS --------
+    # ---------- HELPERS ----------
     def get_pair_val(p, pos):
         return p[pos] if len(p) > pos else ""
 
     def partido_tiene_jugadores_repetidos(partido):
-        js = []
+        jugadores = []
         for pareja in ("pareja_1", "pareja_2"):
-            js.extend([j for j in partido.get(pareja, []) if j])
-        return len(js) != len(set(js))
+            jugadores.extend([j for j in partido.get(pareja, []) if j])
+        return len(jugadores) != len(set(jugadores))
 
     def partido_incompleto(partido):
-        js = []
+        jugadores = []
         for pareja in ("pareja_1", "pareja_2"):
-            js.extend([j for j in partido.get(pareja, []) if j])
-        return len(js) < 4
+            jugadores.extend([j for j in partido.get(pareja, []) if j])
+        return len(jugadores) < 4
 
     def hay_conflicto_pista_hora(jornada, partido_actual):
         for p in jornada.get("partidos", []):
@@ -739,7 +750,7 @@ if menu == "Jornadas":
                         usados.add(j)
         return usados
 
-    # -------- GRID --------
+    # ---------- GRID DE PARTIDOS ----------
     filas = [
         jornada["partidos"][i:i + 2]
         for i in range(0, len(jornada["partidos"]), 2)
@@ -751,11 +762,10 @@ if menu == "Jornadas":
         for col_idx, partido in enumerate(fila):
             idx = fila_idx * 2 + col_idx
 
-            with cols[col_idx]:
-                with st.container(border=True):
+            with colswith st.container(border=True):
                     st.markdown(f"### 🎾 Partido {idx + 1}")
 
-                    # -------- INFO BÁSICA --------
+                    # ---------- INFO BÁSICA ----------
                     c1, c2, c3, c4 = st.columns(4)
 
                     partido["lugar"] = c1.selectbox(
@@ -779,11 +789,7 @@ if menu == "Jornadas":
                         fecha_val = datetime.date.today()
 
                     partido["fecha"] = str(
-                        c3.date_input(
-                            "Fecha",
-                            fecha_val,
-                            key=f"fecha_{jornada_index}_{idx}"
-                        )
+                        c3.date_input("Fecha", fecha_val, key=f"fecha_{jornada_index}_{idx}")
                     )
 
                     horas = [f"{h:02d}:{m:02d}" for h in range(8, 23) for m in (0, 30)]
@@ -794,7 +800,7 @@ if menu == "Jornadas":
                         key=f"hora_{jornada_index}_{idx}"
                     )
 
-                    # -------- PAREJAS --------
+                    # ---------- PAREJAS ----------
                     col_p1, col_p2 = st.columns(2)
                     usados_otros = jugadores_usados_en_otros_partidos(jornada, partido)
 
@@ -808,99 +814,50 @@ if menu == "Jornadas":
                         st.markdown("**Pareja 1**")
                         opts = opciones_validas(get_pair_val(p1, 0))
                         val = get_pair_val(p1, 0)
-                        der1 = st.selectbox(
-                            "Der",
-                            opts,
-                            index=opts.index(val) if val in opts else 0,
-                            key=f"p1d_{jornada_index}_{idx}"
-                        )
+                        der1 = st.selectbox("Der", opts, opts.index(val) if val in opts else 0, key=f"p1d_{jornada_index}_{idx}")
 
                         opts = opciones_validas(get_pair_val(p1, 1))
                         val = get_pair_val(p1, 1)
-                        rev1 = st.selectbox(
-                            "Rev",
-                            opts,
-                            index=opts.index(val) if val in opts else 0,
-                            key=f"p1r_{jornada_index}_{idx}"
-                        )
+                        rev1 = st.selectbox("Rev", opts, opts.index(val) if val in opts else 0, key=f"p1r_{jornada_index}_{idx}")
 
                     with col_p2:
                         st.markdown("**Pareja 2**")
                         opts = opciones_validas(get_pair_val(p2, 0))
                         val = get_pair_val(p2, 0)
-                        der2 = st.selectbox(
-                            "Der",
-                            opts,
-                            index=opts.index(val) if val in opts else 0,
-                            key=f"p2d_{jornada_index}_{idx}"
-                        )
+                        der2 = st.selectbox("Der", opts, opts.index(val) if val in opts else 0, key=f"p2d_{jornada_index}_{idx}")
 
                         opts = opciones_validas(get_pair_val(p2, 1))
                         val = get_pair_val(p2, 1)
-                        rev2 = st.selectbox(
-                            "Rev",
-                            opts,
-                            index=opts.index(val) if val in opts else 0,
-                            key=f"p2r_{jornada_index}_{idx}"
-                        )
+                        rev2 = st.selectbox("Rev", opts, opts.index(val) if val in opts else 0, key=f"p2r_{jornada_index}_{idx}")
 
                     partido["pareja_1"] = [der1, rev1]
                     partido["pareja_2"] = [der2, rev2]
 
-                    # -------- RESULTADO (SETS) --------
+                    # ---------- RESULTADO ----------
                     st.markdown("**Resultado**")
                     s1, s2, s3 = st.columns(3)
 
-                    partido["set1_p1"] = s1.number_input(
-                        "Set1 P1", 0, 7, partido.get("set1_p1", 0),
-                        key=f"s1p1_{jornada_index}_{idx}"
-                    )
-                    partido["set1_p2"] = s1.number_input(
-                        "Set1 P2", 0, 7, partido.get("set1_p2", 0),
-                        key=f"s1p2_{jornada_index}_{idx}"
-                    )
+                    partido["set1_p1"] = s1.number_input("Set1 P1", 0, 7, partido.get("set1_p1", 0), key=f"s1p1_{jornada_index}_{idx}")
+                    partido["set1_p2"] = s1.number_input("Set1 P2", 0, 7, partido.get("set1_p2", 0), key=f"s1p2_{jornada_index}_{idx}")
 
-                    partido["set2_p1"] = s2.number_input(
-                        "Set2 P1", 0, 7, partido.get("set2_p1", 0),
-                        key=f"s2p1_{jornada_index}_{idx}"
-                    )
-                    partido["set2_p2"] = s2.number_input(
-                        "Set2 P2", 0, 7, partido.get("set2_p2", 0),
-                        key=f"s2p2_{jornada_index}_{idx}"
-                    )
+                    partido["set2_p1"] = s2.number_input("Set2 P1", 0, 7, partido.get("set2_p1", 0), key=f"s2p1_{jornada_index}_{idx}")
+                    partido["set2_p2"] = s2.number_input("Set2 P2", 0, 7, partido.get("set2_p2", 0), key=f"s2p2_{jornada_index}_{idx}")
 
-                    partido["set3_p1"] = s3.number_input(
-                        "Set3 P1", 0, 7, partido.get("set3_p1", 0),
-                        key=f"s3p1_{jornada_index}_{idx}"
-                    )
-                    partido["set3_p2"] = s3.number_input(
-                        "Set3 P2", 0, 7, partido.get("set3_p2", 0),
-                        key=f"s3p2_{jornada_index}_{idx}"
-                    )
+                    partido["set3_p1"] = s3.number_input("Set3 P1", 0, 7, partido.get("set3_p1", 0), key=f"s3p1_{jornada_index}_{idx}")
+                    partido["set3_p2"] = s3.number_input("Set3 P2", 0, 7, partido.get("set3_p2", 0), key=f"s3p2_{jornada_index}_{idx}")
 
-                    # -------- GUARDAR --------
-                    if st.button("Guardar", key=f"save_{idx}"):
-
+                    # ---------- GUARDAR ----------
+                    if st.button("Guardar", key=f"save_{jornada_index}_{idx}"):
                         if partido_incompleto(partido):
-                            st.error(
-                                "Casi... son 4 jugadores para Guardar… "
-                                "tú puedes, que no es subir el Everest en chanclas 🏔️🎾"
-                            )
-
+                            st.error("Casi... son 4 jugadores para Guardar… tú puedes 🏔️🎾")
                         elif hay_conflicto_pista_hora(jornada, partido):
-                            st.error(
-                                "Dos partidos, misma pista, misma hora… "
-                                "¿pádel o Fútbol 7? 😂"
-                            )
-
+                            st.error("Dos partidos, misma pista y hora… ¿pádel o Fútbol 7? 😂")
                         elif partido_tiene_jugadores_repetidos(partido):
-                            st.error(
-                                "❌ No repitas jugadores, que no es el Street Fighter 😂"
-                            )
-
+                            st.error("❌ No repitas jugadores, que no es el Street Fighter 😂")
                         else:
                             save_data(data)
                             st.success("✅ Guardado")
+
 
 # ----------------------------
 # RANKING
