@@ -294,6 +294,158 @@ def save_data(data):
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import cm
+from datetime import date
+import io
+
+
+def generar_pdf_results(jornada):
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    # Márgenes
+    left = 2 * cm
+    right = width - 2 * cm
+    top = height - 2 * cm
+    footer_y = 2 * cm
+    y = top
+
+    # =========================
+    # ENCABEZADO
+    # =========================
+    c.setFont("Helvetica-Bold", 15)
+    c.drawCentredString(
+        width / 2,
+        y,
+        f"JORNADA {jornada['numero']} – RESULTS"
+    )
+    y -= 18
+
+    c.setFont("Helvetica", 11)
+    c.drawCentredString(width / 2, y, "Liga de Pádel Empresa")
+    y -= 20
+
+    c.line(left, y, right, y)
+    y -= 20
+
+    # =========================
+    # CUERPO – DIVISIONES
+    # =========================
+    for idx, partido in enumerate(jornada.get("partidos", [])):
+        # Salto de página si no cabe la celda
+        if y < footer_y + 150:
+            c.showPage()
+            y = top
+
+        cell_height = 125
+        cell_top = y
+
+        # ---- Celda ----
+        c.rect(left, y - cell_height + 10, right - left, cell_height, stroke=1, fill=0)
+        y -= 18
+
+        # ---- División ----
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(left + 8, y, f"División {idx + 1}")
+        y -= 14
+
+        fecha = partido.get("fecha", "")
+        hora = partido.get("hora", "")
+        lugar = partido.get("lugar", "")
+        pista = partido.get("pista", "")
+
+        # ---- Fecha / Hora ----
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(left + 8, y, "Fecha:")
+        c.setFont("Helvetica", 9)
+        c.drawString(left + 45, y, fecha)
+
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(left + 230, y, "Hora:")
+        c.setFont("Helvetica", 9)
+        c.drawString(left + 265, y, hora)
+        y -= 12
+
+        # ---- Lugar / Pista ----
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(left + 8, y, "Lugar:")
+        c.setFont("Helvetica", 9)
+        c.drawString(left + 45, y, lugar)
+
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(left + 230, y, "Pista:")
+        c.setFont("Helvetica", 9)
+        c.drawString(left + 265, y, str(pista))
+        y -= 16
+
+        # ---- Equipos centrados ----
+        pareja_1 = partido.get("pareja_1", [])
+        pareja_2 = partido.get("pareja_2", [])
+
+        eq1 = " / ".join(pareja_1) if len(pareja_1) == 2 else "—"
+        eq2 = " / ".join(pareja_2) if len(pareja_2) == 2 else "—"
+
+        col_A_center = left + 140
+        col_B_center = left + 380
+        vs_center = left + 260
+
+        c.setFont("Helvetica-Bold", 9)
+        c.drawCentredString(col_A_center, y, "Equipo A")
+        c.drawCentredString(col_B_center, y, "Equipo B")
+        y -= 12
+
+        c.setFont("Helvetica-Bold", 10)
+        c.drawCentredString(col_A_center, y, eq1)
+        c.drawCentredString(vs_center, y, "vs.")
+        c.drawCentredString(col_B_center, y, eq2)
+        y -= 16
+
+        # ---- RESULTADOS SETS ----
+        sets = []
+        for i in (1, 2, 3):
+            p1 = partido.get(f"set{i}_p1", 0)
+            p2 = partido.get(f"set{i}_p2", 0)
+            if p1 != 0 or p2 != 0:
+                sets.append(f"{p1}-{p2}")
+
+        resultado = "   ".join(sets) if sets else "Sin resultado"
+
+        c.setFont("Helvetica-Bold", 10)
+        c.drawCentredString(width / 2, y, resultado)
+
+        # Posición siguiente celda
+        y = cell_top - cell_height - 15
+
+    # =========================
+    # FOOTER SUPERIOR
+    # =========================
+    c.setFont("Helvetica", 8)
+    c.drawRightString(
+        right,
+        footer_y + 22,
+        f"Documento generado el {date.today().strftime('%d/%m/%Y')}"
+    )
+
+    c.line(left, footer_y + 15, right, footer_y + 15)
+
+    c.setFont("Helvetica-Oblique", 8)
+    c.drawCentredString(
+        width / 2,
+        footer_y,
+        "Report provided by Manolo ©. All rights reserved."
+    )
+
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+    return buffer
+
+
+
+
 
 
 
@@ -1273,7 +1425,6 @@ elif menu == "PDF / PRINT":
 
         with col_right:
             if st.button("⚙️ Generar", key="schedule_generar"):
-                # Obtener índice de la jornada seleccionada
                 jornada_num = int(jornada_schedule.split()[-1]) - 1
                 jornada_data = data["jornadas"][jornada_num]
 
@@ -1303,9 +1454,16 @@ elif menu == "PDF / PRINT":
 
         with col_right:
             if st.button("⚙️ Generar", key="results_generar"):
-                st.info(
-                    f"Generar Results para {jornada_results} "
-                    "(pendiente de implementar)"
+                jornada_num = int(jornada_results.split()[-1]) - 1
+                jornada_data = data["jornadas"][jornada_num]
+
+                pdf_buffer = generar_pdf_results(jornada_data)
+
+                st.download_button(
+                    label="⬇️ Descargar Results PDF",
+                    data=pdf_buffer,
+                    file_name=f"results_jornada_{jornada_data['numero']}.pdf",
+                    mime="application/pdf"
                 )
 
     # -------- RESULTS BOOK (EASTER EGG) --------
@@ -1313,3 +1471,4 @@ elif menu == "PDF / PRINT":
 
     if st.button("📕 Generate Results Book"):
         mostrar_result_book_easter_egg()
+
