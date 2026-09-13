@@ -21,7 +21,6 @@ JUGADORES_INICIALES = [
     "Jaime Baró",
     "Manolo Díaz",
     "Rafa",
-    "Ruben Polanco",
     "Varo"
 ]
 
