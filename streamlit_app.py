@@ -1485,35 +1485,23 @@ if menu == "Jornadas":
     # ----------------------------
     filas_partidos = [
         jornada["partidos"][i:i + 2]
-        for i in range(
-            0,
-            len(jornada["partidos"]),
-            2
-        )
+        for i in range(0, len(jornada["partidos"]), 2)
     ]
 
-    for fila_index, fila_partidos in enumerate(
-        filas_partidos
-    ):
+    for fila_index, fila_partidos in enumerate(filas_partidos):
         columnas = st.columns(2)
 
-        for columna_index, partido in enumerate(
-            fila_partidos
-        ):
-            partido_index = (
-                fila_index * 2
-                + columna_index
-            )
+        for columna_index, partido in enumerate(fila_partidos):
+            partido_index = fila_index * 2 + columna_index
 
-                        with columnas[columna_index]:
-                with st.container(border=True):
+            with columnaswith st.container(border=True):
                     st.markdown(
-                        (
-                            "### 🎾 Partido "
-                            f"{partido_index + 1}"
-                        )
+                        f"### 🎾 Partido {partido_index + 1}"
                     )
 
+                    # ----------------------------
+                    # INFORMACIÓN BÁSICA
+                    # ----------------------------
                     # ----------------------------
                     # INFORMACIÓN BÁSICA
                     # ----------------------------
