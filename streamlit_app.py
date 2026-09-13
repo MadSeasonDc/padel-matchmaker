@@ -38,8 +38,8 @@ LOCATIONS_INICIALES = [
         "email": "N/A",
         "inout": "Outdoor",
         "wall": "Wall",
-        "price": "Un abrazo",
-        "comments": "Aparte del abrazo una cerveza siempre agradece"
+        "price": "La Voluntad: Cerveza",
+        "comments": ""
     },
     {
         "club": "Factory Fit",
