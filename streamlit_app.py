@@ -10,32 +10,23 @@ import io
 DATA_FILE = "padel_data.json"
 
 JUGADORES_INICIALES = [
-    "Antonio Seoane",
-    "Carlos Ortiz",
-    "Nacho Moros",
-    "Nacho Urbano",
-    "Adrian Gomez",
-    "Alvaro Sarmiento",
-    "Manuel Díaz", 
-    "Patricia Seoane",
-    "Julio Mendez",
-    "Jose Luis Pozuelo",
-    "Juan Carmona",
-    "Jesus Fernandez",
-    "Jordi Safont",
-    "Bea Jaen",
-    "Cecile Autran",
-    "Ester Martin",
-    "Graciela Martinez",
-    "Alicia Soriano",
-    "Lela Bekauri",
-    "Oriol Palacios"
+    "Caique Freitas",
+    "Carlitos Diego",
+    "Carlos Alto",
+    "Curro Gil",
+    "Dani Miguez",
+    "Enzo Di Constanzo",
+    "Erik",
+    "Jaime Baró",
+    "Manolo Díaz",
+    "Nog",
+    "Rafa Vega",
+    "Ruben Polanco",
+    "Varo Mar"
 ]
 
-JUGADORES_LESIONADOS = {
-    "Ester Martin",
-    "Jose Luis Pozuelo"
-}
+PARTICIPANTES = JUGADORES_INICIALES.copy()
+
 
 
 LOCATIONS_INICIALES = [
@@ -1247,17 +1238,17 @@ elif menu == "Ranking":
     # ----------------------------
     # ICONOS
     # ----------------------------
-    def nombre_con_icono(row):
-        nombre = row["Jugador"]
-        if nombre in JUGADORES_LESIONADOS:
-            nombre = f"{nombre} ➕"
-        if row["RK"] == 1:
-            return f"🥇 {nombre}"
-        elif row["RK"] == 2:
-            return f"🥈 {nombre}"
-        elif row["RK"] == 3:
-            return f"🥉 {nombre}"
-        return nombre
+ def nombre_con_icono(row):
+    nombre = row["Jugador"]
+
+    if row["RK"] == 1:
+        return f"🥇 {nombre}"
+    elif row["RK"] == 2:
+        return f"🥈 {nombre}"
+    elif row["RK"] == 3:
+        return f"🥉 {nombre}"
+
+    return nombre
 
     df["Jugador"] = df.apply(nombre_con_icono, axis=1)
 
@@ -1330,7 +1321,6 @@ elif menu == "Ranking":
   <li><strong>JG</strong> → Juegos ganados</li>
   <li><strong>JP</strong> → Juegos perdidos</li>
   <li><strong>Dif</strong> → Diferencia de juegos (<strong>JG − JP</strong>)</li>
-  <li>➕ → <strong>No participan más.</strong></li>
 </ul>
 </div>
 """,
