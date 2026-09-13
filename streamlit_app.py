@@ -190,6 +190,225 @@ def calcular_ranking_rows(data):
 
     return filas
 
+def analizar_compatibilidad(data, jugador_1, jugador_2):
+    juntos = {
+        "partidos": 0,
+        "victorias": 0,
+        "derrotas": 0,
+        "empates": 0,
+        "jg": 0,
+        "jp": 0
+    }
+
+    enfrentados = {
+        "partidos": 0,
+        "victorias_j1": 0,
+        "victorias_j2": 0,
+        "empates": 0,
+        "jg_j1": 0,
+        "jp_j1": 0,
+        "jg_j2": 0,
+        "jp_j2": 0
+    }
+
+    historial_juntos = []
+    historial_enfrentados = []
+
+    for jornada in data.get("jornadas", []):
+        numero_jornada = jornada.get("numero", 0)
+
+        for numero_partido, partido in enumerate(
+            jornada.get("partidos", []),
+            start=1
+        ):
+            pareja_1 = [
+                jugador
+                for jugador in partido.get("pareja_1", [])
+                if jugador
+            ]
+
+            pareja_2 = [
+                jugador
+                for jugador in partido.get("pareja_2", [])
+                if jugador
+            ]
+
+            if len(pareja_1) != 2 or len(pareja_2) != 2:
+                continue
+
+            set1_p1 = partido.get("set1_p1", 0)
+            set1_p2 = partido.get("set1_p2", 0)
+            set2_p1 = partido.get("set2_p1", 0)
+            set2_p2 = partido.get("set2_p2", 0)
+            set3_p1 = partido.get("set3_p1", 0)
+            set3_p2 = partido.get("set3_p2", 0)
+
+            set1_jugado = (set1_p1 + set1_p2) > 0
+            set2_jugado = (set2_p1 + set2_p2) > 0
+            set3_jugado = (set3_p1 + set3_p2) > 0
+
+            if not set1_jugado:
+                continue
+
+            sets_p1 = 0
+            sets_p2 = 0
+
+            if set1_p1 > set1_p2:
+                sets_p1 += 1
+            elif set1_p2 > set1_p1:
+                sets_p2 += 1
+
+            if set2_jugado:
+                if set2_p1 > set2_p2:
+                    sets_p1 += 1
+                elif set2_p2 > set2_p1:
+                    sets_p2 += 1
+
+            juegos_p1 = set1_p1 + set2_p1 + set3_p1
+            juegos_p2 = set1_p2 + set2_p2 + set3_p2
+
+            ganador = None
+
+            if set3_jugado:
+                if set3_p1 > set3_p2:
+                    ganador = 1
+                elif set3_p2 > set3_p1:
+                    ganador = 2
+            elif sets_p1 > sets_p2:
+                ganador = 1
+            elif sets_p2 > sets_p1:
+                ganador = 2
+
+            resultado_texto = (
+                f"{set1_p1}-{set1_p2}"
+            )
+
+            if set2_jugado:
+                resultado_texto += f" / {set2_p1}-{set2_p2}"
+
+            if set3_jugado:
+                resultado_texto += f" / {set3_p1}-{set3_p2}"
+
+            # ---------------------------------
+            # PARTIDOS JUGADOS JUNTOS
+            # ---------------------------------
+            juntos_en_pareja_1 = (
+                jugador_1 in pareja_1 and
+                jugador_2 in pareja_1
+            )
+
+            juntos_en_pareja_2 = (
+                jugador_1 in pareja_2 and
+                jugador_2 in pareja_2
+            )
+
+            if juntos_en_pareja_1 or juntos_en_pareja_2:
+                juntos["partidos"] += 1
+
+                if juntos_en_pareja_1:
+                    juntos["jg"] += juegos_p1
+                    juntos["jp"] += juegos_p2
+                    pareja_seleccionada = 1
+                else:
+                    juntos["jg"] += juegos_p2
+                    juntos["jp"] += juegos_p1
+                    pareja_seleccionada = 2
+
+                if ganador is None:
+                    juntos["empates"] += 1
+                    resultado_pareja = "Empate"
+                elif ganador == pareja_seleccionada:
+                    juntos["victorias"] += 1
+                    resultado_pareja = "Victoria"
+                else:
+                    juntos["derrotas"] += 1
+                    resultado_pareja = "Derrota"
+
+                historial_juntos.append({
+                    "Jornada": numero_jornada,
+                    "Partido": numero_partido,
+                    "Resultado": resultado_texto,
+                    "Balance": resultado_pareja
+                })
+
+            # ---------------------------------
+            # ENFRENTAMIENTOS DIRECTOS
+            # ---------------------------------
+            j1_en_p1 = jugador_1 in pareja_1
+            j1_en_p2 = jugador_1 in pareja_2
+            j2_en_p1 = jugador_2 in pareja_1
+            j2_en_p2 = jugador_2 in pareja_2
+
+            se_enfrentaron = (
+                (j1_en_p1 and j2_en_p2) or
+                (j1_en_p2 and j2_en_p1)
+            )
+
+            if se_enfrentaron:
+                enfrentados["partidos"] += 1
+
+                if j1_en_p1:
+                    enfrentados["jg_j1"] += juegos_p1
+                    enfrentados["jp_j1"] += juegos_p2
+                    enfrentados["jg_j2"] += juegos_p2
+                    enfrentados["jp_j2"] += juegos_p1
+
+                    pareja_j1 = 1
+                    pareja_j2 = 2
+                else:
+                    enfrentados["jg_j1"] += juegos_p2
+                    enfrentados["jp_j1"] += juegos_p1
+                    enfrentados["jg_j2"] += juegos_p1
+                    enfrentados["jp_j2"] += juegos_p2
+
+                    pareja_j1 = 2
+                    pareja_j2 = 1
+
+                if ganador is None:
+                    enfrentados["empates"] += 1
+                    ganador_texto = "Empate"
+                elif ganador == pareja_j1:
+                    enfrentados["victorias_j1"] += 1
+                    ganador_texto = jugador_1
+                elif ganador == pareja_j2:
+                    enfrentados["victorias_j2"] += 1
+                    ganador_texto = jugador_2
+
+                historial_enfrentados.append({
+                    "Jornada": numero_jornada,
+                    "Partido": numero_partido,
+                    "Resultado": resultado_texto,
+                    "Ganador": ganador_texto
+                })
+
+    if juntos["partidos"] > 0:
+        compatibilidad = round(
+            juntos["victorias"] / juntos["partidos"] * 100,
+            1
+        )
+    else:
+        compatibilidad = 0.0
+
+    juntos["compatibilidad"] = compatibilidad
+    juntos["diferencia"] = juntos["jg"] - juntos["jp"]
+
+    enfrentados["dif_j1"] = (
+        enfrentados["jg_j1"] -
+        enfrentados["jp_j1"]
+    )
+
+    enfrentados["dif_j2"] = (
+        enfrentados["jg_j2"] -
+        enfrentados["jp_j2"]
+    )
+
+    return {
+        "juntos": juntos,
+        "enfrentados": enfrentados,
+        "historial_juntos": historial_juntos,
+        "historial_enfrentados": historial_enfrentados
+    }
+
 def partido_vacio():
     return {
         "pareja_1": [],
@@ -915,7 +1134,15 @@ st.title("🏓 Pádel Matchmaker")
 
 menu = st.sidebar.radio(
     "Menú",
-    ["Jornadas", "Ranking", "Locations", "Import / Export", "PDF / PRINT"] )
+    [
+        "Jornadas",
+        "Ranking",
+        "Compatibilidad",
+        "Locations",
+        "Import / Export",
+        "PDF / PRINT"
+    ]
+)
 
 
 # ----------------------------
@@ -1364,6 +1591,263 @@ elif menu == "Ranking":
 - ✅ **Empate sin tercer set (1‑1)** → **1 punto por jugador**
 """
     )
+
+# ----------------------------
+# COMPATIBILIDAD
+# ----------------------------
+elif menu == "Compatibilidad":
+    import pandas as pd
+
+    st.header("🤝 Compatibilidad")
+
+    st.markdown(
+        """
+Selecciona dos jugadores para analizar:
+
+- Su rendimiento cuando forman pareja.
+- Las veces que se han enfrentado.
+- El balance de victorias, derrotas y juegos.
+"""
+    )
+
+    jugadores_compatibilidad = sorted(
+        jugador["nombre"]
+        for jugador in data.get("jugadores", [])
+    )
+
+    if len(jugadores_compatibilidad) < 2:
+        st.warning(
+            "Se necesitan al menos dos jugadores para realizar la comparación."
+        )
+        st.stop()
+
+    selector_1, selector_2 = st.columns(2)
+
+    with selector_1:
+        jugador_1 = st.selectbox(
+            "Jugador 1",
+            jugadores_compatibilidad,
+            key="compatibilidad_jugador_1"
+        )
+
+    jugadores_para_selector_2 = [
+        jugador
+        for jugador in jugadores_compatibilidad
+        if jugador != jugador_1
+    ]
+
+    with selector_2:
+        jugador_2 = st.selectbox(
+            "Jugador 2",
+            jugadores_para_selector_2,
+            key="compatibilidad_jugador_2"
+        )
+
+    resultado = analizar_compatibilidad(
+        data,
+        jugador_1,
+        jugador_2
+    )
+
+    juntos = resultado["juntos"]
+    enfrentados = resultado["enfrentados"]
+
+    st.markdown("---")
+
+    # ----------------------------
+    # COMPATIBILIDAD COMO PAREJA
+    # ----------------------------
+    st.subheader("👥 Rendimiento como pareja")
+
+    st.markdown(
+        f"### {jugador_1} + {jugador_2}"
+    )
+
+    compatibilidad = juntos["compatibilidad"]
+
+    if compatibilidad >= 70:
+        st.success(
+            f"Compatibilidad: {compatibilidad:.1f}%"
+        )
+    elif compatibilidad >= 40:
+        st.warning(
+            f"Compatibilidad: {compatibilidad:.1f}%"
+        )
+    else:
+        st.error(
+            f"Compatibilidad: {compatibilidad:.1f}%"
+        )
+
+    st.progress(
+        min(max(compatibilidad / 100, 0.0), 1.0)
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric(
+        "Partidos juntos",
+        juntos["partidos"]
+    )
+
+    c2.metric(
+        "Victorias",
+        juntos["victorias"]
+    )
+
+    c3.metric(
+        "Derrotas",
+        juntos["derrotas"]
+    )
+
+    c4.metric(
+        "Empates",
+        juntos["empates"]
+    )
+
+    c5, c6, c7 = st.columns(3)
+
+    c5.metric(
+        "Juegos ganados",
+        juntos["jg"]
+    )
+
+    c6.metric(
+        "Juegos perdidos",
+        juntos["jp"]
+    )
+
+    c7.metric(
+        "Diferencia",
+        juntos["diferencia"]
+    )
+
+    if juntos["partidos"] == 0:
+        st.info(
+            "Estos jugadores todavía no han jugado juntos."
+        )
+
+    if resultado["historial_juntos"]:
+        with st.expander(
+            "Ver partidos jugados juntos",
+            expanded=False
+        ):
+            df_juntos = pd.DataFrame(
+                resultado["historial_juntos"]
+            )
+
+            st.dataframe(
+                df_juntos,
+                use_container_width=True,
+                hide_index=True
+            )
+
+    st.markdown("---")
+
+    # ----------------------------
+    # ENFRENTAMIENTOS DIRECTOS
+    # ----------------------------
+    st.subheader("⚔️ Enfrentamientos directos")
+
+    e1, e2, e3, e4 = st.columns(4)
+
+    e1.metric(
+        "Enfrentamientos",
+        enfrentados["partidos"]
+    )
+
+    e2.metric(
+        f"Victorias de {jugador_1}",
+        enfrentados["victorias_j1"]
+    )
+
+    e3.metric(
+        f"Victorias de {jugador_2}",
+        enfrentados["victorias_j2"]
+    )
+
+    e4.metric(
+        "Empates",
+        enfrentados["empates"]
+    )
+
+    st.markdown("#### Balance de juegos")
+
+    balance_j1, balance_j2 = st.columns(2)
+
+    with balance_j1:
+        with st.container(border=True):
+            st.markdown(
+                f"### {jugador_1}"
+            )
+
+            b1, b2, b3 = st.columns(3)
+
+            b1.metric(
+                "JG",
+                enfrentados["jg_j1"]
+            )
+
+            b2.metric(
+                "JP",
+                enfrentados["jp_j1"]
+            )
+
+            b3.metric(
+                "Dif",
+                enfrentados["dif_j1"]
+            )
+
+    with balance_j2:
+        with st.container(border=True):
+            st.markdown(
+                f"### {jugador_2}"
+            )
+
+            b1, b2, b3 = st.columns(3)
+
+            b1.metric(
+                "JG",
+                enfrentados["jg_j2"]
+            )
+
+            b2.metric(
+                "JP",
+                enfrentados["jp_j2"]
+            )
+
+            b3.metric(
+                "Dif",
+                enfrentados["dif_j2"]
+            )
+
+    if enfrentados["partidos"] == 0:
+        st.info(
+            "Estos jugadores todavía no se han enfrentado."
+        )
+
+    if resultado["historial_enfrentados"]:
+        with st.expander(
+            "Ver historial de enfrentamientos",
+            expanded=False
+        ):
+            df_enfrentamientos = pd.DataFrame(
+                resultado["historial_enfrentados"]
+            )
+
+            st.dataframe(
+                df_enfrentamientos,
+                use_container_width=True,
+                hide_index=True
+            )
+
+    st.markdown("---")
+
+    st.caption(
+        "La compatibilidad se calcula como el porcentaje de "
+        "victorias conseguidas en los partidos jugados juntos."
+    )
+
+
 # ----------------------------
 # LOCATIONS
 # ----------------------------
