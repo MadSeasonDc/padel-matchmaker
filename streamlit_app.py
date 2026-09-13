@@ -1215,10 +1215,11 @@ elif menu == "Ranking":
                     for j in p1 + p2:
                         stats[j]["Pts"] += 1
 
-    # ----------------------------
+     # ----------------------------
     # DATAFRAME
     # ----------------------------
     filas = []
+
     for nombre, s in stats.items():
         filas.append({
             "Jugador": nombre,
@@ -1231,24 +1232,28 @@ elif menu == "Ranking":
             "Dif": s["JG"] - s["JP"]
         })
 
-    filas.sort(key=lambda x: (x["Pts"], x["PG"], x["Dif"]), reverse=True)
+    filas.sort(
+        key=lambda x: (x["Pts"], x["PG"], x["Dif"]),
+        reverse=True
+    )
+
     df = pd.DataFrame(filas)
     df.insert(0, "RK", range(1, len(df) + 1))
 
     # ----------------------------
-    # ICONOS
+    # ICONOS DEL TOP 3
     # ----------------------------
- def nombre_con_icono(row):
-    nombre = row["Jugador"]
+    def nombre_con_icono(row):
+        nombre = row["Jugador"]
 
-    if row["RK"] == 1:
-        return f"🥇 {nombre}"
-    elif row["RK"] == 2:
-        return f"🥈 {nombre}"
-    elif row["RK"] == 3:
-        return f"🥉 {nombre}"
+        if row["RK"] == 1:
+            return f"🥇 {nombre}"
+        elif row["RK"] == 2:
+            return f"🥈 {nombre}"
+        elif row["RK"] == 3:
+            return f"🥉 {nombre}"
 
-    return nombre
+        return nombre
 
     df["Jugador"] = df.apply(nombre_con_icono, axis=1)
 
@@ -1258,15 +1263,28 @@ elif menu == "Ranking":
     def style_row(row):
         estilos = ["" for _ in row.index]
 
+        # Colores del Top 3 únicamente en el nombre
         idx_jugador = row.index.get_loc("Jugador")
-        if row["RK"] == 1:
-            estilos[idx_jugador] = "background-color:#FFD700;font-weight:bold"
-        elif row["RK"] == 2:
-            estilos[idx_jugador] = "background-color:#C0C0C0"
-        elif row["RK"] == 3:
-            estilos[idx_jugador] = "background-color:#CD7F32"
 
+        if row["RK"] == 1:
+            estilos[idx_jugador] = (
+                "background-color:#FFD700;"
+                "font-weight:bold"
+            )
+        elif row["RK"] == 2:
+            estilos[idx_jugador] = (
+                "background-color:#C0C0C0;"
+                "font-weight:bold"
+            )
+        elif row["RK"] == 3:
+            estilos[idx_jugador] = (
+                "background-color:#CD7F32;"
+                "font-weight:bold"
+            )
+
+        # Diferencia positiva en verde y negativa en rojo
         idx_dif = row.index.get_loc("Dif")
+
         if row["Dif"] > 0:
             estilos[idx_dif] = "color:green;font-weight:bold"
         elif row["Dif"] < 0:
@@ -1274,16 +1292,24 @@ elif menu == "Ranking":
 
         return estilos
 
+    # ----------------------------
+    # TABLA COMPACTA
+    # ----------------------------
     df_styled = (
         df.style
         .apply(style_row, axis=1)
         .set_properties(
             subset=["PJ", "PG", "PP", "Pts", "JG", "JP", "Dif"],
-            **{"width": "55px", "text-align": "center"}
+            **{
+                "width": "55px",
+                "text-align": "center"
+            }
         )
         .set_properties(
             subset=["Jugador"],
-            **{"width": "240px"}
+            **{
+                "width": "240px"
+            }
         )
     )
 
