@@ -19,10 +19,9 @@ JUGADORES_INICIALES = [
     "Erik",
     "Jaime Baró",
     "Manolo Díaz",
-    "Nog",
-    "Rafa Vega",
+    "Rafa",
     "Ruben Polanco",
-    "Varo Mar"
+    "Varo"
 ]
 
 PARTICIPANTES = JUGADORES_INICIALES.copy()
