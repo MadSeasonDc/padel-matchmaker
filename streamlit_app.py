@@ -11,10 +11,11 @@ DATA_FILE = "padel_data.json"
 
 JUGADORES_INICIALES = [
     "Caique Freitas",
-    "Carlitos Diego",
+    "Carlitos ",
     "Carlos Alto",
     "Curro Gil",
     "Dani Miguez",
+    "Diego Arenas",
     "Enzo Di Constanzo",
     "Erik",
     "Jaime Baró",
