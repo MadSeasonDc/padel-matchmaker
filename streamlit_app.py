@@ -1505,7 +1505,8 @@ if menu == "Jornadas":
                 + columna_index
             )
 
-            with columnaswith st.container(border=True):
+                        with columnas[columna_index]:
+                with st.container(border=True):
                     st.markdown(
                         (
                             "### 🎾 Partido "
