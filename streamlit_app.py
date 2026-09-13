@@ -1494,7 +1494,7 @@ if menu == "Jornadas":
         for columna_index, partido in enumerate(fila_partidos):
             partido_index = fila_index * 2 + columna_index
 
-            with columnaswith st.container(border=True):
+                 with columnas[columna_index], st.container(border=True):
                     st.markdown(
                         f"### 🎾 Partido {partido_index + 1}"
                     )
