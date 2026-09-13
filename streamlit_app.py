@@ -31,6 +31,17 @@ PARTICIPANTES = JUGADORES_INICIALES.copy()
 
 LOCATIONS_INICIALES = [
     {
+        "club": "Casa Curro",
+        "address": "Avenida de Fernando VII 5, 3C, Escalera C",
+        "telephone": "650 20 30 09",
+        "whatsapp": "N/A",
+        "email": "N/A",
+        "inout": "Outdoor",
+        "wall": "Wall",
+        "price": "N/A",
+        "comments": ""
+    },
+    {
         "club": "Factory Fit",
         "address": "Calle Santa Leonor, 52",
         "telephone": "913 040 291",
@@ -51,20 +62,8 @@ LOCATIONS_INICIALES = [
         "wall": "Wall",
         "price": "8,90 € interior / 6,90 € exterior",
         "comments": ""
-    },
-    {
-        "club": "Urb. Lela",
-        "address": "N/A",
-        "telephone": "N/A",
-        "whatsapp": "N/A",
-        "email": "N/A",
-        "inout": "",
-        "wall": "",
-        "price": "(La voluntad)",
-        "comments": "Solo partidos en los que participe Lela"
     }
 ]
-
 
 
 from pathlib import Path
