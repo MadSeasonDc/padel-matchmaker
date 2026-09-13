@@ -195,12 +195,8 @@ def calcular_ranking_rows(data):
 # ----------------------------
 def obtener_resultado_partido(partido):
     """
-    Analiza un partido y devuelve:
-    - ganador: "p1", "p2", "empate" o None
-    - puntos_p1
-    - puntos_p2
-    - juegos_p1
-    - juegos_p2
+    Analiza un partido y devuelve el resultado, los puntos
+    obtenidos por cada pareja y el total de juegos.
     """
 
     s1_p1 = partido.get("set1_p1", 0)
@@ -240,7 +236,7 @@ def obtener_resultado_partido(partido):
         elif s2_p2 > s2_p1:
             sets_p2 += 1
 
-    # Partido decidido en el tercer set
+    # Si se juega el tercer set, el tercer set decide el partido.
     if set3_jugado:
         if s3_p1 > s3_p2:
             ganador = "p1"
@@ -255,7 +251,7 @@ def obtener_resultado_partido(partido):
             puntos_p1 = 1
             puntos_p2 = 1
 
-    # Partido sin tercer set
+    # Partido ganado sin tercer set.
     elif sets_p1 > sets_p2:
         ganador = "p1"
         puntos_p1 = 3
@@ -266,6 +262,7 @@ def obtener_resultado_partido(partido):
         puntos_p1 = 0
         puntos_p2 = 3
 
+    # Un set para cada pareja y sin tercer set.
     else:
         ganador = "empate"
         puntos_p1 = 1
@@ -288,18 +285,16 @@ def calcular_compatibilidad_avanzada(
     juegos_perdidos
 ):
     """
-    Formula avanzada de compatibilidad:
+    Calcula la compatibilidad con esta ponderacion:
 
-    - 60 % rendimiento por resultados
-    - 25 % rendimiento por juegos
-    - 15 % experiencia jugando juntos
+    60 % resultados obtenidos juntos.
+    25 % porcentaje de juegos ganados.
+    15 % experiencia jugando juntos.
     """
 
     if partidos == 0:
         return 0.0
 
-    # Victoria = 1
-    # Empate = 0.5
     rendimiento_resultados = (
         (victorias + empates * 0.5) / partidos
     ) * 100
@@ -311,9 +306,9 @@ def calcular_compatibilidad_avanzada(
             juegos_ganados / total_juegos
         ) * 100
     else:
-        rendimiento_juegos = 0
+        rendimiento_juegos = 0.0
 
-    # La experiencia alcanza el máximo con 5 partidos juntos
+    # La experiencia alcanza el 100 % con cinco partidos juntos.
     experiencia = min(partidos / 5, 1) * 100
 
     compatibilidad = (
@@ -326,6 +321,13 @@ def calcular_compatibilidad_avanzada(
 
 
 def analizar_compatibilidad(data, jugador_1, jugador_2):
+    """
+    Analiza dos situaciones:
+
+    1. Los jugadores formando pareja.
+    2. Los jugadores enfrentandose entre si.
+    """
+
     juntos = {
         "partidos": 0,
         "victorias": 0,
@@ -404,23 +406,24 @@ def analizar_compatibilidad(data, jugador_1, jugador_2):
             # ----------------------------
             # JUGANDO JUNTOS
             # ----------------------------
-            juntos_en_p1 = (
+            juntos_en_pareja_1 = (
                 jugador_1 in pareja_1
                 and jugador_2 in pareja_1
             )
 
-            juntos_en_p2 = (
+            juntos_en_pareja_2 = (
                 jugador_1 in pareja_2
                 and jugador_2 in pareja_2
             )
 
-            if juntos_en_p1 or juntos_en_p2:
+            if juntos_en_pareja_1 or juntos_en_pareja_2:
                 juntos["partidos"] += 1
 
-                if juntos_en_p1:
+                if juntos_en_pareja_1:
                     juntos["jg"] += resultado["juegos_p1"]
                     juntos["jp"] += resultado["juegos_p2"]
                     puntos_obtenidos = resultado["puntos_p1"]
+                    rivales = " / ".join(pareja_2)
 
                     if resultado["ganador"] == "p1":
                         juntos["victorias"] += 1
@@ -432,12 +435,11 @@ def analizar_compatibilidad(data, jugador_1, jugador_2):
                         juntos["empates"] += 1
                         resultado_texto = "Empate"
 
-                    rivales = " / ".join(pareja_2)
-
                 else:
                     juntos["jg"] += resultado["juegos_p2"]
                     juntos["jp"] += resultado["juegos_p1"]
                     puntos_obtenidos = resultado["puntos_p2"]
+                    rivales = " / ".join(pareja_1)
 
                     if resultado["ganador"] == "p2":
                         juntos["victorias"] += 1
@@ -448,8 +450,6 @@ def analizar_compatibilidad(data, jugador_1, jugador_2):
                     else:
                         juntos["empates"] += 1
                         resultado_texto = "Empate"
-
-                    rivales = " / ".join(pareja_1)
 
                 juntos["puntos"] += puntos_obtenidos
 
@@ -468,20 +468,30 @@ def analizar_compatibilidad(data, jugador_1, jugador_2):
             # ----------------------------
             # ENFRENTAMIENTOS DIRECTOS
             # ----------------------------
-            j1_en_p1_j2_en_p2 = (
-                jugador_1 in pareja_1
-                and jugador_2 in pareja_2
+            jugador_1_en_pareja_1 = jugador_1 in pareja_1
+            jugador_1_en_pareja_2 = jugador_1 in pareja_2
+            jugador_2_en_pareja_1 = jugador_2 in pareja_1
+            jugador_2_en_pareja_2 = jugador_2 in pareja_2
+
+            enfrentados_en_partido = (
+                (
+                    jugador_1_en_pareja_1
+                    and jugador_2_en_pareja_2
+                )
+                or
+                (
+                    jugador_1_en_pareja_2
+                    and jugador_2_en_pareja_1
+                )
             )
 
-            j1_en_p2_j2_en_p1 = (
-                jugador_1 in pareja_2
-                and jugador_2 in pareja_1
-            )
-
-            if j1_en_p1_j2_en_p2 or j1_en_p2_j2_en_p1:
+            if enfrentados_en_partido:
                 enfrentados["partidos"] += 1
 
-                if j1_en_p1_j2_en_p2:
+                if (
+                    jugador_1_en_pareja_1
+                    and jugador_2_en_pareja_2
+                ):
                     enfrentados["jg_j1"] += resultado["juegos_p1"]
                     enfrentados["jp_j1"] += resultado["juegos_p2"]
 
@@ -525,6 +535,9 @@ def analizar_compatibilidad(data, jugador_1, jugador_2):
                     "Hora": hora
                 })
 
+    # ----------------------------
+    # CALCULOS FINALES
+    # ----------------------------
     juntos["diferencia"] = juntos["jg"] - juntos["jp"]
 
     juntos["compatibilidad"] = calcular_compatibilidad_avanzada(
@@ -536,131 +549,13 @@ def analizar_compatibilidad(data, jugador_1, jugador_2):
     )
 
     enfrentados["dif_j1"] = (
-        enfrentados["jg_j1"] - enfrentados["jp_j1"]
+        enfrentados["jg_j1"]
+        - enfrentados["jp_j1"]
     )
 
     enfrentados["dif_j2"] = (
-        enfrentados["jg_j2"] - enfrentados["jp_j2"]
-    )
-
-    return {
-        "juntos": juntos,
-        "enfrentados": enfrentados,
-        "historial_juntos": historial_juntos,
-        "historial_enfrentados": historial_enfrentados
-    }
-
-            # ---------------------------------
-            # PARTIDOS JUGADOS JUNTOS
-            # ---------------------------------
-            juntos_en_pareja_1 = (
-                jugador_1 in pareja_1 and
-                jugador_2 in pareja_1
-            )
-
-            juntos_en_pareja_2 = (
-                jugador_1 in pareja_2 and
-                jugador_2 in pareja_2
-            )
-
-            if juntos_en_pareja_1 or juntos_en_pareja_2:
-                juntos["partidos"] += 1
-
-                if juntos_en_pareja_1:
-                    juntos["jg"] += juegos_p1
-                    juntos["jp"] += juegos_p2
-                    pareja_seleccionada = 1
-                else:
-                    juntos["jg"] += juegos_p2
-                    juntos["jp"] += juegos_p1
-                    pareja_seleccionada = 2
-
-                if ganador is None:
-                    juntos["empates"] += 1
-                    resultado_pareja = "Empate"
-                elif ganador == pareja_seleccionada:
-                    juntos["victorias"] += 1
-                    resultado_pareja = "Victoria"
-                else:
-                    juntos["derrotas"] += 1
-                    resultado_pareja = "Derrota"
-
-                historial_juntos.append({
-                    "Jornada": numero_jornada,
-                    "Partido": numero_partido,
-                    "Resultado": resultado_texto,
-                    "Balance": resultado_pareja
-                })
-
-            # ---------------------------------
-            # ENFRENTAMIENTOS DIRECTOS
-            # ---------------------------------
-            j1_en_p1 = jugador_1 in pareja_1
-            j1_en_p2 = jugador_1 in pareja_2
-            j2_en_p1 = jugador_2 in pareja_1
-            j2_en_p2 = jugador_2 in pareja_2
-
-            se_enfrentaron = (
-                (j1_en_p1 and j2_en_p2) or
-                (j1_en_p2 and j2_en_p1)
-            )
-
-            if se_enfrentaron:
-                enfrentados["partidos"] += 1
-
-                if j1_en_p1:
-                    enfrentados["jg_j1"] += juegos_p1
-                    enfrentados["jp_j1"] += juegos_p2
-                    enfrentados["jg_j2"] += juegos_p2
-                    enfrentados["jp_j2"] += juegos_p1
-
-                    pareja_j1 = 1
-                    pareja_j2 = 2
-                else:
-                    enfrentados["jg_j1"] += juegos_p2
-                    enfrentados["jp_j1"] += juegos_p1
-                    enfrentados["jg_j2"] += juegos_p1
-                    enfrentados["jp_j2"] += juegos_p2
-
-                    pareja_j1 = 2
-                    pareja_j2 = 1
-
-                if ganador is None:
-                    enfrentados["empates"] += 1
-                    ganador_texto = "Empate"
-                elif ganador == pareja_j1:
-                    enfrentados["victorias_j1"] += 1
-                    ganador_texto = jugador_1
-                elif ganador == pareja_j2:
-                    enfrentados["victorias_j2"] += 1
-                    ganador_texto = jugador_2
-
-                historial_enfrentados.append({
-                    "Jornada": numero_jornada,
-                    "Partido": numero_partido,
-                    "Resultado": resultado_texto,
-                    "Ganador": ganador_texto
-                })
-
-    if juntos["partidos"] > 0:
-        compatibilidad = round(
-            juntos["victorias"] / juntos["partidos"] * 100,
-            1
-        )
-    else:
-        compatibilidad = 0.0
-
-    juntos["compatibilidad"] = compatibilidad
-    juntos["diferencia"] = juntos["jg"] - juntos["jp"]
-
-    enfrentados["dif_j1"] = (
-        enfrentados["jg_j1"] -
-        enfrentados["jp_j1"]
-    )
-
-    enfrentados["dif_j2"] = (
-        enfrentados["jg_j2"] -
-        enfrentados["jp_j2"]
+        enfrentados["jg_j2"]
+        - enfrentados["jp_j2"]
     )
 
     return {
