@@ -33,13 +33,13 @@ LOCATIONS_INICIALES = [
     {
         "club": "Casa Curro",
         "address": "Avenida de Fernando VII 5, 3C, Escalera C",
-        "telephone": "650 20 30 09",
-        "whatsapp": "N/A",
+        "telephone": "653 45 08 61",
+        "whatsapp": "653 45 08 61",
         "email": "N/A",
         "inout": "Outdoor",
         "wall": "Wall",
-        "price": "N/A",
-        "comments": ""
+        "price": "Un abrazo",
+        "comments": "Aparte del abrazo una cerveza siempre agradece"
     },
     {
         "club": "Factory Fit",
