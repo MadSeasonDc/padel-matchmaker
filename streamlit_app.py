@@ -21,8 +21,8 @@ JUGADORES_INICIALES = [
     "Jaime Baró",
     "Manolo Díaz",
     "Rafa",
-    "Varo"
-    "Oriol"
+    "Varo",
+    "Oriol",
     "Miguel"
 ]
 
