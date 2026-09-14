@@ -22,6 +22,8 @@ JUGADORES_INICIALES = [
     "Manolo Díaz",
     "Rafa",
     "Varo"
+    "Oriol"
+    "Miguel"
 ]
 
 PARTICIPANTES = JUGADORES_INICIALES.copy()
